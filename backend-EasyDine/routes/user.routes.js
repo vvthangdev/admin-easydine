@@ -1,16 +1,15 @@
 // routes/userRoutes.js
-const express = require('express');
+const express = require("express");
 // const User = require('../models/user.model');
-const {
-  getAllUsers,
-  createUser,
-} = require('../controllers/user.controller.js')
+const { getAllUsers, signUp } = require("../controllers/user.controller.js");
+
 const router = express.Router();
 
 // Lấy tất cả người dùng
-router.get('/', getAllUsers);
+router.get("/", getAllUsers);
 
-router.post('/', createUser);
+router.post("/signup", signUp);
+// router.post("/", createUser);
 
 // router.get('/', async (req, res) => {
 //   try {
