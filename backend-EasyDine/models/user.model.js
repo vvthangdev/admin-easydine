@@ -7,45 +7,21 @@ const User = sequelize.define(
   {
     id: {
       type: DataTypes.INTEGER,
-      autoIncrement: true,
-      primaryKey: true,
+      primaryKey: true, // Đảm bảo Sequelize nhận diện đúng auto-increment nếu cần
     },
-    role: {
-      type: DataTypes.ENUM("customer", "admin"),
-      allowNull: false,
-    },
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    address: {
-      type: DataTypes.STRING,
-    },
-    bio: {
-      type: DataTypes.TEXT,
-    },
-    gmail: {
-      type: DataTypes.STRING,
-      unique: true,
-    },
-    phone: {
-      type: DataTypes.STRING,
-      unique: true,
-    },
-    username: {
-      type: DataTypes.STRING,
-      unique: true,
-    },
-    password: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    token: {
-      type: DataTypes.STRING,
-    },
+    role: DataTypes.ENUM("customer", "admin"),
+    name: DataTypes.STRING,
+    address: DataTypes.STRING,
+    bio: DataTypes.TEXT,
+    email: DataTypes.STRING,
+    phone: DataTypes.STRING,
+    username: DataTypes.STRING,
+    password: DataTypes.STRING,
+    token: DataTypes.STRING,
   },
   {
-    timestamps: false,
+    tableName: "User",
+    timestamps: false, // Nếu bảng không có các trường createdAt và updatedAt
   }
 );
 
