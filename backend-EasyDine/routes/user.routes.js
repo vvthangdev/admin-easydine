@@ -1,6 +1,8 @@
 const express = require("express");
 const userMiddleware = require("../middlewares/user.middleware.js");
 const userController = require("../controllers/user.controller.js");
+const userUtil = require("../utils/user.util.js");
+const authMiddware = require("../middlewares/auth.middleware.js");
 
 const router = express.Router();
 
@@ -8,18 +10,27 @@ router.get("/", userController.getAllUsers);
 
 router.post(
   "/signup",
-  userMiddleware.validateSignUpSignUp,
+  userUtil.validateSignUpSignUp,
   userMiddleware.checkUserExistsSignUp,
   userController.signUp
 );
 
 router.post("/login", userMiddleware.checkUserExistLogin, userController.login);
 
-module.exports = router;
+router.post("/refresh-token", userController.refreshToken);
 
-// {
-//   validateSignUpSignUp,
-//   checkUserExistsSignUp,
-//   checkUserExistLogin,
-// }
-// { getAllUsers, signUp }
+router.post("/logout", userController.logout);
+// Route to update user information (requires authentication)
+router.put(
+  "/update",
+  authMiddware.authenticateToken,
+  userController.updateUser
+);
+
+// Route to delete user (requires authentication)
+router.delete(
+  "/delete",
+  userController.deleteUser
+);
+
+module.exports = router;
