@@ -77,7 +77,7 @@ const updateUser = async (req, res) => {
 
 const login = async (req, res) => {
   let { email, password } = req.body;
-  console.log(email);
+  // console.log(email);
   try {
     const user = await userService.getUserByEmail(email);
     // console.log(user);
@@ -142,23 +142,19 @@ const login = async (req, res) => {
 
 const logout = async (req, res) => {
   // Get the refresh token from the authorization header
-  const refreshToken = req.headers["authorization"]?.split(" ")[1];
+  // const accessToken = req.headers["authorization"]?.split(" ")[1];
 
-  // Check if the refresh token is provided
-  if (!refreshToken) {
-    return res.status(403).send("Refresh token is required for logout!");
-  }
+  // // Check if the refresh token is provided
+  // if (!accessToken) {
+  //   return res.status(403).send("Access token is required for logout!");
+  // }
 
   try {
     // Decode the refresh token to get the username
-    const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET;
-    const decoded = await authUtil.verifyToken(
-      refreshToken,
-      refreshTokenSecret
-    );
-    console.log(decoded);
+    // const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
+    // const decoded = await authUtil.verifyToken(accessToken, accessTokenSecret);
     // Invalidate the refresh token by clearing it in the database
-    await userService.updateRefreshToken(decoded.payload.username, null);
+    await userService.updateRefreshToken(req.user.username, null);
 
     res.json({
       status: "SUCCESS",
@@ -192,8 +188,6 @@ const refreshToken = async (req, res) => {
 
     // Tạo data cho access token mới
     const dataForAccessToken = { username: decoded.payload.username };
-
-    console.log(dataForAccessToken);
     // Thiết lập thời gian sống và secret cho access token
     const accessTokenLife = process.env.ACCESS_TOKEN_LIFE;
     const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
@@ -217,29 +211,19 @@ const refreshToken = async (req, res) => {
 };
 
 const deleteUser = async (req, res) => {
-  // Ensure the user is authenticated
-  const refreshToken = req.headers["authorization"]?.split(" ")[1];
-  if (!refreshToken) {
-    return res.status(401).send("Refresh token is required!");
-  }
-
+  let { password } = req.body;
   try {
     // Verify the access token to ensure the user is authenticated
-    const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET;
-    const decoded = await authUtil.verifyToken(
-      refreshToken,
-      refreshTokenSecret
+    const user = await userService.getUserByUserName(req.user.username);
+
+    const isPasswordValid = await userService.validatePassword(
+      password,
+      user.password
     );
-
-    const user = await userService.getUserByUserName(decoded.payload.username);
-
-    const refreshTokenDB = user.refresh_token;
-    if (refreshToken === refreshTokenDB) {
-      await userService.deleteUser(decoded.payload.username);
-    } else {
-      return res.status(404).send("You cannot delete user!");
+    if (!isPasswordValid) {
+      return res.status(401).send("Password incorrect!");
     }
-    // Delete the user by username (decoded from the access token)
+    await userService.deleteUser(user.username);
 
     res.json({
       status: "SUCCESS",

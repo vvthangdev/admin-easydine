@@ -60,7 +60,7 @@ async function validatePassword(password, hashedPassword) {
   return await bcrypt.compare(password, hashedPassword);
 }
 
-async function updateRefreshToken(username, accessToken) {
+async function updateRefreshToken(username, refreshToken) {
   try {
     const result = await User.update(
       {
