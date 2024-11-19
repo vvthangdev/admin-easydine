@@ -45,10 +45,10 @@ const signUp = async (req, res) => {
 
 const updateUser = async (req, res) => {
   try {
-    const { username, ...otherFields } = req.body; // Adjust as needed to accept relevant fields
+    const {...otherFields } = req.body; // Adjust as needed to accept relevant fields
 
     // console.log(req.username)
-    console.log(otherFields);
+    // console.log(otherFields);
     if (!otherFields || Object.keys(otherFields).length === 0) {
       return res.status(400).send("No fields to update.");
     }
@@ -61,9 +61,6 @@ const updateUser = async (req, res) => {
     if (!updatedUser) {
       return res.status(404).send("User not found!");
     }
-
-    console.log(req.user);
-    console.log(req.body);
     res.json({
       status: "SUCCESS",
       message: "User updated successfully!",

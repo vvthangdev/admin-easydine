@@ -57,7 +57,7 @@ const User = sequelize.define(
     },
   },
   {
-    tableName: "User", // Matches the existing table name in the database
+    tableName: "user", // Matches the existing table name in the database
     timestamps: false, // Disable timestamps if your table does not have `createdAt` and `updatedAt` fields
   }
 );

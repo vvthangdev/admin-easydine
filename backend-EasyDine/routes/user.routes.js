@@ -6,7 +6,7 @@ const authMiddware = require("../middlewares/auth.middleware.js");
 
 const router = express.Router();
 
-router.get("/", userController.getAllUsers);
+router.get("/all-users", userController.getAllUsers);
 
 router.post(
   "/signup",
@@ -21,8 +21,8 @@ router.post("/refresh-token", userController.refreshToken);
 
 router.post("/logout", authMiddware.authenticateToken, userController.logout);
 // Route to update user information (requires authentication)
-router.put(
-  "/update",
+router.patch(
+  "/update-user",
   authMiddware.authenticateToken,
   userController.updateUser
 );

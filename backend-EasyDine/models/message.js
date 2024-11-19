@@ -32,11 +32,11 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true,
       defaultValue: Sequelize.Sequelize.literal('CURRENT_TIMESTAMP')
     },
-    status: {
-      type: DataTypes.ENUM('delivered','sent','read'),
-      allowNull: true,
-      defaultValue: "sent"
-    }
+    // status: {
+    //   type: DataTypes.ENUM('delivered','sent','read'),
+    //   allowNull: true,
+    //   defaultValue: "sent"
+    // }
   }, {
     sequelize,
     tableName: 'message',

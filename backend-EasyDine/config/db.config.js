@@ -1,6 +1,6 @@
 // config/database.js
-const { Sequelize } = require('sequelize');
-require('dotenv').config();
+const { Sequelize } = require("sequelize");
+require("dotenv").config();
 
 const sequelize = new Sequelize(
   process.env.DB_NAME,
@@ -12,4 +12,6 @@ const sequelize = new Sequelize(
     port: process.env.DB_PORT,
   }
 );
+
+// logging: false : dùng để không hiển thị truy vấn SQL
 module.exports = sequelize;
