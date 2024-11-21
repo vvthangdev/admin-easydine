@@ -36,9 +36,10 @@ const signUp = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    res.json({
+    res.status(500).json({
       status: "FAILED",
-      message: "An error occurred during sign up!",
+      // message: "An error occurred during sign up!",
+      message: error
     });
   }
 };

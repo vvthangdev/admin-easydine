@@ -11,14 +11,14 @@ router.post(
   conversationController.createConversation
 ); // create conversation
 
-// router.get('/', authMiddleWare.authenticateToken, conversationController.getListConversations); // get list conversations of user
+router.get('/', authMiddleWare.authenticateToken, conversationController.getListConversations); // get list conversations of user
 
-// router.delete('/:conversationId', authMiddleWare.authenticateToken, conversationController.deleteConversation); // delete conversation
+router.delete('/:conversationId', authMiddleWare.authenticateToken, conversationController.deleteConversation); // delete conversation
 
 // router.post('message/:conversationId', authMiddleWare.authenticateToken, conversationController.sendMessage); // send mesaage to conversation
 
-// router.delete('message/:conversationId/:messageId', authMiddleWare.authenticateToken, conversationController.deleteMessage) //delete message
+router.delete('message/:conversationId/:messageId', authMiddleWare.authenticateToken, conversationController.deleteMessage) //delete message
 
-// router.get('/:conversationId', authMiddleWare.authenticateToken, conversationController.getListMessages) // get all messages of conversation
+router.get('/:conversationId', authMiddleWare.authenticateToken, conversationController.getListMessages) // get all messages of conversation
 
 module.exports = router;

@@ -2,7 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const app = express();
 const authUtil = require("../utils/auth.util");
-
+const User = require("../models/user.model");
 app.use(express.json());
 
 async function authenticateToken(req, res, next) {
@@ -25,7 +25,11 @@ async function authenticateToken(req, res, next) {
     }
     // Gán thông tin người dùng vào request
     // Đặt payload vào req.user mà không cần nested "payload"
-    req.user = user.payload ? user.payload : user;
+    const userObject = await User.findOne({
+      username: user
+    });
+    // req.user = user.payload ? user.payload : user;
+    req.user = userObject;
     next(); // Chuyển sang middleware hoặc route tiếp theo
   } catch (error) {
     console.log(error);
