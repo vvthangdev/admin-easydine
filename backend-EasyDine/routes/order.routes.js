@@ -9,8 +9,6 @@ const router = express.Router();
 
 router.get("/", orderController.getAllOrders);
 
-router.use(authMiddware.authenticateToken)
-
 router.post("/create-order", orderController.createOrder);
 
 // router.patch("/update-reservation", orderController.updateOrder);

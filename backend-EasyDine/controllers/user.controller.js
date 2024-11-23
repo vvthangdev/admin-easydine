@@ -90,6 +90,7 @@ const login = async (req, res) => {
 
     const dataForAccessToken = {
       username: user.username,
+      role: user.role,
       // Thêm các thông tin khác nếu cần
     };
 
@@ -185,7 +186,7 @@ const refreshToken = async (req, res) => {
     );
 
     // Tạo data cho access token mới
-    const dataForAccessToken = { username: decoded.payload.username };
+    const dataForAccessToken = { username: decoded.payload.username, role: decoded.payload.role };
     // Thiết lập thời gian sống và secret cho access token
     const accessTokenLife = process.env.ACCESS_TOKEN_LIFE;
     const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;

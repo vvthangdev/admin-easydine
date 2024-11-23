@@ -26,9 +26,12 @@ async function authenticateToken(req, res, next) {
     // Gán thông tin người dùng vào request
     // Đặt payload vào req.user mà không cần nested "payload"
     const userObject = await User.findOne({
-      username: user
-    });
+      where: {
+        username: user.payload.username,
+      },
+    });    
     // req.user = user.payload ? user.payload : user;
+    // console.log("AAAAAAAAAAAA");
     req.user = userObject;
     next(); // Chuyển sang middleware hoặc route tiếp theo
   } catch (error) {
@@ -37,6 +40,29 @@ async function authenticateToken(req, res, next) {
   }
 }
 
+async function adminRoleAuth(req, res, next) {
+  try {
+    // Kiểm tra nếu vai trò trong yêu cầu là ADMIN
+    // console.log(req.user);
+    if (req.user.role === "ADMIN") {
+      // Chuyển tiếp yêu cầu đến middleware hoặc route handler tiếp theo
+      return next();
+    } else {
+      // Nếu không phải ADMIN, trả về lỗi quyền truy cập
+      return res.status(403).json({
+        message: "Forbidden: You do not have the required permissions.",
+      });
+    }
+  } catch (error) {
+    // Xử lý lỗi nếu có
+    return res.status(500).json({
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+}
+
 module.exports = {
   authenticateToken,
+  adminRoleAuth,
 };
