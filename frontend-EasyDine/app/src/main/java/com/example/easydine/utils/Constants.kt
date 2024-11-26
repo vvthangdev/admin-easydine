@@ -1,4 +1,5 @@
 package com.example.easydine.utils
 
-class Constants {
+object Constants {
+    const val BASE_URL = "https://yourapiurl.com/"
 }

@@ -1,4 +1,7 @@
 package com.example.easydine.data.models
 
-class User {
-}
+data class User(
+    val id: Int,
+    val name: String,
+    val email: String
+)

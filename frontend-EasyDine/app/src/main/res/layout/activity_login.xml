@@ -1,10 +1,164 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.login.LoginActivity">
+    android:background="#1E1E2C"
+    android:padding="16dp">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- Tiêu đề -->
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Log In"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="40dp" />
+
+    <!-- Mô tả -->
+    <TextView
+        android:id="@+id/tvSubtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Please sign in to your existing account"
+        android:textSize="14sp"
+        android:textColor="#B0B0B0"
+        android:layout_below="@id/tvTitle"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="8dp" />
+
+    <!-- LinearLayout cho trường Email và Password -->
+    <LinearLayout
+        android:id="@+id/llInputs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_below="@id/tvSubtitle"
+        android:layout_marginTop="302dp">
+
+        <!-- Trường Email -->
+        <EditText
+            android:id="@+id/etEmail"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:hint="example@gmail.com"
+            android:background="@drawable/rounded_edit_text"
+            android:padding="12dp"
+            android:inputType="textEmailAddress"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#B0B0B0"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Trường Password -->
+        <EditText
+            android:id="@+id/etPassword"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:hint="Password"
+            android:background="@drawable/rounded_edit_text"
+            android:padding="12dp"
+            android:inputType="textPassword"
+            android:drawableEnd="@drawable/ic_eye"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#B0B0B0" />
+    </LinearLayout>
+
+    <!-- LinearLayout cho Remember Me và Forgot Password -->
+    <LinearLayout
+        android:id="@+id/llOptions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@id/llInputs"
+        android:layout_marginTop="8dp">
+
+        <CheckBox
+            android:id="@+id/cbRememberMe"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Remember me"
+            android:textColor="#B0B0B0" />
+
+        <TextView
+            android:id="@+id/tvForgotPassword"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Forgot Password"
+            android:textColor="#FF6A00"
+            android:layout_weight="1"
+            android:gravity="end" />
+    </LinearLayout>
+
+    <!-- Nút Log In -->
+    <Button
+        android:id="@+id/btnLogin"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="LOG IN"
+        android:backgroundTint="#FF6A00"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:layout_below="@id/llOptions"
+        android:layout_marginTop="50dp" />
+
+    <!-- Text Sign Up -->
+    <TextView
+        android:id="@+id/tvSignUp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Don’t have an account? SIGN UP"
+        android:textColor="#B0B0B0"
+        android:layout_below="@id/btnLogin"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp" />
+
+    <!-- Text Or -->
+    <TextView
+        android:id="@+id/tvOr"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Or"
+        android:textColor="#B0B0B0"
+        android:layout_below="@id/tvSignUp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="8dp" />
+
+    <!-- LinearLayout cho các biểu tượng mạng xã hội -->
+    <LinearLayout
+        android:id="@+id/llSocialIcons"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@id/tvOr"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp">
+
+        <ImageView
+            android:id="@+id/ivFacebook"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="8dp"
+            android:background="@drawable/rounded_icon_background"
+            android:src="@drawable/ic_facebook" />
+
+        <ImageView
+            android:id="@+id/ivTwitter"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/ic_twitter"
+            android:background="@drawable/rounded_icon_background"
+            android:layout_margin="8dp" />
+
+        <ImageView
+            android:id="@+id/ivApple"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/ic_google"
+            android:background="@drawable/rounded_icon_background"
+            android:layout_margin="8dp" />
+    </LinearLayout>
+
+</RelativeLayout>
