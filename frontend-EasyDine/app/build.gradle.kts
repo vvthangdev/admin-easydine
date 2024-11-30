@@ -56,5 +56,5 @@ dependencies {
     // Thêm các thư viện Lifecycle (LiveData & ViewModel)
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
-
+    
 }

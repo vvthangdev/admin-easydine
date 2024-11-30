@@ -8,8 +8,55 @@
     tools:context=".ui.HomeActivity"
     tools:openDrawer="start">
 
+    <!-- Nội dung chính của màn hình -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:layout_marginTop="100dp">
+
+        <!-- Các TextView để hiển thị thông tin -->
+        <TextView
+            android:id="@+id/tvUsername"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Username: "
+            android:textSize="18sp"/>
+
+        <TextView
+            android:id="@+id/tvStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Status: "
+            android:textSize="18sp"/>
+
+        <TextView
+            android:id="@+id/tvMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Message: "
+            android:textSize="18sp"/>
+
+        <TextView
+            android:id="@+id/tvAccessToken"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="AccessToken: "
+            android:textSize="18sp"/>
+
+        <TextView
+            android:id="@+id/tvRefreshToken"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="RefreshToken: "
+            android:textSize="18sp"/>
+    </LinearLayout>
+
+    <!-- Chèn layout chứa nội dung chính (đã có sẵn) -->
     <include layout="@layout/activity_main_content" />
 
+    <!-- Thanh điều hướng Drawer -->
     <com.google.android.material.navigation.NavigationView
         android:layout_width="wrap_content"
         android:layout_height="match_parent"

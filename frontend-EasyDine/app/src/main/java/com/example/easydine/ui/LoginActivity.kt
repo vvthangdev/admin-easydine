@@ -36,8 +36,25 @@ class LoginActivity : AppCompatActivity() {
         userRepository.loginUser(email, password).enqueue(object : Callback<LoginResponse> {
             override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
                 if (response.isSuccessful && response.body()?.success == true) {
-                    Toast.makeText(this@LoginActivity, "Login Successful!", Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(this@LoginActivity, HomeActivity::class.java))
+                    val loginResponse = response.body()
+
+                    // Lưu token vào SharedPreferences
+                    val sharedPreferences = getSharedPreferences("AppPrefs", MODE_PRIVATE)
+                    val editor = sharedPreferences.edit()
+                    editor.putString("accessToken", loginResponse?.accessToken)
+                    editor.putString("refreshToken", loginResponse?.refreshToken)
+                    editor.apply()
+
+                    // Chuyển đến HomeActivity và truyền thông tin loginResponse
+                    val intent = Intent(this@LoginActivity, HomeActivity::class.java).apply {
+                        putExtra("username", loginResponse?.username)
+                        putExtra("status", loginResponse?.status)
+                        putExtra("message", loginResponse?.message)
+                        putExtra("accessToken", loginResponse?.accessToken)
+                        putExtra("refreshToken", loginResponse?.refreshToken)
+                    }
+                    startActivity(intent)
+                    finish() // Đóng màn hình đăng nhập
                 } else {
                     Toast.makeText(this@LoginActivity, "Login failed!", Toast.LENGTH_SHORT).show()
                 }
