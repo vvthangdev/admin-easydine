@@ -4,6 +4,7 @@ const sequelize = require("../config/db.config");
 const OrderDetail = require("../models/order_detail.model");
 const ReservationTable = require("../models/reservation_table.model");
 const TableInfo = require("../models/table_info.model");
+const ItemOrder = require("../models/item_order.model")
 
 // 1. Cấu hình dotenv để đọc biến môi trường từ .env
 require("dotenv").config();
@@ -12,45 +13,43 @@ require("dotenv").config();
 const reservationDurationMinutes =
   parseInt(process.env.TABLE_RESERVATION_DURATION_MINUTES) || 120; // Giả sử 120 phút là giá trị mặc định
 
-async function createOrder(orderData) {
+async function createOrder(orderData, { transaction }) {
   try {
     const newOrder = new OrderDetail({
       ...orderData,
     });
 
-    // Lưu order mới vào cơ sở dữ liệu
-    await newOrder.save();
+    // Lưu order mới vào cơ sở dữ liệu với transaction
+    await newOrder.save({ transaction });
 
     return newOrder; // Trả về order vừa được tạo
   } catch (error) {
-    // Xử lý lỗi khi lưu vào cơ sở dữ liệu
-    throw new Error("Error saving the order");
+    console.error("Error saving the order:", error);
+    throw new Error("Error saving the order"); // Ném lỗi ra ngoài để rollback transaction nếu có lỗi
   }
 }
 
 // Hàm kiểm tra xem có bàn nào trống trong khoảng thời gian người dùng chọn
-const checkAvailableTables = async (startTime, endTime) => {
+const checkAvailableTables = async (startTime, endTime, options = {}) => {
   try {
-    // Chuyển startTime và endTime sang dạng chuỗi ISO chuẩn
-    const startTimeFormatted = new Date(startTime).toISOString();
-    const endTimeFormatted = new Date(endTime).toISOString();
+    console.log(startTime, "and", endTime);
 
-    // Tìm các bàn trống trong khoảng thời gian từ startTime đến endTime
+    // Tìm các bàn trống trong khoảng thời gian từ startTime đến endTime với cơ chế locking
     const availableTables = await TableInfo.findAll({
       where: {
         table_number: {
           [Op.notIn]: sequelize.literal(`
             (SELECT table_id 
             FROM reservation_table
-            WHERE start_time < '${endTimeFormatted}' AND end_time > '${startTimeFormatted}')
+            WHERE start_time < '${endTime}' AND end_time > '${startTime}')
           `),
         },
       },
+      lock: true, // Đảm bảo khóa các bản ghi trong quá trình kiểm tra
+      transaction: options.transaction, // Sử dụng transaction từ bên ngoài nếu có
     });
 
     // Kiểm tra và trả về danh sách các bàn trống nếu có
-    // console.log("Số bàn trống:", availableTables.length);
-    // console.log(availableTables);
     return availableTables.length > 0 ? availableTables : null;
   } catch (error) {
     console.error("Error checking available tables:", error);
@@ -58,32 +57,83 @@ const checkAvailableTables = async (startTime, endTime) => {
   }
 };
 
+
 // Hàm tạo đặt bàn
-async function createReservation(reservationData) {
+// async function createReservation(reservationData) {
+//   try {
+//     const { reservation_id, table_id, start_time } = reservationData;
+
+//     // Tính toán thời gian kết thúc (end_time) từ start_time, cộng thêm thời gian lấy từ env
+//     const end_time = new Date(start_time);
+//     end_time.setMinutes(end_time.getMinutes() + reservationDurationMinutes); // Cộng thêm thời gian từ env (tính theo phút)
+
+//     // Tạo đối tượng reservation mới
+//     const newReservation = new ReservationTable({
+//       reservation_id,
+//       table_id,
+//       start_time,
+//       end_time, // Cung cấp end_time
+//     });
+
+//     // Lưu reservation mới vào cơ sở dữ liệu
+//     await newReservation.save();
+
+//     return newReservation; // Trả về reservation vừa được tạo
+//   } catch (error) {
+//     console.error("Error creating reservation:", error);
+//     throw new Error("Error saving the Reservation");
+//   }
+// }
+
+async function createReservations(reservedTables, { transaction }) {
   try {
-    const { reservation_id, table_id, start_time } = reservationData;
+    if (!reservedTables || reservedTables.length === 0) {
+      throw new Error('No tables to reserve');
+    }
 
-    // Tính toán thời gian kết thúc (end_time) từ start_time, cộng thêm thời gian lấy từ env
-    const end_time = new Date(start_time);
-    end_time.setMinutes(end_time.getMinutes() + reservationDurationMinutes); // Cộng thêm thời gian từ env (tính theo phút)
+    const createdReservations = [];
 
-    // Tạo đối tượng reservation mới
-    const newReservation = new ReservationTable({
-      reservation_id,
-      table_id,
-      start_time,
-      end_time, // Cung cấp end_time
-    });
+    // Lặp qua từng bàn trong reservedTables và tạo reservation
+    for (let reservationData of reservedTables) {
+      const { reservation_id, table_id, start_time, people_assigned } = reservationData;
 
-    // Lưu reservation mới vào cơ sở dữ liệu
-    await newReservation.save();
+      const end_time = new Date(start_time);
+      end_time.setMinutes(end_time.getMinutes() + parseInt(process.env.RESERVATION_DURATION_MINUTES) || 120);
 
-    return newReservation; // Trả về reservation vừa được tạo
+      const table = await TableInfo.findOne({
+        where: { table_number: table_id },
+        transaction, // Sử dụng transaction
+      });
+
+      if (!table) {
+        throw new Error(`Table with number ${table_id} not found`);
+      }
+
+      if (table.capacity < people_assigned) {
+        throw new Error(`Table ${table_id} does not have enough capacity for ${people_assigned} people`);
+      }
+
+      // Tạo đối tượng reservation mới
+      const newReservation = new ReservationTable({
+        reservation_id,
+        table_id,
+        start_time,
+        end_time,
+        people_assigned,
+      });
+
+      // Lưu reservation mới vào cơ sở dữ liệu với transaction
+      await newReservation.save({ transaction });
+      createdReservations.push(newReservation);
+    }
+
+    return createdReservations;
   } catch (error) {
-    console.error("Error creating reservation:", error);
-    throw new Error("Error saving the Reservation");
+    console.error('Error creating reservations:', error);
+    throw new Error('Error saving the Reservations');
   }
 }
+
 
 const updateTable = async (table_number, updatedData) => {
   // Tìm người dùng theo username
@@ -122,10 +172,30 @@ async function getTableByTableNumber(table_number) {
   }
 }
 
+
+async function createItemOrders(itemOrders, { transaction }) {
+  try {
+    // Kiểm tra nếu không có item nào để tạo
+    if (!itemOrders || itemOrders.length === 0) {
+      throw new Error("No items to create");
+    }
+
+    // Lưu tất cả các item orders vào cơ sở dữ liệu
+    await ItemOrder.bulkCreate(itemOrders, { transaction });
+
+    // Trả về kết quả (mảng các item orders đã được tạo)
+    return itemOrders; // Hoặc có thể trả về thông tin các item order đã được lưu
+  } catch (error) {
+    console.error("Error creating item orders:", error);
+    throw new Error("Error saving item orders");
+  }
+}
+
 module.exports = {
   createOrder,
-  createReservation,
+  createReservations,
   checkAvailableTables,
   updateTable,
   getTableByTableNumber,
+  createItemOrders,
 };

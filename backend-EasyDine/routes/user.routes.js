@@ -8,6 +8,12 @@ const router = express.Router();
 
 router.get("/all-users", userController.getAllUsers);
 
+router.get(
+  "/user-info",
+  authMiddware.authenticateToken,
+  userController.userInfo
+);
+
 router.post(
   "/signup",
   userUtil.validateSignUpSignUp,

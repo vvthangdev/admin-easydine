@@ -22,3 +22,4 @@ router.delete('message/:conversationId/:messageId', authMiddleWare.authenticateT
 router.get('/:conversationId', authMiddleWare.authenticateToken, conversationController.getListMessages) // get all messages of conversation
 
 module.exports = router;
+  

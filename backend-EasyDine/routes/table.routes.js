@@ -9,6 +9,7 @@ const router = express.Router();
 router.get("/", tableController.getAllTables);
 
 router.use(authMiddware.authenticateToken);
+
 router.use(authMiddware.adminRoleAuth);
 
 router.post("/create-table", tableController.createTable);

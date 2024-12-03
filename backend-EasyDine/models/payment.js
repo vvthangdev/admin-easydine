@@ -14,7 +14,7 @@ module.exports = function(sequelize, DataTypes) {
         model: 'order_detail',
         key: 'id'
       }
-    },
+    },  
     qr_code: {
       type: DataTypes.STRING(255),
       allowNull: true

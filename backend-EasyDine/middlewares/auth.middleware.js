@@ -31,6 +31,7 @@ async function authenticateToken(req, res, next) {
       },
     });    
     // req.user = user.payload ? user.payload : user;
+    // console.log(req.user)
     // console.log("AAAAAAAAAAAA");
     req.user = userObject;
     next(); // Chuyển sang middleware hoặc route tiếp theo
