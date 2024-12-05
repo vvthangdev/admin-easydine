@@ -40,4 +40,9 @@ router.delete(
   userController.deleteUser
 );
 
+router.post(
+  "/sendOTP",
+  userController.sendOTP
+)
+
 module.exports = router;

@@ -4,10 +4,10 @@ const reviewService = require('../services/reviewService');
 exports.createReview = async (req, res) => {
   try {
     const { item_id, order_id, rating, comment } = req.body;
-    const user_id = req.user._id; // Lấy user từ middleware (xác thực JWT)
+    const user_id = req.user.id; // Lấy user từ middleware (xác thực JWT)
 
     const review = await reviewService.createReview({ user_id, item_id, order_id, rating, comment });
-    res.status(201).json({
+    res.status(200).json({
       message: 'Review created successfully',
       review
     });

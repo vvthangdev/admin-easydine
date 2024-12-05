@@ -3,6 +3,7 @@ const User = require("../models/user.model.js");
 require("dotenv").config();
 const userService = require("../services/user.service");
 const authUtil = require("../utils/auth.util");
+const { Auth, LoginCredentials } = require("two-step-auth");
 
 const getAllUsers = async (req, res) => {
   try {
@@ -44,7 +45,7 @@ const signUp = async (req, res) => {
     return res.json({
       status: "SUCCESS",
       message: "Signup successful!",
-      data: newUser,
+      data: newUser.username,
     });
   } catch (error) {
     console.log(error);
@@ -89,7 +90,9 @@ const login = async (req, res) => {
   let { email, password } = req.body;
   // console.log(email);
   try {
-    const user = await userService.getUserByEmail(email);
+    const user = await User.findOne({
+      where: { email: email }
+    });
     // console.log(user);
 
     const isPasswordValid = await userService.validatePassword(
@@ -257,6 +260,39 @@ const deleteUser = async (req, res) => {
   }
 };
 
+const sendOTP = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    // Validate the email format
+    if (!email || typeof email !== 'string' || !/\S+@\S+\.\S+/.test(email)) {
+      return res.status(400).json({ status: "Error", message: "Invalid email address" });
+    }
+
+    // Call the Auth function
+    const res1 = await Auth(email, "");
+
+    // Log essential details
+    console.log("OTP sent successfully:", {
+      email: res1.mail,
+      success: res1.success,
+    });
+
+    // Send success response
+    return res.status(200).json({
+      status: "Success",
+      message: "OTP sent successfully",
+    });
+  } catch (e) {
+    console.error("Error in sendOTP:", e);
+    return res.status(500).json({
+      status: "Error",
+      message: "Internal Server Error",
+    });
+  }
+};
+
+
 module.exports = {
   getAllUsers,
   userInfo,
@@ -266,4 +302,5 @@ module.exports = {
   logout,
   updateUser,
   deleteUser,
+  sendOTP
 };

@@ -13,7 +13,7 @@ require("dotenv").config();
 const reservationDurationMinutes =
   parseInt(process.env.TABLE_RESERVATION_DURATION_MINUTES) || 120; // Giả sử 120 phút là giá trị mặc định
 
-async function createOrder(orderData, { transaction }) {
+async function createOrder(orderData, { transaction} = {}) {
   try {
     const newOrder = new OrderDetail({
       ...orderData,
@@ -173,7 +173,7 @@ async function getTableByTableNumber(table_number) {
 }
 
 
-async function createItemOrders(itemOrders, { transaction }) {
+async function createItemOrders(itemOrders, { transaction} = {}) {
   try {
     // Kiểm tra nếu không có item nào để tạo
     if (!itemOrders || itemOrders.length === 0) {
@@ -190,7 +190,20 @@ async function createItemOrders(itemOrders, { transaction }) {
     throw new Error("Error saving item orders");
   }
 }
-
+async function updateOrder(id, data) { 
+  try { 
+    const order = await OrderDetail.findOne({ where: { id } });
+    if (!order) {
+      return null;
+    }
+    const newOrder = Object.assign(order, {id, ...data});
+    await newOrder.save();
+    return newOrder;
+  } catch(e) { 
+    console.log(e);
+    throw new Error("Error while updating order");
+  }
+}
 module.exports = {
   createOrder,
   createReservations,
@@ -198,4 +211,5 @@ module.exports = {
   updateTable,
   getTableByTableNumber,
   createItemOrders,
+  updateOrder
 };

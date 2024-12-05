@@ -1,32 +1,35 @@
-// const express = require("express");
-// const router = express.Router(); // create router to define 
-
-// // method need to define 
-
-// /*
-//     1.create order 
-//     2.set state order
-//     3.
-// */
-
-// router.get('/', )
-// router.post('/', )
-
-// router
-// module.exports = router;
-
 const express = require('express');
 const router = express.Router();
-const orderController = require('../controllers/orderController');
-const authMiddleware = require('../middlewares/authMiddleware');
+const orderController = require('../controllers/order.controller');
+const authMiddleware = require('../middlewares/auth.middleware');
 
 // Tạo đơn hàng
-router.post('/create', authMiddleware, orderController.createOrder);
-
-// Thanh toán
-router.post('/pay/:orderId', authMiddleware, orderController.payOrder);
+/*
+    {
+        'userinfo': {
+            'name': "Thanh",
+            'address': "abc",
+            'phone': "0979545288" 
+        },
+        'status': 'confirmed',
+        'type': 'ship'
+        'order': [ 
+            {
+                'item_id': 123, 
+                'quantity': 10
+            }
+        ]
+    }
+    order_detail -> userorderin4 -> order_item
+*/
+router.post('/create', authMiddleware.authenticateToken, orderController.createShipOrder); // tạo đơn hàng với menu order và thông tin người dùng, status là confirmed, nếu trong vòng 10p người dùng hủy thì có thể hủy
 
 // Cập nhật trạng thái đơn hàng
-router.put('/update-status/:orderId', authMiddleware, orderController.updateOrderStatus);
+router.put('/update-status/', authMiddleware.authenticateToken, orderController.updateOrder); // hủy đơn hàng
+
+
+// router.get('/get', auth)
+// Cập nhật trạng thái info người dùng của đơn hàng, tạm thời bỏ qua
+// router.put('/update-user-info/:orderId', authMiddleware.authenticateToken, orderUserInfoController.updateInfo);
 
 module.exports = router;

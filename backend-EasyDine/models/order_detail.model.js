@@ -11,7 +11,6 @@ const OrderDetail = sequelize.define('OrderDetail', {
   customer_id: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    unique: true,
     references: {
       model: User,
       key: 'id',
@@ -32,10 +31,18 @@ const OrderDetail = sequelize.define('OrderDetail', {
     validate: {
       min: 1, // Đảm bảo số người phải >= 1 nếu có giá trị
     },},
-  status: {
+  status: { // ship use only 'confirmed' and 'canceled'
     type: DataTypes.ENUM('pending', 'confirmed', 'canceled', 'out_of_seats'),
     defaultValue: 'pending',
   },
+  star: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  comment: {
+    type: DataTypes.STRING(255),
+    allowNull: true
+  }
 }, {
   tableName: 'order_detail',
   timestamps: false,
