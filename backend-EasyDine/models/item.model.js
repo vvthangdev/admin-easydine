@@ -11,6 +11,7 @@ const Item = sequelize.define(
     },
     name: {
       type: DataTypes.STRING(255),
+
       allowNull: false, // Cột này không thể null
     },
     image: {

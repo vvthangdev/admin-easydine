@@ -8,6 +8,7 @@ const io = new Server(server);
 const Message = require("./models/message.js");
 const conversationService = require("./services/conversation.service.js");
 require("dotenv").config();
+const os = require('os');
 
 const userRoutes = require("./routes/user.routes"); // Import route user
 const conversationRoutes = require("./routes/conversation.routes");
@@ -76,6 +77,18 @@ io.on("connection", (socket) => {
 // Kết nối database và chạy server
 const PORT = process.env.PORT || 8080;
 
+function getLocalIp() {
+  const interfaces = os.networkInterfaces();
+  for (let iface of Object.values(interfaces)) {
+      for (let details of iface) {
+          if (details.family === 'IPv4' && !details.internal) {
+              return details.address;
+          }
+      }
+  }
+  return 'localhost'; // Fallback nếu không tìm thấy
+}
+
 sequelize
   .sync()
   // nếu muốn đồng bộ lại db bỏ comment dòng này
@@ -85,5 +98,8 @@ sequelize
     server.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}/`);
     });
+  //   server.listen(PORT, '0.0.0.0', () => {
+  //     console.log(`Server is running on http://${getLocalIp()}:${PORT}/`);
+  // });
   })
   .catch((err) => console.error("Unable to connect to the database:", err));

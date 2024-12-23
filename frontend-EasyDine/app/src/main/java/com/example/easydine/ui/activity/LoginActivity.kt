@@ -1,10 +1,10 @@
-package com.example.easydine.ui
+package com.example.easydine.ui.activity
 
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.easydine.data.models.LoginResponse
+import com.example.easydine.data.model.LoginResponse
 import com.example.easydine.data.repositories.UserRepository
 import com.example.easydine.databinding.ActivityLoginBinding
 import retrofit2.Call
@@ -35,24 +35,25 @@ class LoginActivity : AppCompatActivity() {
     private fun loginUser(email: String, password: String) {
         userRepository.loginUser(email, password).enqueue(object : Callback<LoginResponse> {
             override fun onResponse(call: Call<LoginResponse>, response: Response<LoginResponse>) {
-                if (response.isSuccessful && response.body()?.success == true) {
+                if (response.isSuccessful && response.body()?.status == "SUCCESS") {
                     val loginResponse = response.body()
 
                     // Lưu token vào SharedPreferences
                     val sharedPreferences = getSharedPreferences("AppPrefs", MODE_PRIVATE)
                     val editor = sharedPreferences.edit()
+                    editor.putString("status", loginResponse?.status)
+                    editor.putString("message", loginResponse?.message)
+                    editor.putString("role", loginResponse?.role)
+                    editor.putString("address", loginResponse?.address)
+                    editor.putString("avatar", loginResponse?.avatar)
+                    editor.putString("email", loginResponse?.email)
+                    editor.putString("phone", loginResponse?.phone)
+                    editor.putString("username", loginResponse?.username)
                     editor.putString("accessToken", loginResponse?.accessToken)
                     editor.putString("refreshToken", loginResponse?.refreshToken)
                     editor.apply()
 
-                    // Chuyển đến HomeActivity và truyền thông tin loginResponse
-                    val intent = Intent(this@LoginActivity, HomeActivity::class.java).apply {
-                        putExtra("username", loginResponse?.username)
-                        putExtra("status", loginResponse?.status)
-                        putExtra("message", loginResponse?.message)
-                        putExtra("accessToken", loginResponse?.accessToken)
-                        putExtra("refreshToken", loginResponse?.refreshToken)
-                    }
+                    val intent = Intent(this@LoginActivity, HomeActivity::class.java)
                     startActivity(intent)
                     finish() // Đóng màn hình đăng nhập
                 } else {

@@ -8,8 +8,8 @@ const router = express.Router();
 
 router.get("/", itemController.getAllItems);
 
-router.use(authMiddware.authenticateToken);
-router.use(authMiddware.adminRoleAuth);
+// router.use(authMiddware.authenticateToken);
+// router.use(authMiddware.adminRoleAuth);
 
 router.post("/create-item", itemController.createItem);
 
