@@ -1,9 +1,19 @@
 const ItemInfo = require("../models/item.model");
 const itemService = require("../services/item.service");
+const ItemBanner = require("../models/itembanner")
 
 const getAllItems = async (req, res) => {
   try {
     const items = await ItemInfo.findAll();
+    res.json(items);
+  } catch (error) {
+    res.status(500).json({ error: "Error fetching items" });
+  }
+};
+
+const getItemBanner = async (req, res) => {
+  try {
+    const items = await ItemBanner.findAll();
     res.json(items);
   } catch (error) {
     res.status(500).json({ error: "Error fetching items" });
@@ -19,6 +29,30 @@ const createItem = async (req, res) => {
     res.status(500).json({ error: "Error creating item" });
   }
 };
+
+const createItemBanner = async (req, res) => {
+  try {
+    const { image, title } = req.body;
+
+    // Kiểm tra dữ liệu đầu vào
+    if (!image || !title) {
+      return res.status(400).json({ error: "Image and title are required." });
+    }
+
+    // Tạo ItemBanner mới
+    const newItem = await ItemBanner.create({
+      image,
+      title,
+    });
+
+    // Trả về phản hồi
+    res.status(201).json(newItem);
+  } catch (error) {
+    console.error("Error creating item:", error); // Log lỗi để dễ gỡ lỗi
+    res.status(500).json({ error: "Error creating item" });
+  }
+};
+
 
 const updateItem = async (req, res) => {
   try {
@@ -91,7 +125,9 @@ const deleteItem = async (req, res) => {
 
 module.exports = {
   getAllItems,
+  getItemBanner,
   createItem,
+  createItemBanner,
   updateItem,
   searchItem,
   deleteItem,

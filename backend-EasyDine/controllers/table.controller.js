@@ -12,6 +12,7 @@ const getAllTables = async (req, res) => {
 
 const createTable = async (req, res) => {
   try {
+    console.log(req.user)
     const { ...tableData } = req.body;
     const newTable = await tableService.createTable({ ...tableData });
     res.status(201).json(newTable);
@@ -47,32 +48,6 @@ const updateTable = async (req, res) => {
   }
 };
 
-const tableInfo = async (req, res) => {
-  try {
-    const { ...otherFields } = req.body; // Adjust as needed to accept relevant fields
-
-    if (!otherFields || Object.keys(otherFields).length === 0) {
-      return res.status(400).send("No fields to update.");
-    }
-
-    // Update the user information in the database
-    const updatedUser = await userService.updateUser(req.user.username, {
-      ...otherFields, // Spread other fields if there are additional updates
-    });
-
-    if (!updatedUser) {
-      return res.status(404).send("User not found!");
-    }
-    res.json({
-      status: "SUCCESS",
-      message: "User updated successfully!",
-      user: updatedUser,
-    });
-  } catch (error) {
-    res.status(500).json({ error: "Error fetching table" });
-  }
-};
-
 const deleteTable = async (req, res) => {
   try {
     console.log(req.body.table_number)
@@ -93,6 +68,5 @@ module.exports = {
   getAllTables,
   createTable,
   updateTable,
-  tableInfo,
   deleteTable,
 };

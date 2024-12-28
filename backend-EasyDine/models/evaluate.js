@@ -1,13 +1,28 @@
-const Sequelize = require('sequelize');
-module.exports = function(sequelize, DataTypes) {
-  return sequelize.define('evaluate', {
-    order_id: {
+const { DataTypes } = require("sequelize");
+const sequelize = require("../config/db.config"); 
+const Item = require("./item.model");
+const OrderDetail = require("./order_detail.model");
+
+const Evaluate = sequelize.define('Evaluate', {
+    id: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      primaryKey: true,
+      primaryKey: true,  
+    },
+    item_id: { 
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: { 
+        model: Item,
+        key: "id"
+      }
+    },
+    order_id: { 
+      type: DataTypes.INTEGER,
+      allowNull: false,
       references: {
-        model: 'order_detail',
-        key: 'id'
+        model: OrderDetail,
+        id: "id"
       }
     },
     star: {
@@ -33,4 +48,4 @@ module.exports = function(sequelize, DataTypes) {
       },
     ]
   });
-};
+module.exports = Evaluate;
