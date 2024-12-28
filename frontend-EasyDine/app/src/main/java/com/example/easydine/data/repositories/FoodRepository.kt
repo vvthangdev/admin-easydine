@@ -3,7 +3,7 @@ package com.example.easydine.data.repositories
 import androidx.lifecycle.LiveData
 import com.example.easydine.data.local.dao.FoodDao
 import com.example.easydine.data.model.Food
-import com.example.easydine.network.service.FoodApiService
+import com.example.easydine.data.network.service.FoodApiService
 
 class FoodRepository(
     private val foodDao: FoodDao,

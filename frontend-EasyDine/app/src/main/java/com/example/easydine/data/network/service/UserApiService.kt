@@ -1,8 +1,10 @@
-package com.example.easydine.network.service
+package com.example.easydine.data.network.service
 
-import com.example.easydine.network.response.LoginResponse
-import com.example.easydine.network.response.RefreshTokenResponse
+import com.example.easydine.data.network.response.LoginResponse
+import com.example.easydine.data.network.response.RefreshTokenResponse
+import com.example.easydine.data.network.response.SignUpResponse
 import retrofit2.Response
+import retrofit2.http.Body
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.Header
@@ -27,4 +29,14 @@ interface UserApiService {
     suspend fun refreshAccessToken(
         @Header("Authorization") authorization: String
     ): Response<RefreshTokenResponse>
+
+    @FormUrlEncoded
+    @POST("/api/auth/signup")
+    suspend fun registerUser(
+        @Field("email") email: String,
+        @Field("name") name: String,
+        @Field("username") username: String,
+        @Field("phone") phone: String,
+        @Field("password") password: String,
+    ): Response<SignUpResponse>
 }

@@ -8,6 +8,9 @@ const router = express.Router();
 
 router.get("/", itemController.getAllItems);
 
+router.get("/item-banner", itemController.getItemBanner);
+router.post("/create-itembanner", itemController.createItemBanner);
+
 // router.use(authMiddware.authenticateToken);
 // router.use(authMiddware.adminRoleAuth);
 

@@ -39,7 +39,7 @@ class LoginViewModel : ViewModel() {
                         val editor = sharedPreferences.edit()
 
                         // Lưu các thông tin người dùng vào SharedPreferences
-                        loginResponse?.let {
+                        loginResponse.let {
                             editor.putInt("id", it.id) // Lưu id
                             editor.putString("name", it.name) // Lưu name
                             editor.putString("status", it.status)

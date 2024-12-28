@@ -1,9 +1,10 @@
 package com.example.easydine.data.repositories
 
 import android.util.Log
-import com.example.easydine.network.response.LoginResponse
-import com.example.easydine.network.ApiClient
-import com.example.easydine.network.response.RefreshTokenResponse
+import com.example.easydine.data.network.ApiClient
+import com.example.easydine.data.network.response.LoginResponse
+import com.example.easydine.data.network.response.RefreshTokenResponse
+import com.example.easydine.data.network.response.SignUpResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -19,18 +20,15 @@ class UserRepository {
                 // Gọi API để login
                 val response = apiService.loginUser(email, password)
 
-                // Log thông tin chi tiết về response
-//                Log.d("UserRepository", "Login API response: ${response.body()}")
-//                Log.d("UserRepository", "Response code: ${response.code()}")
-//                Log.d("UserRepository", "Response message: ${response.message()}")
-
-                // Kiểm tra response và trả về LoginResponse nếu thành công
                 if (response.isSuccessful) {
                     Log.d("UserRepository", "Login successful. Status: ${response.body()}")
                     return@withContext response.body()
                 } else {
                     // Log khi API trả về lỗi (4xx hoặc 5xx)
-                    Log.e("UserRepository", "Login failed. Error code: ${response.code()} - ${response.message()}")
+                    Log.e(
+                        "UserRepository",
+                        "Login failed. Error code: ${response.code()} - ${response.message()}"
+                    )
                     return@withContext null
                 }
             } catch (e: Exception) {
@@ -52,21 +50,22 @@ class UserRepository {
                 // Gọi API để refresh token với header Authorization
                 val response = apiService.refreshAccessToken(authorizationHeader)
 
-                // Log thông tin chi tiết về response
-//                Log.d("UserRepository", "Refresh token API response: ${response.body()}")
-//                Log.d("UserRepository", "Response code: ${response.code()}")
-//                Log.d("UserRepository", "Response message: ${response.message()}")
-
                 // Kiểm tra nếu API trả về response thành công
                 if (response.isSuccessful) {
                     // Log thành công và thông tin về accessToken
-                    Log.d("UserRepository", "Refresh token successful. AccessToken: ${response.body()?.accessToken}")
+                    Log.d(
+                        "UserRepository",
+                        "Refresh token successful. AccessToken: ${response.body()?.accessToken}"
+                    )
 
                     // Trả về LoginResponse nếu thành công
                     return@withContext response.body()
                 } else {
                     // Log khi API trả về lỗi, thêm thông tin lỗi chi tiết
-                    Log.e("UserRepository", "Refresh token failed. Error code: ${response.code()} - ${response.message()}")
+                    Log.e(
+                        "UserRepository",
+                        "Refresh token failed. Error code: ${response.code()} - ${response.message()}"
+                    )
                     if (response.errorBody() != null) {
                         Log.e("UserRepository", "Error Body: ${response.errorBody()?.string()}")
                     }
@@ -80,6 +79,25 @@ class UserRepository {
         }
     }
 
-//    suspend fun signUpUser()
+    suspend fun signUpUser(
+        email: String,
+        name: String,
+        username: String,
+        phone: String,
+        password: String
+    ): SignUpResponse? {
+        return try {
+            // Gọi API đăng ký với các tham số cần thiết
+            val response = apiService.registerUser(email, name, username, phone, password)
+
+            if (response.isSuccessful) {
+                response.body()  // Trả về dữ liệu người dùng nếu đăng ký thành công
+            } else {
+                null  // Trả về null nếu đăng ký không thành công
+            }
+        } catch (e: Exception) {
+            null  // Trả về null trong trường hợp có lỗi (ví dụ: lỗi kết nối)
+        }
+    }
 
 }

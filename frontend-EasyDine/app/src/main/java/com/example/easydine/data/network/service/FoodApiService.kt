@@ -1,8 +1,8 @@
-package com.example.easydine.network.service
+package com.example.easydine.data.network.service
 
 import com.example.easydine.data.model.Food
 import retrofit2.http.GET
-import com.example.easydine.network.response.FoodResponse
+import com.example.easydine.data.network.response.FoodResponse
 import retrofit2.Response
 import retrofit2.http.*
 

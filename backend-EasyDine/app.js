@@ -36,7 +36,7 @@ app.use("/tables", tableRouter);
 app.use("/orders", orderRouter);
 app.use("/item", itemRouter);
 app.use("/item-order", itemOrdRouter);
-app.use("/item-category", itemCategoryRouter);
+// app.use("/item-category", itemCategoryRouter);
 app.use("/admin", adminRouter);
 
 app.use("/ship", shipRouter);

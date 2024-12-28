@@ -1,6 +1,6 @@
-package com.example.easydine.network
+package com.example.easydine.data.network
 
-import com.example.easydine.network.service.UserApiService
+import com.example.easydine.data.network.service.UserApiService
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -9,7 +9,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 
 object ApiClient {
-    private const val BASE_URL = "https://eff1-2a09-bac5-d45b-e6-00-17-351.ngrok-free.app/"
+    private const val BASE_URL = "https://3cec-104-28-222-75.ngrok-free.app/"
 
     // Moshi instance
     private val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()

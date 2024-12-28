@@ -1,4 +1,4 @@
-package com.example.easydine.network.response
+package com.example.easydine.data.network.response
 
 import com.squareup.moshi.Json
 
