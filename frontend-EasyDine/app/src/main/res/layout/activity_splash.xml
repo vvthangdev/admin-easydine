@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.activity.SplashActivity">
+    tools:context=".ui.splash.SplashActivity">
 
     <ImageView
         android:id="@+id/imageView"
@@ -13,5 +13,5 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
-        app:srcCompat="@drawable/logo_v1" />
+        app:srcCompat="@drawable/splash_page" />
 </LinearLayout>

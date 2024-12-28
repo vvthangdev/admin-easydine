@@ -2,11 +2,6 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     kotlin("kapt")
-//    id("com.google.devtools.ksp")
-//    alias(libs.plugins.kotlin.android) version "1.9.10" // Cập nhật phiên bản Kotlin
-//    id("kotlin-kapt")
-//    id("com.google.devtools.ksp") version "1.9.10-1.0.13" // Phiên bản KSP mới
-//    id("com.google.dagger.hilt.android") version "2.48.1" // Phiên bản Hilt
 }
 
 android {
@@ -60,22 +55,19 @@ dependencies {
     val room_version = "2.6.0"
     implementation ("androidx.room:room-runtime:$room_version")
     kapt ("androidx.room:room-compiler:$room_version")
-
-    // Kotlin Extensions and Coroutines support for Room
     implementation ("androidx.room:room-ktx:$room_version")
-
-    // Test helpers
     testImplementation ("androidx.room:room-testing:$room_version")
-//    implementation(libs.androidx.room.runtime)  // Thêm Room runtime
-//    ksp(libs.androidx.room.compiler)  // KSP Room compiler
-//    implementation("androidx.room:room-runtime:$roomVersion")
-//    implementation("androidx.room:room-ktx:$roomVersion")
-//    ksp(libs.androidx.room.compiler)
+    implementation ("com.squareup.retrofit2:converter-moshi:$room_version")
+    // Moshi for JSON parsing
+    implementation ("com.squareup.moshi:moshi:1.15.0")
+    implementation ("com.squareup.moshi:moshi-kotlin:1.15.0")
 
-//    val hiltVersion = "2.48"
-//        implementation("com.google.dagger:hilt-android:$hiltVersion")
-//        kapt("com.google.dagger:hilt-compiler:$hiltVersion")
+    implementation ("androidx.viewpager2:viewpager2:1.0.0")
 
+    // OkHttp for logging interceptor
+    implementation ("com.squareup.okhttp3:logging-interceptor:4.9.3")
+
+    
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")

@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/login_color_bg"
+    tools:context=".ui.signup.SignUpActivity">
+
+    <!-- Logo hoặc hình ảnh nền -->
+    <ImageView
+        android:id="@+id/ivBackgroundImage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scaleType="centerCrop"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/bg_asset" />
+
+    <!-- Tiêu đề chính -->
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:text="Sign Up"
+        android:textColor="@color/white"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Mô tả phụ -->
+    <TextView
+        android:id="@+id/tvSubtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="Sign up your account"
+        android:textColor="@color/white"
+        android:textSize="15sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvTitle" />
+
+    <!-- Hình ảnh nền chính -->
+    <ImageView
+        android:id="@+id/ivWhiteBackground"
+        android:layout_width="match_parent"
+        android:layout_height="800dp"
+        android:layout_marginTop="50dp"
+        android:scaleType="fitXY"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvSubtitle"
+        app:srcCompat="@drawable/white_bg" />
+
+    <!-- Container cho các trường nhập liệu -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="800dp"
+        android:orientation="vertical"
+        android:padding="30dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/ivWhiteBackground">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <!-- Trường Email -->
+            <TextView
+                android:id="@+id/tvEmailLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Email"
+                android:textColor="@color/txt_login_color"
+                android:textSize="20sp" />
+
+            <EditText
+                android:id="@+id/edtEmail"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/edt_login_bg"
+                android:ems="10"
+                android:gravity="center_vertical"
+                android:hint="example@gmail.com"
+                android:inputType="text"
+                android:paddingStart="20dp"
+                android:textColorHint="#A0A5BA"
+                android:textSize="20sp" />
+
+            <!-- Trường User Name -->
+            <TextView
+                android:id="@+id/tvFullNameLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="Name"
+                android:textColor="@color/txt_login_color"
+                android:textSize="20sp" />
+
+            <EditText
+                android:id="@+id/edtFullName"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/edt_login_bg"
+                android:ems="10"
+                android:gravity="center_vertical"
+                android:hint="Nguyen Van A"
+                android:inputType="text"
+                android:paddingStart="20dp"
+                android:textColorHint="#A0A5BA"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/tvUserNameLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="User name"
+                android:textColor="@color/txt_login_color"
+                android:textSize="20sp" />
+
+            <EditText
+                android:id="@+id/edtUserName"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/edt_login_bg"
+                android:ems="10"
+                android:gravity="center_vertical"
+                android:hint="Aris"
+                android:inputType="text"
+                android:paddingStart="20dp"
+                android:textColorHint="#A0A5BA"
+                android:textSize="20sp" />
+
+            <!-- Trường Full Name -->
+
+            <!-- Trường Phone Number -->
+            <TextView
+                android:id="@+id/tvPhoneLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="Phone"
+                android:textColor="@color/txt_login_color"
+                android:textSize="20sp" />
+
+            <EditText
+                android:id="@+id/edtPhone"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/edt_login_bg"
+                android:ems="10"
+                android:gravity="center_vertical"
+                android:hint="+84 0123456789"
+                android:inputType="text"
+                android:paddingStart="20dp"
+                android:textColorHint="#A0A5BA"
+                android:textSize="20sp" />
+
+            <!-- Trường Password -->
+            <TextView
+                android:id="@+id/tvPasswordLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="Password"
+                android:textColor="@color/txt_login_color"
+                android:textSize="20sp" />
+
+            <EditText
+                android:id="@+id/edtPassword"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/edt_login_bg"
+                android:ems="10"
+                android:gravity="center_vertical"
+                android:hint="**********"
+                android:inputType="textPassword"
+                android:paddingStart="20dp"
+                android:textColorHint="#A0A5BA"
+                android:textSize="20sp" />
+
+            <!-- Button Sign Up -->
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnSignUp"
+                android:layout_marginTop="20dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/btn_login_bg"
+                android:gravity="center"
+                android:text="SIGN UP"
+                android:textColor="@color/white"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

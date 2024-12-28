@@ -1,25 +1,38 @@
 package com.example.easydine.network
 
-import com.example.easydine.network.service.ApiService
-import com.example.easydine.network.service.FoodApiService
+import com.example.easydine.network.service.UserApiService
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.moshi.MoshiConverterFactory
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 
 object ApiClient {
-    private const val BASE_URL = "https://00ca-113-185-51-228.ngrok-free.app/" // URL API gốc
+    private const val BASE_URL = "https://eff1-2a09-bac5-d45b-e6-00-17-351.ngrok-free.app/"
 
-    val retrofit: Retrofit = Retrofit.Builder()
-        .baseUrl(BASE_URL)
-        .addConverterFactory(GsonConverterFactory.create())
-        .build()
+    // Moshi instance
+    private val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
 
-    // ApiService cho UserRepository
-    val apiService: ApiService by lazy {
-        retrofit.create(ApiService::class.java)
+    // HttpLoggingInterceptor for logging requests and responses
+    private val loggingInterceptor = HttpLoggingInterceptor().apply {
+        level = HttpLoggingInterceptor.Level.BODY
     }
 
-    // FoodApiService cho FoodRepository
-    val foodApiService: FoodApiService by lazy {
-        retrofit.create(FoodApiService::class.java)
+    // OkHttpClient with interceptor
+    private val httpClient = OkHttpClient.Builder()
+        .addInterceptor(loggingInterceptor)
+        .build()
+
+    // Retrofit instance
+    private val retrofit: Retrofit = Retrofit.Builder()
+        .baseUrl(BASE_URL)
+        .client(httpClient) // Add OkHttpClient with interceptor
+        .addConverterFactory(MoshiConverterFactory.create(moshi))
+        .build()
+
+    // UserApiService instance
+    val userApiService: UserApiService by lazy {
+        retrofit.create(UserApiService::class.java)
     }
 }

@@ -8,7 +8,7 @@ const io = new Server(server);
 const Message = require("./models/message.js");
 const conversationService = require("./services/conversation.service.js");
 require("dotenv").config();
-const os = require('os');
+const os = require("os");
 
 const userRoutes = require("./routes/user.routes"); // Import route user
 const conversationRoutes = require("./routes/conversation.routes");
@@ -19,7 +19,7 @@ const itemRouter = require("./routes/item.routes.js");
 const itemOrdRouter = require("./routes/item_order.routes.js");
 const shipRouter = require("./routes/ship.routes.js");
 const itemCategoryRouter = require("./routes/item_category.routes.js");
-const adminRouter = require("./routes/admin.routes.js")
+const adminRouter = require("./routes/admin.routes.js");
 
 const contactRouter = require("./routes/contact.routes.js");
 const sequelize = require("./config/db.config.js");
@@ -37,7 +37,7 @@ app.use("/orders", orderRouter);
 app.use("/item", itemRouter);
 app.use("/item-order", itemOrdRouter);
 app.use("/item-category", itemCategoryRouter);
-app.use("/admin", adminRouter)
+app.use("/admin", adminRouter);
 
 app.use("/ship", shipRouter);
 app.use("/contact", contactRouter);
@@ -80,13 +80,13 @@ const PORT = process.env.PORT || 8080;
 function getLocalIp() {
   const interfaces = os.networkInterfaces();
   for (let iface of Object.values(interfaces)) {
-      for (let details of iface) {
-          if (details.family === 'IPv4' && !details.internal) {
-              return details.address;
-          }
+    for (let details of iface) {
+      if (details.family === "IPv4" && !details.internal) {
+        return details.address;
       }
+    }
   }
-  return 'localhost'; // Fallback nếu không tìm thấy
+  return "localhost"; // Fallback nếu không tìm thấy
 }
 
 sequelize
@@ -98,8 +98,8 @@ sequelize
     server.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}/`);
     });
-  //   server.listen(PORT, '0.0.0.0', () => {
-  //     console.log(`Server is running on http://${getLocalIp()}:${PORT}/`);
-  // });
+    //   server.listen(PORT, '0.0.0.0', () => {
+    //     console.log(`Server is running on http://${getLocalIp()}:${PORT}/`);
+    // });
   })
   .catch((err) => console.error("Unable to connect to the database:", err));
