@@ -63,7 +63,7 @@ export default function OrderManagements() {
       dataIndex: "time",
       key: "time",
       render: (text) => (
-        <span>{moment(text).format("DD/MM/YYYY HH:mm:ss")}</span>
+        <span>{moment.utc(text).local().format("DD/MM/YYYY HH:mm:ss")}</span>
       ), // Định dạng thời gian
     },
     {
