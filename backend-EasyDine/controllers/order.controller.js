@@ -3,6 +3,7 @@ const orderService = require("../services/order.service");
 const userService = require("../services/user.service");
 const sequelize = require("../config/db.config"); // Đảm bảo import sequelize để sử dụng transaction
 const { createOrderUserInfo } = require("../services/order_user_info.service");
+const { where } = require("sequelize");
 
 const getAllOrders = async (req, res) => {
   try {
@@ -16,7 +17,7 @@ const getAllOrders = async (req, res) => {
 const getAllOrdersOfCustomer = async (req, res) => {
   try {
     const customer_id = req.user.id;
-    const orders = await OrderDetail.findAll({customer_id});
+    const orders = await OrderDetail.findAll( {where: {customer_id: customer_id}});
     res.json(orders);
   } catch (error) {
     res.status(500).json({ error: "Error fetching orders" });
