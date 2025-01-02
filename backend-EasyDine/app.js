@@ -17,7 +17,6 @@ const tableRouter = require("./routes/table.routes.js");
 const orderRouter = require("./routes/order.routes.js");
 const itemRouter = require("./routes/item.routes.js");
 const itemOrdRouter = require("./routes/item_order.routes.js");
-const shipRouter = require("./routes/ship.routes.js");
 const itemCategoryRouter = require("./routes/item_category.routes.js");
 const adminRouter = require("./routes/admin.routes.js");
 
@@ -39,7 +38,6 @@ app.use("/item-order", itemOrdRouter);
 // app.use("/item-category", itemCategoryRouter);
 app.use("/admin", adminRouter);
 
-app.use("/ship", shipRouter);
 app.use("/contact", contactRouter);
 // chat through socket
 let users = {};

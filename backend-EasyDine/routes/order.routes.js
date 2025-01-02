@@ -10,14 +10,24 @@ const router = express.Router();
 
 router.use(authMiddware.authenticateToken);
 
-router.get("/", authMiddware.adminRoleAuth,orderController.getAllOrders);
+router.get("/", authMiddware.adminRoleAuth, orderController.getAllOrders);
 
-router.get('/get-all-user-orders', authMiddware.authenticateToken, orderController.getAllOrdersOfCustomer);
+router.get(
+  "/get-all-user-orders",
+  authMiddware.authenticateToken,
+  orderController.getAllOrdersOfCustomer
+);
 
 router.post("/update-evaluate/:orderId", orderController.updateEvaluate);
 
-router.use(authMiddware.notAdminRoleAuth);
+router.delete(
+  "/delete-order/:id",
+  authMiddware.adminRoleAuth,
+  orderController.deleteOrder
+);
 
-router.post("/create-order", orderController.createOrder);
+// router.use(authMiddware.notAdminRoleAuth);
+
+router.post("/create-order", authMiddware.notAdminRoleAuth, orderController.createOrder);
 
 module.exports = router;

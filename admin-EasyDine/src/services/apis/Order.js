@@ -18,6 +18,9 @@ export const orderAPI = {
     },
     searchItem: (data) => {
         return axiosInstance.get('/item/delete-item');
+    },
+    deleteOrder: (data) => {
+        return axiosInstance.delete(`/orders/delete-order/${data}`)
     }
 };
 

@@ -179,36 +179,27 @@ const updateEvaluate = async (req, res) => {
   }
 };
 
-const createShipOrder = async (req, res) => {
-  try { 
-    const {userInfo, status, type, orderItems} = req.body;
-    const customerId = req.user.id;
-    // create order_detail for ship
-    const newOrder = await orderService.createOrder({status, type, 'customer_id': customerId});
-    try {
-      // create orderuserinfo
-      await createOrderUserInfo({...userInfo, 'order_detail_id': customerId});
-      //create itemOrders
-      await orderService.createItemOrders(orderItems.map( (item) => (
-        {
-          'item_id': item.item_id,
-          'customer_id': customerId,
-          'quantity': item.quantity,
-          'order_id': newOrder.id
-        })
-      ));
-    } catch(error) {
-      newOrder.destroy();
-      res.status(500).json({ error: "Error happend when create ship order 1"});
+const deleteOrder = async (req, res) => {
+  const { id } = req.params; // Lấy id của đơn hàng từ params
+  console.log(req.params)
+
+  try {
+    // Tìm đơn hàng theo id
+    const order = await OrderDetail.findOne({ where: { id } });
+
+    // Kiểm tra xem đơn hàng có tồn tại không
+    if (!order) {
+      return res.status(404).json({ error: "Order not found!" });
     }
-    res.json({
-      status: "Success",
-      message: "Create ship order successfully",
-      data: newOrder
-    });
-  } catch(e) {
-      console.log(e);
-      res.status(500).json({ error: "Error happend when create ship order 2"});
+
+    // Xóa đơn hàng
+    await order.destroy();
+
+    // Trả về phản hồi thành công
+    res.status(200).json({ message: "Order deleted successfully!" });
+  } catch (error) {
+    console.error("Error deleting order:", error);
+    res.status(500).json({ error: "Error deleting order" });
   }
 };
 
@@ -216,7 +207,7 @@ module.exports = {
   getAllOrders,
   createOrder,
   updateOrder,
-  createShipOrder,
   updateEvaluate,
-  getAllOrdersOfCustomer
+  getAllOrdersOfCustomer,
+  deleteOrder,
 };

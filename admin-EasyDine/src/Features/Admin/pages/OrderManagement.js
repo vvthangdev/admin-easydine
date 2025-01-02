@@ -22,7 +22,7 @@ export default function OrderManagements() {
   const [form] = Form.useForm();
   const [editingOrder, setEditingOrder] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState("ship"); // State to track active tab
+  const [activeTab, setActiveTab] = useState("reservation"); // State to track active tab
 
   const fetchOrders = async () => {
     setLoading(true);
