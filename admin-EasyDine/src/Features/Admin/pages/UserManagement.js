@@ -79,13 +79,23 @@ export default function UserManagement() {
 
     const handleDelete = async (record) => {
         try {
-            await adminAPI.deleteUser(record); // Xóa người dùng
-            setUsers(users.filter(user => user.id !== record.id));
+            // Gửi yêu cầu DELETE với body chứa thông tin username
+            const response = await adminAPI.deleteUser({
+                method: 'DELETE', // Hoặc 'POST' nếu bạn sử dụng POST để xóa
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username: record.username }), // Dữ liệu body là JSON
+            });
+            setUsers(users.filter(user => user.id !== record.id)); // Cập nhật danh sách người dùng
             message.success('Xóa người dùng thành công');
         } catch (error) {
             message.error('Xóa người dùng không thành công');
         }
     };
+    
+    
+    
 
     const handleModalOk = async () => {
         try {

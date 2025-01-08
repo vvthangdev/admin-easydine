@@ -24,6 +24,22 @@ export default function OrderManagements() {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("reservation"); // State to track active tab
 
+  const [orderDetails, setOrderDetails] = useState(null);
+  const [detailsModalVisible, setDetailsModalVisible] = useState(false);
+
+  const handleViewDetails = async (id) => {
+    try {
+      console.log("Fetching details for order ID:", id); // Kiểm tra ID truyền vào
+      const response = await orderAPI.getOrderDetails(id); // Gọi API
+      console.log("Order details:", response); // Log dữ liệu trả về từ API
+      setOrderDetails(response); // Lưu dữ liệu trả về vào state
+      setDetailsModalVisible(true); // Hiển thị modal
+    } catch (error) {
+      message.error("Không thể lấy thông tin chi tiết đơn hàng");
+      console.error("Error fetching order details:", error);
+    }
+  };
+
   const fetchOrders = async () => {
     setLoading(true);
     try {
@@ -63,8 +79,8 @@ export default function OrderManagements() {
       dataIndex: "time",
       key: "time",
       render: (text) => (
-        <span>{moment.utc(text).local().format("DD/MM/YYYY HH:mm:ss")}</span>
-      ), // Định dạng thời gian
+        <span>{moment.utc(text).format("DD/MM/YYYY HH:mm:ss")}</span>
+      ),
     },
     {
       title: "Trạng Thái",
@@ -94,6 +110,13 @@ export default function OrderManagements() {
             className="text-red-600 hover:text-red-800"
           >
             Xóa
+          </Button>
+          <Button
+            type="link"
+            onClick={() => handleViewDetails(record.id)} // Thêm nút Xem Chi Tiết
+            className="text-green-600 hover:text-green-800"
+          >
+            Xem Chi Tiết
           </Button>
         </Space>
       ),
@@ -199,6 +222,96 @@ export default function OrderManagements() {
           </div>
         </TabPane>
       </Tabs>
+
+      <Modal
+        title="Chi Tiết Đơn Hàng"
+        open={detailsModalVisible}
+        onCancel={() => setDetailsModalVisible(false)}
+        footer={[
+          <Button key="close" onClick={() => setDetailsModalVisible(false)}>
+            Đóng
+          </Button>,
+        ]}
+      >
+        {orderDetails ? (
+          <div>
+            {/* Reserved Tables */}
+            <h3>Danh Sách Bàn Đặt:</h3>
+            {orderDetails.reservedTables.length > 0 ? (
+              <ul>
+                {orderDetails.reservedTables.map((table) => (
+                  <li key={table.id}>
+                    <b>Bàn:</b> {table.table_id}, <b>Thời gian:</b>{" "}
+                    {`${moment
+                      .utc(table.start_time)
+                      .local()
+                      .format("HH:mm:ss")} - ${moment
+                      .utc(table.end_time)
+                      .local()
+                      .format("HH:mm:ss")}`}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>Không có bàn đặt nào.</p>
+            )}
+
+            {/* Item Orders */}
+            <h3>Danh Sách Mặt Hàng:</h3>
+            {orderDetails.itemOrders.length > 0 ? (
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "16px",
+                }}
+              >
+                {orderDetails.itemOrders.map((item) => (
+                  <div
+                    key={item.id}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      borderBottom: "1px solid #ddd",
+                      paddingBottom: "8px",
+                    }}
+                  >
+                    <img
+                      src={item.itemImage}
+                      alt={item.itemName}
+                      style={{
+                        width: "80px",
+                        height: "80px",
+                        marginRight: "16px",
+                        objectFit: "cover",
+                      }}
+                    />
+                    <div>
+                      <p>
+                        <b>Tên:</b> {item.itemName}
+                      </p>
+                      <p>
+                        <b>Giá:</b> {item.itemPrice.toLocaleString()} VND
+                      </p>
+                      <p>
+                        <b>Số Lượng:</b> {item.quantity}
+                      </p>
+                      <p>
+                        <b>Tổng Tiền:</b>{" "}
+                        {(item.itemPrice * item.quantity).toLocaleString()} VND
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p>Không có mặt hàng nào được đặt.</p>
+            )}
+          </div>
+        ) : (
+          <p>Đang tải thông tin chi tiết...</p>
+        )}
+      </Modal>
 
       <Modal
         title={editingOrder ? "Sửa Đơn Hàng" : "Thêm Đơn Hàng Mới"}

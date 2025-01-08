@@ -46,9 +46,9 @@ async function authenticateToken(req, res, next) {
 async function adminRoleAuth(req, res, next) {
   try {
     // Kiểm tra nếu vai trò trong yêu cầu là ADMIN
-    console.log(req.user);
+    // console.log(req.user);
     if (req.user.role === "ADMIN") {
-      console.log("Next")
+      // console.log("Next")
       // Chuyển tiếp yêu cầu đến middleware hoặc route handler tiếp theo
       return next();
     } else {

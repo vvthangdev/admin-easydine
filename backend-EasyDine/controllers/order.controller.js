@@ -1,9 +1,9 @@
 const OrderDetail = require("../models/order_detail.model");
 const orderService = require("../services/order.service");
-const userService = require("../services/user.service");
+const ReservedTable = require("../models/reservation_table.model")
 const sequelize = require("../config/db.config"); // Đảm bảo import sequelize để sử dụng transaction
-const { createOrderUserInfo } = require("../services/order_user_info.service");
-const { where } = require("sequelize");
+const ItemOrder = require("../models/item_order.model");
+const Item = require("../models/item.model")
 
 const getAllOrders = async (req, res) => {
   try {
@@ -13,6 +13,123 @@ const getAllOrders = async (req, res) => {
     res.status(500).json({ error: "Error fetching orders" });
   }
 };
+
+const getAllOrdersInfo = async (req, res) => {
+  try {
+    // Lấy tất cả các đơn hàng
+    const orders = await OrderDetail.findAll();
+
+    // Tính tổng tiền (`totalAmount`) cho mỗi đơn hàng
+    const enrichedOrders = await Promise.all(
+      orders.map(async (order) => {
+        // Lấy tất cả các mục hàng liên quan đến đơn hàng
+        const itemOrders = await ItemOrder.findAll({
+          where: { order_id: order.id },
+        });
+
+        // Tính tổng tiền từ các mục hàng
+        let totalAmount = 0;
+        for (const itemOrder of itemOrders) {
+          const item = await Item.findOne({ where: { id: itemOrder.item_id } });
+          if (item) {
+            totalAmount += item.price * itemOrder.quantity;
+          }
+        }
+
+        // Trả về đơn hàng với các thông tin bổ sung
+        return {
+          id: order.id,
+          time: order.time,
+          num_people: order.num_people || 0, // Nếu không có, trả về 0
+          totalAmount,
+          type: order.type,
+        };
+      })
+    );
+
+    // Trả về kết quả JSON
+    res.json(enrichedOrders);
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    res.status(500).json({ error: "Error fetching orders" });
+  }
+};
+
+// const getOrderInfo = async (req, res) => {
+//   try {
+//     const { id } = req.query;
+
+//     if (!id) {
+//       return res.status(400).json({ error: "Order ID is required" });
+//     }
+
+//     // Lấy thông tin các bàn đã đặt
+//     const reservedTables = await ReservedTable.findAll({
+//       where: { reservation_id: id },
+//     });
+
+//     // Lấy thông tin các món hàng trong đơn hàng
+//     const itemOrders = await ItemOrder.findAll({
+//       where: { order_id: id },
+//     });
+
+//     // Trả về dữ liệu JSON
+//     res.json({
+//       status: "SUCCESS",
+//       message: "Order details fetched successfully",
+//       reservedTables,
+//       itemOrders,
+//     });
+//   } catch (error) {
+//     console.error("Error fetching order info:", error);
+//     res.status(500).json({ error: "Error fetching order info" });
+//   }
+// };
+
+const getOrderInfo = async (req, res) => {
+  try {
+    const { id } = req.query;
+
+    if (!id) {
+      return res.status(400).json({ error: "Order ID is required" });
+    }
+
+    // Lấy thông tin các bàn đã đặt
+    const reservedTables = await ReservedTable.findAll({
+      where: { reservation_id: id },
+    });
+
+    // Lấy thông tin các món hàng trong đơn hàng
+    const itemOrders = await ItemOrder.findAll({
+      where: { order_id: id },
+    });
+
+    // Duyệt qua từng itemOrder để truy vấn thêm tên món ăn từ bảng Item
+    const enrichedItemOrders = await Promise.all(
+      itemOrders.map(async (itemOrder) => {
+        const item = await Item.findOne({ where: { id: itemOrder.item_id } });
+        return {
+          ...itemOrder.dataValues, // Copy dữ liệu từ itemOrder
+          itemName: item ? item.name : null, // Thêm tên món ăn
+          itemImage: item ? item.image : null, // Thêm hình ảnh món ăn (nếu cần)
+          itemPrice: item ? item.price : null, // Thêm giá món ăn (nếu cần)
+        };
+      })
+    );
+
+    // Trả về dữ liệu JSON
+    res.json({
+      status: "SUCCESS",
+      message: "Order details fetched successfully",
+      reservedTables,
+      itemOrders: enrichedItemOrders,
+    });
+  } catch (error) {
+    console.error("Error fetching order info:", error);
+    res.status(500).json({ error: "Error fetching order info" });
+  }
+};
+
 
 const getAllOrdersOfCustomer = async (req, res) => {
   try {
@@ -205,6 +322,8 @@ const deleteOrder = async (req, res) => {
 
 module.exports = {
   getAllOrders,
+  getAllOrdersInfo,
+  getOrderInfo,
   createOrder,
   updateOrder,
   updateEvaluate,

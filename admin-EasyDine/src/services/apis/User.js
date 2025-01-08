@@ -5,8 +5,6 @@ export const userAPI = {
         return axiosInstance.get('/api/auth/all-users');
     },
 
-
-
     updateUser: (user) => {
         return axiosInstance.patch('/api/auth/update-user',user);
     },

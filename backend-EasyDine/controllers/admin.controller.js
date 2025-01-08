@@ -8,6 +8,7 @@ const { Auth, LoginCredentials } = require("two-step-auth");
 const adminDeleteUser = async (req, res) => {
   try {
     let { username } = req.body;
+    console.log(req)
     if (!username) {
       return res.status(401).send("Username required!");
     }

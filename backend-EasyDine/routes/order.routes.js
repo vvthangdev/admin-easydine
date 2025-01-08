@@ -11,6 +11,7 @@ const router = express.Router();
 router.use(authMiddware.authenticateToken);
 
 router.get("/", authMiddware.adminRoleAuth, orderController.getAllOrders);
+router.get("/all-order-info", authMiddware.adminRoleAuth, orderController.getAllOrdersInfo);
 
 router.get(
   "/get-all-user-orders",
@@ -25,6 +26,8 @@ router.delete(
   authMiddware.adminRoleAuth,
   orderController.deleteOrder
 );
+
+router.get("/order-info", orderController.getOrderInfo)
 
 // router.use(authMiddware.notAdminRoleAuth);
 

@@ -23,7 +23,6 @@ const adminRouter = require("./routes/admin.routes.js");
 const contactRouter = require("./routes/contact.routes.js");
 const sequelize = require("./config/db.config.js");
 
-const orderUserInfo = require("./models/order_user_info.model.js");
 app.use(cors());
 app.use(express.json()); // Parse các request có nội dung dạng JSON
 app.use(express.urlencoded({ extended: true })); // Parse các request có nội dung dạng URL-encoded
