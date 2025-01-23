@@ -9,6 +9,7 @@ import {
   message,
   InputNumber,
   Tabs,
+  Select,
 } from "antd";
 import moment from "moment"; // Import moment
 import { orderAPI } from "../../../services/apis/Order"; // Assuming you have an API for orders
@@ -30,6 +31,16 @@ export default function OrderManagements() {
 
   const [orderDetails, setOrderDetails] = useState(null);
   const [detailsModalVisible, setDetailsModalVisible] = useState(false);
+
+  const handleStatusChange = async (orderId, newStatus) => {
+    try {
+      await orderAPI.updateOrderStatus(orderId, newStatus);
+      message.success("Cập nhật trạng thái thành công");
+      fetchOrders();
+    } catch (error) {
+      message.error("Không thể cập nhật trạng thái");
+    }
+  };
 
   const handleViewCustomerDetails = async (customerId) => {
     try {
@@ -117,6 +128,18 @@ export default function OrderManagements() {
       title: "Trạng Thái",
       dataIndex: "status",
       key: "status",
+      render: (text, record) => (
+        <Select
+          value={text}
+          onChange={(value) => handleStatusChange(record.id, value)}
+          popupMatchSelectWidth={false} // hoặc chiều rộng cụ thể
+        >
+          <Select.Option value="pending">Pending</Select.Option>
+          <Select.Option value="confirmed">Confirmed</Select.Option>
+          <Select.Option value="completed">Completed</Select.Option>
+          <Select.Option value="canceled">Canceled</Select.Option>
+        </Select>
+      ),
     },
     {
       title: "Loại Đơn Hàng",
@@ -236,7 +259,7 @@ export default function OrderManagements() {
               rowKey="id"
               loading={loading}
               className="w-full"
-              pagination={{ pageSize: 5 }} // Add pagination
+              pagination={{ pageSize: 10 }} // Add pagination
             />
           </div>
         </TabPane>
@@ -248,7 +271,7 @@ export default function OrderManagements() {
               rowKey="id"
               loading={loading}
               className="w-full"
-              pagination={{ pageSize: 5 }} // Add pagination
+              pagination={{ pageSize: 10 }} // Add pagination
             />
           </div>
         </TabPane>

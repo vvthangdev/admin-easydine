@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Row, Col, Card, message, Spin } from "antd";
 import {
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   BarChart,
   Bar,
   XAxis,
@@ -11,6 +11,7 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
+import { ShoppingCart, Users, DollarSign } from "lucide-react"; // Import icons
 import { orderAPI } from "../../../services/apis/Order";
 
 export default function OrderOverview() {
@@ -61,7 +62,15 @@ export default function OrderOverview() {
       {/* Thông tin tổng quan */}
       <Row gutter={16}>
         <Col span={8}>
-          <Card title="Tổng Số Đơn Hàng" bordered>
+          <Card
+            title={
+              <>
+                <ShoppingCart style={{ marginRight: "8px" }} />
+                Tổng Số Đơn Hàng
+              </>
+            }
+            bordered
+          >
             <Spin spinning={loading}>
               <p style={{ fontSize: "24px", fontWeight: "bold" }}>
                 {totalSummary.totalOrders}
@@ -70,7 +79,15 @@ export default function OrderOverview() {
           </Card>
         </Col>
         <Col span={8}>
-          <Card title="Tổng Số Người Đặt" bordered>
+          <Card
+            title={
+              <>
+                <Users style={{ marginRight: "8px" }} />
+                Tổng Số Người Đặt
+              </>
+            }
+            bordered
+          >
             <Spin spinning={loading}>
               <p style={{ fontSize: "24px", fontWeight: "bold" }}>
                 {totalSummary.totalPeople}
@@ -79,7 +96,15 @@ export default function OrderOverview() {
           </Card>
         </Col>
         <Col span={8}>
-          <Card title="Tổng Doanh Thu" bordered>
+          <Card
+            title={
+              <>
+                <DollarSign style={{ marginRight: "8px" }} />
+                Tổng Doanh Thu
+              </>
+            }
+            bordered
+          >
             <Spin spinning={loading}>
               <p style={{ fontSize: "24px", fontWeight: "bold" }}>
                 {totalSummary.totalRevenue.toLocaleString()} VND
@@ -89,35 +114,42 @@ export default function OrderOverview() {
         </Col>
       </Row>
 
-      {/* Biểu đồ đường doanh thu và biểu đồ cột số đơn hàng */}
+      {/* Biểu đồ */}
       <Row gutter={16} className="mt-6">
-        {/* Biểu đồ doanh thu bên trái */}
+        {/* Biểu đồ miền doanh thu */}
         <Col span={12}>
           <Card title="Doanh Thu Theo Ngày" bordered>
             <Spin spinning={loading}>
-              <LineChart
+              <AreaChart
                 width={500}
                 height={300}
                 data={chartData}
                 margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
               >
-                <CartesianGrid strokeDasharray="3 3" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
                 <XAxis dataKey="date" />
                 <YAxis />
-                <Tooltip />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#fff', borderRadius: '5px' }}
+                  itemStyle={{ color: '#000' }}
+                  cursor={{ strokeDasharray: '3 3' }} 
+                />
                 <Legend />
-                <Line
+                <Area
                   type="monotone"
                   dataKey="totalRevenue"
                   stroke="#82ca9d"
+                  fillOpacity={0.6}
+                  fill="#82ca9d"
                   name="Doanh Thu"
+                  dot={{ stroke: '#82ca9d', strokeWidth: 2 }} // Thêm điểm vào biểu đồ
                 />
-              </LineChart>
+              </AreaChart>
             </Spin>
           </Card>
         </Col>
 
-        {/* Biểu đồ số đơn hàng bên phải */}
+        {/* Biểu đồ cột số lượng đơn hàng */}
         <Col span={12}>
           <Card title="Số Lượng Đơn Hàng Theo Ngày" bordered>
             <Spin spinning={loading}>
@@ -127,10 +159,14 @@ export default function OrderOverview() {
                 data={chartData}
                 margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
               >
-                <CartesianGrid strokeDasharray="3 3" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
                 <XAxis dataKey="date" />
                 <YAxis />
-                <Tooltip />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#fff', borderRadius: '5px' }}
+                  itemStyle={{ color: '#000' }}
+                  cursor={{ strokeDasharray: '3 3' }} 
+                />
                 <Legend />
                 <Bar dataKey="numOrders" fill="#8884d8" name="Số Đơn Hàng" />
               </BarChart>

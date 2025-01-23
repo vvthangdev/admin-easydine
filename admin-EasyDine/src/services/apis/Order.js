@@ -5,6 +5,17 @@ export const orderAPI = {
     return axiosInstance.get("/orders");
   },
 
+  updateOrderStatus: async(id, status) => {
+    try {
+      const response = await axiosInstance.patch(`/orders/update-order-status`, {id, status});
+      console.log("Raw API Response:", response); // Kiểm tra phản hồi API đầy đủ
+      return response; // Đảm bảo trả về dữ liệu cần thiết từ response
+    } catch (error) {
+      console.error("Error fetching order details:", error);
+      throw error; // Ném lỗi nếu có
+    }
+  },
+
   getAllOrdersInfo: async () => {
     try {
       const response = await axiosInstance.get("/orders/all-order-info"); // Gọi API
@@ -18,7 +29,7 @@ export const orderAPI = {
   getOrderDetails: async (id) => {
     try {
       const response = await axiosInstance.get(`/orders/order-info`, {
-        params: { id }, // Truyền ID vào query string
+        params: { id },
       });
       console.log("Raw API Response:", response); // Kiểm tra phản hồi API đầy đủ
       return response; // Đảm bảo trả về dữ liệu cần thiết từ response
