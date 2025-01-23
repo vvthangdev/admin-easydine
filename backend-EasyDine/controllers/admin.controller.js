@@ -8,7 +8,7 @@ const { Auth, LoginCredentials } = require("two-step-auth");
 const adminDeleteUser = async (req, res) => {
   try {
     let { username } = req.body;
-    console.log(req)
+    console.log(req);
     if (!username) {
       return res.status(401).send("Username required!");
     }
@@ -30,20 +30,18 @@ const adminDeleteUser = async (req, res) => {
 
 const adminUpdateUser = async (req, res) => {
   try {
-    const { username, ...otherFields } = req.body; // Adjust as needed to accept relevant fields
+    const { id } = req.params;
+    console.log(req.params);
+    const { ...userInfo } = req.body;
+    // console.log(userInfo);
+    // const customerId = req.query.id; // Lấy customerId từ URL params
+    // console.log(customerId);
 
-    // console.log(req.username)
-    // console.log(otherFields);
-    if(!username) {
-        return res.status(400).send("Username required!")
-    }
-    if (!otherFields || Object.keys(otherFields).length === 0) {
-      return res.status(400).send("No fields to update.");
-    }
+    const user = await userService.getUserByUserId(id);
+    console.log(user);
 
-    // Update the user information in the database
-    const updatedUser = await userService.updateUser(username, {
-      ...otherFields, // Spread other fields if there are additional updates
+    const updatedUser = await userService.updateUser(user.username, {
+      ...userInfo, // Spread other fields if there are additional updates
     });
 
     if (!updatedUser) {
@@ -60,7 +58,26 @@ const adminUpdateUser = async (req, res) => {
   }
 };
 
+const adminGetUserInfo = async (req, res) => {
+  try {
+    const customerId = req.query.id; // Lấy customerId từ URL params
+    // console.log(customerId);
+
+    const customer = await userService.getUserByUserId(customerId);
+    // console.log(customer); // Gọi DB để lấy thông tin
+    if (!customer) {
+      return res
+        .status(404)
+        .json({ error: "Không tìm thấy thông tin khách hàng" });
+    }
+    res.status(200).json(customer);
+  } catch (error) {
+    res.status(500).json({ error: "Không thể lấy thông tin khách hàng" });
+  }
+};
+
 module.exports = {
   adminDeleteUser,
   adminUpdateUser,
+  adminGetUserInfo,
 };

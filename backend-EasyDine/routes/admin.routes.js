@@ -6,12 +6,14 @@ const authMiddware = require("../middlewares/auth.middleware.js");
 
 const router = express.Router();
 
-router.use(authMiddware.authenticateToken);
-router.use(authMiddware.adminRoleAuth);
+// router.use(authMiddware.authenticateToken);
+// router.use(authMiddware.adminRoleAuth);
 
 router.delete("/delete-user", adminController.adminDeleteUser);
 
-router.patch("/update-user", adminController.adminUpdateUser);
+router.patch("/update-user/:id", adminController.adminUpdateUser);
+
+router.get("/customer", adminController.adminGetUserInfo);
 
 // router.get("/all-users", userController.getAllUsers);
 

@@ -12,6 +12,7 @@ import {
 } from "antd";
 import moment from "moment"; // Import moment
 import { orderAPI } from "../../../services/apis/Order"; // Assuming you have an API for orders
+import { adminAPI } from "../../../services/apis/Admin";
 
 const { TabPane } = Tabs;
 
@@ -24,8 +25,29 @@ export default function OrderManagements() {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("reservation"); // State to track active tab
 
+  const [customerDetails, setCustomerDetails] = useState(null); // Lưu thông tin khách hàng
+  const [customerModalVisible, setCustomerModalVisible] = useState(false); // Trạng thái hiển thị modal
+
   const [orderDetails, setOrderDetails] = useState(null);
   const [detailsModalVisible, setDetailsModalVisible] = useState(false);
+
+  const handleViewCustomerDetails = async (customerId) => {
+    try {
+      const response = await adminAPI.getCustomerDetails(customerId); // Gọi API để lấy thông tin khách hàng
+      setCustomerDetails({
+        name: response.name,
+        address: response.address,
+        avatar: response.avatar,
+        email: response.email,
+        phone: response.phone,
+        username: response.username,
+      });
+      setCustomerModalVisible(true); // Hiển thị modal
+    } catch (error) {
+      message.error("Không thể lấy thông tin chi tiết khách hàng");
+      console.error("Error fetching customer details:", error);
+    }
+  };
 
   const handleViewDetails = async (id) => {
     try {
@@ -71,8 +93,17 @@ export default function OrderManagements() {
     },
     {
       title: "Mã khách hàng",
-      dataIndex: "customer_id",
+      dataIndex: "customer_id", // Khớp với tên trường trong dữ liệu bảng
       key: "customer_id",
+      render: (customerId) => (
+        <Button
+          type="link"
+          onClick={() => handleViewCustomerDetails(customerId)} // Truyền đúng `customerId`
+          className="text-blue-600 hover:text-blue-800"
+        >
+          {customerId}
+        </Button>
+      ),
     },
     {
       title: "Thời gian",
@@ -224,6 +255,49 @@ export default function OrderManagements() {
       </Tabs>
 
       <Modal
+        title="Thông Tin Khách Hàng"
+        open={customerModalVisible}
+        onCancel={() => setCustomerModalVisible(false)}
+        footer={[
+          <Button key="close" onClick={() => setCustomerModalVisible(false)}>
+            Đóng
+          </Button>,
+        ]}
+      >
+        {customerDetails ? (
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+              <img
+                src={customerDetails.avatar}
+                alt={customerDetails.name}
+                style={{
+                  width: "80px",
+                  height: "80px",
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                }}
+              />
+              <h3>{customerDetails.name}</h3>
+            </div>
+            <p>
+              <b>Địa Chỉ:</b> {customerDetails.address}
+            </p>
+            <p>
+              <b>Email:</b> {customerDetails.email}
+            </p>
+            <p>
+              <b>Số Điện Thoại:</b> {customerDetails.phone}
+            </p>
+            <p>
+              <b>Username:</b> {customerDetails.username}
+            </p>
+          </div>
+        ) : (
+          <p>Đang tải thông tin...</p>
+        )}
+      </Modal>
+
+      <Modal
         title="Chi Tiết Đơn Hàng"
         open={detailsModalVisible}
         onCancel={() => setDetailsModalVisible(false)}
@@ -244,10 +318,8 @@ export default function OrderManagements() {
                     <b>Bàn:</b> {table.table_id}, <b>Thời gian:</b>{" "}
                     {`${moment
                       .utc(table.start_time)
-                      .local()
                       .format("HH:mm:ss")} - ${moment
                       .utc(table.end_time)
-                      .local()
                       .format("HH:mm:ss")}`}
                   </li>
                 ))}
@@ -307,6 +379,39 @@ export default function OrderManagements() {
             ) : (
               <p>Không có mặt hàng nào được đặt.</p>
             )}
+
+            {/* Tổng hóa đơn và VAT */}
+            <div
+              style={{
+                marginTop: "20px",
+                borderTop: "1px solid #ddd",
+                paddingTop: "16px",
+              }}
+            >
+              <h3>Tính Tổng Hóa Đơn:</h3>
+              {(() => {
+                const totalAmount = orderDetails.itemOrders.reduce(
+                  (acc, item) => acc + item.itemPrice * item.quantity,
+                  0
+                );
+                const vat = totalAmount * 0.1; // Tính VAT 10%
+                const grandTotal = totalAmount + vat; // Tổng sau VAT
+
+                return (
+                  <div>
+                    <p>
+                      <b>Tổng Tiền:</b> {totalAmount.toLocaleString()} VND
+                    </p>
+                    <p>
+                      <b>VAT (10%):</b> {vat.toLocaleString()} VND
+                    </p>
+                    <p style={{ fontWeight: "bold", color: "#d9534f" }}>
+                      <b>Tổng Cộng:</b> {grandTotal.toLocaleString()} VND
+                    </p>
+                  </div>
+                );
+              })()}
+            </div>
           </div>
         ) : (
           <p>Đang tải thông tin chi tiết...</p>
