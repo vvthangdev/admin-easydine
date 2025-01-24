@@ -1,7 +1,8 @@
 import axios from "axios";
-
+// https://backend-easydine.onrender.com
+// http://localhost:8080
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:8080", // Thay đổi baseURL theo API của bạn
+  baseURL: "https://backend-easydine.onrender.com", // Thay đổi baseURL theo API của bạn
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",

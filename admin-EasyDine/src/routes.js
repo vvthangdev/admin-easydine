@@ -3,9 +3,9 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Login from "./Features/Login/Login"
 import HomePage from './Features/HomePage/HomePage';
-import Reservation from './Features/Reservation/Reservation'
+import Overview from "./Features/Admin/pages/Overview";
 import Register from "./Features/Register/Register"
-import Menu from './Features/Menu/menu';
+// import Menu from './Features/Menu/menu';
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import { AuthProvider } from "./contexts/AuthContext";
 import Profile from "./Features/Profile/profile";
@@ -21,16 +21,9 @@ import ShipOrder from "./Features/ShipOrder/ShipOrder";
 import OrderHistory from './Features/OrderHistory/OrderHistory';
 import ContactManagement from "./Features/Admin/pages/ContactManagement";
 
-
-
-
-
 const AppRoutes = () => {
     const navLinks = [
         { path: '/', label: 'Trang chủ' },
-        // { path: '/menu', label: 'Thực đơn' },
-        // { path: '/reservation', label: 'Đặt bàn' },
-        // { path: '/contact', label: 'Liên hệ' },
     ];
     return (
         <AuthProvider>
@@ -39,16 +32,9 @@ const AppRoutes = () => {
                 <Routes>
                     {/* Public Routes */}
                     <Route path="/" element={<HomePage />} />
-                    {/* <Route path="/reservation" element={<Reservation />} /> */}
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
-                    {/* <Route path="/menu" element={<Menu />} /> */}
                     <Route path="/unauthorized" element={<BanKhongPhaiLaAdmin />} />
-                    {/* <Route path="/contact" element={<Contact/>} />
-                    <Route path="/ship" element={<ShipOrder />} />
-                    <Route path="/orders" element={<OrderHistory />} /> */}
-
-                    {/* Protected Profile Route */}
 
                     <Route path="/profile" element={
                         <ProtectedRoute>
@@ -62,6 +48,8 @@ const AppRoutes = () => {
                             <AdminLayout />
                         </ProtectedRoute>
                     }>
+                        <Route index element={<Overview />} /> {/* Đặt làm trang mặc định */}
+                        <Route path="overview" element={<Overview />} /> {/* Thêm route */}
                         <Route path="tables" element={<TableManagement />} />
                         <Route path="menu" element={<ItemManagements />} />
                         <Route path="users" element={<UserManagement />} />

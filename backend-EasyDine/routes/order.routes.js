@@ -3,24 +3,40 @@ const userMiddleware = require("../middlewares/user.middleware.js");
 const orderController = require("../controllers/order.controller.js");
 const authMiddware = require("../middlewares/auth.middleware.js");
 const { route } = require("./user.routes.js");
-// const userUtil = require("../utils/user.util.js");
-// const authMiddware = require("../middlewares/auth.middleware.js");
 
 const router = express.Router();
 
 router.use(authMiddware.authenticateToken);
 
-router.get("/", authMiddware.adminRoleAuth,orderController.getAllOrders);
+router.get("/", authMiddware.adminRoleAuth, orderController.getAllOrders);
+router.get(
+  "/all-order-info",
+  authMiddware.adminRoleAuth,
+  orderController.getAllOrdersInfo
+);
 
-router.get('/get-all-orders', authMiddware.authenticateToken, orderController.getAllOrdersOfCustomer);
+router.patch("/update-order-status", orderController.updateOrder);
 
-router.post("/update-evaluate/:orderId", orderController.updateEvaluate);
+router.get(
+  "/get-all-user-orders",
+  authMiddware.authenticateToken,
+  orderController.getAllOrdersOfCustomer
+);
 
-router.use(authMiddware.notAdminRoleAuth);
+router.delete(
+  "/delete-order/:id",
+  authMiddware.adminRoleAuth,
+  orderController.deleteOrder
+);
 
-router.post("/create-order", orderController.createOrder);
-// router.patch("/update-reservation", orderController.updateOrder);
+router.get("/order-info", orderController.getOrderInfo);
 
-// router.delete("/delete-reservation", orderController.deleteOrder);
+// router.use(authMiddware.notAdminRoleAuth);
+
+router.post(
+  "/create-order",
+  authMiddware.notAdminRoleAuth,
+  orderController.createOrder
+);
 
 module.exports = router;

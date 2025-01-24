@@ -1,5 +1,6 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/db.config"); // Đảm bảo bạn thay đổi đường dẫn cho phù hợp
+const OrderDetail = require("./order_detail.model");
 
 const ItemOrder = sequelize.define(
   "ItemOrder",
@@ -26,7 +27,7 @@ const ItemOrder = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false, // Cột này không thể null
       references: {
-        model: "order_detail", // Tên bảng tham chiếu
+        model: OrderDetail, // Tên bảng tham chiếu
         key: "id", // Tên cột tham chiếu trong bảng `order_detail`
       },
       onDelete: "CASCADE", // Xóa dữ liệu liên quan khi xóa order

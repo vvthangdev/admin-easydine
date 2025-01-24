@@ -51,6 +51,13 @@ async function getUserByUserName(username) {
   });
 }
 
+async function getUserByUserId(userId) {
+  return await User.findOne({
+    where: { id: userId },
+    attributes: { exclude: ["refresh_token", "password"] }, // Loại bỏ refresh_token khỏi kết quả
+  });
+}
+
 async function getUserByEmail(email) {
   // console.log(User.findOne({ where: { email: email } }));
   return await User.findOne({
@@ -117,6 +124,7 @@ const deleteUser = async (username) => {
 module.exports = {
   isUserExists,
   createUser,
+  getUserByUserId,
   getUserByUserName,
   getUserByEmail,
   validatePassword,
