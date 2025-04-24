@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Button, Modal, Form, Input, Space, message } from 'antd';
+import { Table, Button, Modal, Form, Input, message } from 'antd';
 import { contactAPI } from "../../../services/apis/Contact";
 
 export default function ContactManagement() {
@@ -47,38 +47,12 @@ export default function ContactManagement() {
             dataIndex: 'message',
             key: 'message',
         },
-        // {
-        //     title: 'Thao tác',
-        //     key: 'action',
-        //     render: (_, record) => (
-        //         <Space size="middle">
-        //             <Button type="link" onClick={() => handleEdit(record)}>Sửa</Button>
-        //             <Button type="link" onClick={() => handleDelete(record)}>Xóa</Button>
-        //         </Space>
-        //     ),
-        // },
     ];
 
     const handleAdd = () => {
         setEditingContact(null);
         form.resetFields();
         setIsModalVisible(true);
-    };
-
-    const handleEdit = (record) => {
-        setEditingContact(record);
-        form.setFieldsValue(record);
-        setIsModalVisible(true);
-    };
-
-    const handleDelete = async (record) => {
-        try {
-            await contactAPI.deleteContact(record.id); // Xóa liên hệ
-            setContacts(contacts.filter(contact => contact.id !== record.id));
-            message.success('Xóa liên hệ thành công');
-        } catch (error) {
-            message.error('Xóa liên hệ không thành công');
-        }
     };
 
     const handleModalOk = async () => {

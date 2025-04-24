@@ -10,7 +10,7 @@ export default function Profile() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false); // Modal xác nhận xóa
   const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false);
+  const [setLoading] = useState(false);
   const [avatar, setAvatar] = useState([]); // Trạng thái cho ảnh đại diện
   const [password, setPassword] = useState(""); // Trạng thái cho mật khẩu
   const navigate = useNavigate();
@@ -34,7 +34,7 @@ export default function Profile() {
 
   useEffect(() => {
     fetchProfile();
-  }, []);
+  }, [fetchProfile]); // Thêm fetchProfile
 
   const handleEdit = () => {
     setIsModalVisible(true);
