@@ -11,14 +11,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Checkout mã nguồn
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # Cài đặt Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20.17.0'
 
+      # Cache node modules để tăng tốc
       - name: Cache node modules
         uses: actions/cache@v4
         with:
@@ -27,11 +30,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
+      # Cài đặt dependencies và build với bộ nhớ tăng
       - name: Install dependencies and build
         run: |
           npm install
-          npm run build
+          NODE_OPTIONS=--max-old-space-size=4096 npm run build
 
+      # Deploy qua SSH với password
       - name: Deploy to server
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -42,5 +47,5 @@ jobs:
             cd ${{ secrets.SERVER_DESTINATION }}
             git pull origin main
             npm install
-            npm run build
+            NODE_OPTIONS=--max-old-space-size=4096 npm run build
             sudo systemctl restart nginx
