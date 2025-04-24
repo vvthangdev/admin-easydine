@@ -10,7 +10,7 @@ export default function HeroSection() {
                 <h1 className="text-4xl md:text-6xl font-bold text-gray-800 text-center">
                     Quản lý
                     <span className="text-orange-500 block mt-2">Nhà hàng của bạn</span>
-                    Một cách thật dễ dàng
+                    Một cách thật dễ
                 </h1>
 
                 <p className="text-lg md:text-xl text-gray-600 text-center">
