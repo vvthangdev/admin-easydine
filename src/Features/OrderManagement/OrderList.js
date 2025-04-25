@@ -68,7 +68,7 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
       setOrders({ reservation: reservationOrders, ship: shipOrders });
     } catch (error) {
       console.error("Error loading orders:", error);
-      message.error("Error loading orders");
+      message.error("Lỗi khi tải danh sách đơn hàng");
     } finally {
       setLoading(false);
     }
@@ -77,12 +77,15 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
   const fetchAvailableTables = async (date, startTime, endTime) => {
     try {
       if (!date || !startTime || !endTime) return;
-      const startDateTime = moment(`${date} ${startTime}`, "DD/MM/YYYY HH:mm");
-      const endDateTime = moment(`${date} ${endTime}`, "DD/MM/YYYY HH:mm");
+      const startDateTime = moment.utc(
+        `${date} ${startTime}`,
+        "DD/MM/YYYY HH:mm"
+      );
+      const endDateTime = moment.utc(`${date} ${endTime}`, "DD/MM/YYYY HH:mm");
 
       const response = await orderAPI.getAvailableTables({
-        start_time: startDateTime.format("YYYY-MM-DDTHH:mm:ss"),
-        end_time: endDateTime.format("YYYY-MM-DDTHH:mm:ss"),
+        start_time: startDateTime.format("YYYY-MM-DDTHH:mm:ss[Z]"),
+        end_time: endDateTime.format("YYYY-MM-DDTHH:mm:ss[Z]"),
       });
       setAvailableTables(response.data || response);
     } catch (error) {
@@ -143,8 +146,11 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
   const handleAdd = () => {
     setEditingOrder(null);
     setFormData({
-      date: moment().format("DD/MM/YYYY"),
-      start_time: moment().format("HH:mm"),
+      date: moment().utc().format("DD/MM/YYYY"),
+      start_time: moment().utc().format("HH:mm"),
+      end_time: moment().utc().add(1, "hours").format("HH:mm"),
+      type: "reservation",
+      status: "pending",
     });
     setAvailableTables([]);
     setSelectedItems([]);
@@ -155,39 +161,39 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
     setEditingOrder(record);
     try {
       const orderDetails = await orderAPI.getOrderDetails(record.id);
-      const reservedTables =
-        orderDetails.data?.reservedTables?.map((table) => table.table_id) || [];
-      const items =
-        orderDetails.data?.itemOrders?.map((item) => ({
-          id: item.item_id,
-          name: item.itemName,
-          price: item.itemPrice,
-          quantity: item.quantity,
-        })) || [];
+      const data = orderDetails.data || orderDetails;
 
-      setFormData({
-        type: record.type,
-        status: record.status,
-        date: moment(record.time).format("DD/MM/YYYY"),
-        start_time: orderDetails.data?.reservedTables?.[0]
-          ? moment(orderDetails.data.reservedTables[0].start_time).format(
-              "HH:mm"
-            )
-          : moment(record.time).format("HH:mm"),
-        end_time: orderDetails.data?.reservedTables?.[0]
-          ? moment(orderDetails.data.reservedTables[0].end_time).format("HH:mm")
-          : null,
+      const reservedTables = data.reservedTables?.map((table) => table.table_id) || [];
+
+      const items = data.itemOrders?.map((item) => ({
+        id: item.item_id,
+        name: item.itemName,
+        price: item.itemPrice,
+        quantity: item.quantity,
+      })) || [];
+
+      const newFormData = {
+        type: record.type || "reservation",
+        status: record.status || "pending",
+        date: moment.utc(data.time || record.time).format("DD/MM/YYYY"),
+        start_time: data.reservedTables?.[0]
+          ? moment.utc(data.reservedTables[0].start_time).format("HH:mm")
+          : moment.utc(data.time || record.time).format("HH:mm"),
+        end_time: data.reservedTables?.[0]
+          ? moment.utc(data.reservedTables[0].end_time).format("HH:mm")
+          : moment.utc(data.time || record.time).add(1, "hours").format("HH:mm"),
         tables: reservedTables,
-      });
+      };
 
+      setFormData(newFormData);
       setSelectedItems(items);
-      if (orderDetails.data?.reservedTables?.[0]) {
-        fetchAvailableTables(
-          moment(record.time).format("DD/MM/YYYY"),
-          moment(orderDetails.data.reservedTables[0].start_time).format("HH:mm"),
-          moment(orderDetails.data.reservedTables[0].end_time).format("HH:mm")
-        );
-      }
+
+      fetchAvailableTables(
+        newFormData.date,
+        newFormData.start_time,
+        newFormData.end_time
+      );
+
       setIsModalVisible(true);
     } catch (error) {
       console.error("Error loading order for edit:", error);
@@ -231,26 +237,30 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
         return;
       }
 
-      const startDateTime = moment(
+      const startDateTime = moment.utc(
         `${formData.date} ${formData.start_time}`,
         "DD/MM/YYYY HH:mm"
       );
-      const endDateTime = moment(
+      const endDateTime = moment.utc(
         `${formData.date} ${formData.end_time}`,
         "DD/MM/YYYY HH:mm"
       );
 
       const orderData = {
         id: editingOrder ? editingOrder.id : undefined,
-        start_time: startDateTime.format("YYYY-MM-DDTHH:mm:ss"),
-        end_time: endDateTime.format("YYYY-MM-DDTHH:mm:ss"),
+        start_time: startDateTime.format("YYYY-MM-DDTHH:mm:ss[Z]"),
+        end_time: endDateTime.format("YYYY-MM-DDTHH:mm:ss[Z]"),
         type: formData.type,
-        tables: formData.type === "reservation" ? formData.tables || [] : [],
+        status: formData.status,
         items: selectedItems.map((item) => ({
           id: item.id,
           quantity: item.quantity,
         })),
       };
+
+      if (formData.tables?.length > 0) {
+        orderData.tables = formData.tables;
+      }
 
       if (editingOrder) {
         await orderAPI.updateOrder(orderData);
@@ -266,6 +276,9 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
               ...newOrder,
               id: newOrder._id,
               time: newOrder.time || newOrder.start_time,
+              customerName: selectedCustomer?.name || "Không xác định",
+              customerPhone: selectedCustomer?.phone || "Không xác định",
+              customerId: selectedCustomer?._id,
             },
           ],
         }));
@@ -299,7 +312,7 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
       title: "Ngày",
       dataIndex: "time",
       key: "time",
-      render: (text) => moment(text).format("DD/MM/YY HH:mm"),
+      render: (text) => moment.utc(text).format("DD/MM/YY, HH:mm"),
     },
     {
       title: "Trạng Thái",
@@ -497,24 +510,24 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
             </p>
             <p>
               <b>Ngày:</b>{" "}
-              {moment(orderDetails.order?.time || orderDetails.time).format(
+              {moment.utc(orderDetails.order?.time || orderDetails.time).format(
                 "DD/MM/YYYY"
               )}
             </p>
             <p>
               <b>Thời gian bắt đầu:</b>{" "}
               {orderDetails.reservedTables?.[0]
-                ? moment(orderDetails.reservedTables[0].start_time).format(
-                    "HH:mm"
-                  )
+                ? moment
+                    .utc(orderDetails.reservedTables[0].start_time)
+                    .format("HH:mm")
                 : "N/A"}
             </p>
             <p>
               <b>Thời gian kết thúc:</b>{" "}
               {orderDetails.reservedTables?.[0]
-                ? moment(orderDetails.reservedTables[0].end_time).format(
-                    "HH:mm"
-                  )
+                ? moment
+                    .utc(orderDetails.reservedTables[0].end_time)
+                    .format("HH:mm")
                 : "N/A"}
             </p>
             <p>
@@ -532,9 +545,11 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
                 {orderDetails.reservedTables.map((table) => (
                   <li key={table._id}>
                     <b>Bàn:</b> {table.table_id}, <b>Thời gian:</b>{" "}
-                    {`${moment(table.start_time).format("HH:mm")} - ${moment(
-                      table.end_time
-                    ).format("HH:mm")}`}
+                    {`${moment
+                      .utc(table.start_time)
+                      .format("HH:mm, DD/MM/YYYY")} - ${moment
+                      .utc(table.end_time)
+                      .format("HH:mm, DD/MM/YYYY")}`}
                   </li>
                 ))}
               </ul>
