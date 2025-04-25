@@ -1,0 +1,10 @@
+|- OrderManagements.jsx
+  |- UserSearch.jsx
+  |- OrderList.jsx
+    |- OrderTable.jsx
+    |- OrderFormModal.jsx
+      |- OrderBasicInfo.jsx
+      |- ItemSelector.jsx
+      |- SelectedItems.jsx
+    |- CustomerDetailsModal.jsx
+    |- OrderDetailsModal.jsx

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Table, Button, Input } from "antd";
+import { Table, Button, Input, Space } from "antd";
 import { userAPI } from "../../services/apis/User";
 
 const { Search: SearchInput } = Input;
@@ -37,11 +37,7 @@ const UserSearch = ({ onSelectCustomer }) => {
       title: "Hành động",
       key: "action",
       render: (_, record) => (
-        <Button
-          className="text-blue-600 hover:text-blue-700"
-          type="link"
-          onClick={() => handleSelectCustomer(record)}
-        >
+        <Button type="link" onClick={() => handleSelectCustomer(record)}>
           Chọn
         </Button>
       ),
@@ -55,13 +51,13 @@ const UserSearch = ({ onSelectCustomer }) => {
   };
 
   return (
-    <div className="h-full overflow-y-auto">
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">Tìm kiếm khách hàng</h2>
+    <div className="p-4 bg-white h-full overflow-y-auto">
+      <h2 className="text-lg font-semibold mb-4">Tìm kiếm khách hàng</h2>
       <SearchInput
         placeholder="Tìm kiếm theo tên, số điện thoại, địa chỉ"
         value={searchTerm}
         onChange={handleSearch}
-        className="w-full mb-4 border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+        style={{ width: "100%", marginBottom: 16 }}
       />
       {searchResults.length > 0 && (
         <Table
@@ -70,8 +66,6 @@ const UserSearch = ({ onSelectCustomer }) => {
           rowKey="_id"
           pagination={false}
           size="small"
-          className="text-sm text-gray-600"
-          rowClassName="hover:bg-gray-100 transition-all duration-200"
         />
       )}
     </div>

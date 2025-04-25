@@ -17,11 +17,11 @@ const OrderManagements = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <div className="w-1/3 border-r border-gray-200 bg-white/80 backdrop-blur-md p-4">
+    <div className="flex min-h-screen bg-gray-100">
+      <div className="w-1/3 border-r">
         <UserSearch onSelectCustomer={handleSelectCustomer} />
       </div>
-      <div className="w-2/3 p-4">
+      <div className="w-2/3">
         <OrderList
           selectedCustomer={selectedCustomer}
           onClearFilter={handleClearFilter}

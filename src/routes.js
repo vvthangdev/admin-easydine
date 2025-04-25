@@ -57,8 +57,9 @@ const AppRoutes = () => {
             <Route path="overview" element={<Overview />} /> {/* Thêm route */}
             <Route path="tables" element={<TableManagement />} />
             <Route path="menu" element={<ItemManagements />} />
-            <Route path="users" element={<UserManagement />} />
+            
             <Route path="orders" element={<OrderManagements />} />
+            <Route path="users" element={<UserManagement />} />
             <Route path="contacts" element={<ContactManagement />} />
           </Route>
         </Routes>

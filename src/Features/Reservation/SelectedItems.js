@@ -82,8 +82,8 @@ const SelectedItems = ({ selectedItems, setSelectedItems }) => {
           value={note}
           onChange={(e) => handleNoteChange(record.id, record.size, e.target.value)}
           placeholder="Nhập ghi chú (ví dụ: Ít đá)"
-          rows={3}
-          style={{ width: 200 }}
+          rows={3} // Tăng số hàng để hiển thị tốt hơn
+          style={{ width: 200 }} // Tăng chiều rộng ô ghi chú
         />
       ),
     },
@@ -129,15 +129,14 @@ const SelectedItems = ({ selectedItems, setSelectedItems }) => {
 
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Món đã chọn</h3>
+      <h3>Món đã chọn</h3>
       <Table
         columns={columns}
         dataSource={selectedItems}
         rowKey={(record) => `${record.id}-${record.size || "default"}`}
         pagination={false}
         size="small"
-        className="text-sm text-gray-600 flex-1 overflow-y-auto"
-        rowClassName="hover:bg-gray-100 transition-all duration-200"
+        style={{ flex: 1, overflowY: "auto" }}
       />
     </div>
   );
