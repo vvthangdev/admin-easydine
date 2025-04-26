@@ -1,8 +1,36 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Modal, Button } from "antd";
 import moment from "moment";
+import { userAPI } from "../../services/apis/User";
 
 const OrderDetailsModal = ({ visible, orderDetails, onCancel }) => {
+  const [staffName, setStaffName] = useState("N/A");
+
+  // Fetch staff information when orderDetails changes
+  useEffect(() => {
+    const fetchStaffName = async () => {
+      if (orderDetails?.order?.staff_id) {
+        try {
+          const response = await userAPI.getUserById(orderDetails.order.staff_id);
+          if (response.data?.status === "SUCCESS") {
+            setStaffName(response.data.user.name || "N/A");
+          } else if (response.status === "SUCCESS") {
+            setStaffName(response.user?.name || response.name || "N/A");
+          } else {
+            setStaffName("N/A");
+          }
+        } catch (error) {
+          console.error("Error fetching staff information:", error);
+          setStaffName("N/A");
+        }
+      } else {
+        setStaffName("N/A");
+      }
+    };
+
+    fetchStaffName();
+  }, [orderDetails]);
+
   return (
     <Modal
       title="Chi Tiết Đơn Hàng"
@@ -28,11 +56,27 @@ const OrderDetailsModal = ({ visible, orderDetails, onCancel }) => {
               <div className="grid grid-cols-2 gap-2 text-sm text-gray-600 mt-2">
                 <p><span className="font-medium text-gray-900">Mã Đơn Hàng:</span> {orderDetails.order?.id || orderDetails._id || "N/A"}</p>
                 <p><span className="font-medium text-gray-900">Mã Khách Hàng:</span> {orderDetails.order?.customer_id || orderDetails.customer_id || "N/A"}</p>
-                <p><span className="font-medium text-gray-900">Ngày:</span> {orderDetails.order?.time || orderDetails.time ? moment.utc(orderDetails.order?.time || orderDetails.time).format("DD/MM/YYYY") : "N/A"}</p>
-                <p><span className="font-medium text-gray-900">Thời gian bắt đầu:</span> {orderDetails.reservedTables?.[0]?.start_time ? moment.utc(orderDetails.reservedTables[0].start_time).format("HH:mm") : "N/A"}</p>
-                <p><span className="font-medium text-gray-900">Thời gian kết thúc:</span> {orderDetails.reservedTables?.[0]?.end_time ? moment.utc(orderDetails.reservedTables[0].end_time).format("HH:mm") : "N/A"}</p>
+                <p>
+                  <span className="font-medium text-gray-900">Ngày:</span>{" "}
+                  {orderDetails.order?.time || orderDetails.time
+                    ? moment.utc(orderDetails.order?.time || orderDetails.time).local().format("DD/MM/YYYY")
+                    : "N/A"}
+                </p>
+                <p>
+                  <span className="font-medium text-gray-900">Thời gian bắt đầu:</span>{" "}
+                  {orderDetails.reservedTables?.[0]?.start_time
+                    ? moment.utc(orderDetails.reservedTables[0].start_time).local().format("HH:mm")
+                    : "N/A"}
+                </p>
+                <p>
+                  <span className="font-medium text-gray-900">Thời gian kết thúc:</span>{" "}
+                  {orderDetails.reservedTables?.[0]?.end_time
+                    ? moment.utc(orderDetails.reservedTables[0].end_time).local().format("HH:mm")
+                    : "N/A"}
+                </p>
                 <p><span className="font-medium text-gray-900">Loại:</span> {orderDetails.order?.type || orderDetails.type || "N/A"}</p>
                 <p><span className="font-medium text-gray-900">Trạng Thái:</span> {orderDetails.order?.status || orderDetails.status || "N/A"}</p>
+                <p><span className="font-medium text-gray-900">Nhân viên phục vụ:</span> {staffName}</p>
               </div>
             </div>
 
@@ -42,7 +86,10 @@ const OrderDetailsModal = ({ visible, orderDetails, onCancel }) => {
                 <ul className="list-disc pl-5 text-sm text-gray-600 mt-2">
                   {orderDetails.reservedTables.map((table) => (
                     <li key={table._id}>
-                      <span className="font-medium text-gray-900">Bàn:</span> {table.table_id || "N/A"}, <span className="font-medium text-gray-900">Thời gian:</span> {table.start_time && table.end_time ? `${moment.utc(table.start_time).format("HH:mm, DD/MM/YYYY")} - ${moment.utc(table.end_time).format("HH:mm, DD/MM/YYYY")}` : "N/A"}
+                      <span className="font-medium text-gray-900">Bàn:</span> {table.table_id || "N/A"}, <span className="font-medium text-gray-900">Thời gian:</span>{" "}
+                      {table.start_time && table.end_time
+                        ? `${moment.utc(table.start_time).local().format("HH:mm, DD/MM/YYYY")} - ${moment.utc(table.end_time).local().format("HH:mm, DD/MM/YYYY")}`
+                        : "N/A"}
                     </li>
                   ))}
                 </ul>

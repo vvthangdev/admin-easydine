@@ -38,23 +38,26 @@ const OrderFormModal = ({
       const newFormData = {
         type: editingOrder.type || "reservation",
         status: editingOrder.status || "pending",
-        date: moment.utc(data.time || editingOrder.time).format("DD/MM/YYYY"),
+        date: moment.utc(data.time || editingOrder.time).local().format("DD/MM/YYYY"),
         start_time: data.reservedTables?.[0]
-          ? moment.utc(data.reservedTables[0].start_time).format("HH:mm")
-          : moment.utc(data.time || editingOrder.time).format("HH:mm"),
+          ? moment.utc(data.reservedTables[0].start_time).local().format("HH:mm")
+          : moment.utc(data.time || editingOrder.time).local().format("HH:mm"),
         end_time: data.reservedTables?.[0]
-          ? moment.utc(data.reservedTables[0].end_time).format("HH:mm")
-          : moment.utc(data.time || editingOrder.time).add(1, "hours").format("HH:mm"),
+          ? moment.utc(data.reservedTables[0].end_time).local().format("HH:mm")
+          : moment.utc(data.time || editingOrder.time).local().add(1, "hours").format("HH:mm"),
         tables: reservedTables,
       };
 
       setFormData(newFormData);
       setSelectedItems(items);
 
+      const startDateTime = moment(`${newFormData.date} ${newFormData.start_time}`, "DD/MM/YYYY HH:mm").utc();
+      const endDateTime = moment(`${newFormData.date} ${newFormData.end_time}`, "DD/MM/YYYY HH:mm").utc();
+
       fetchAvailableTables(
         newFormData.date,
-        newFormData.start_time,
-        newFormData.end_time
+        startDateTime.format("YYYY-MM-DDTHH:mm:ss[Z]"),
+        endDateTime.format("YYYY-MM-DDTHH:mm:ss[Z]")
       );
     } catch (error) {
       console.error("Error loading order for edit:", error);
@@ -62,7 +65,7 @@ const OrderFormModal = ({
   }, [editingOrder]);
 
   const resetForm = () => {
-    const now = moment().utc();
+    const now = moment(); // Local time
     setFormData({
       date: now.format("DD/MM/YYYY"),
       start_time: now.format("HH:mm"),
@@ -77,15 +80,10 @@ const OrderFormModal = ({
   const fetchAvailableTables = async (date, startTime, endTime) => {
     try {
       if (!date || !startTime || !endTime) return;
-      const startDateTime = moment.utc(
-        `${date} ${startTime}`,
-        "DD/MM/YYYY HH:mm"
-      );
-      const endDateTime = moment.utc(`${date} ${endTime}`, "DD/MM/YYYY HH:mm");
 
       const response = await orderAPI.getAvailableTables({
-        start_time: startDateTime.format("YYYY-MM-DDTHH:mm:ss[Z]"),
-        end_time: endDateTime.format("YYYY-MM-DDTHH:mm:ss[Z]"),
+        start_time: startTime,
+        end_time: endTime,
       });
       setAvailableTables(response.data || response);
     } catch (error) {
@@ -113,14 +111,14 @@ const OrderFormModal = ({
       return;
     }
 
-    const startDateTime = moment.utc(
+    const startDateTime = moment(
       `${formData.date} ${formData.start_time}`,
       "DD/MM/YYYY HH:mm"
-    );
-    const endDateTime = moment.utc(
+    ).utc();
+    const endDateTime = moment(
       `${formData.date} ${formData.end_time}`,
       "DD/MM/YYYY HH:mm"
-    );
+    ).utc();
 
     const orderData = {
       id: editingOrder ? editingOrder.id : undefined,
@@ -135,6 +133,7 @@ const OrderFormModal = ({
         size: item.size || null,
         note: item.note || "",
       })),
+      customer_id: selectedCustomer?._id,
     };
 
     onSubmit(orderData);

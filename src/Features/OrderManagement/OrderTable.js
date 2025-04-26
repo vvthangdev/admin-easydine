@@ -30,7 +30,7 @@ const OrderTable = ({
       title: "Ngày",
       dataIndex: "time",
       key: "time",
-      render: (text) => moment.utc(text).format("HH:mm, DD/MM/YY"),
+      render: (text) => (text ? moment.utc(text).local().format("HH:mm, DD/MM/YY") : "N/A"),
     },
     {
       title: "Trạng Thái",

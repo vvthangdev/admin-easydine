@@ -18,20 +18,6 @@ export const orderAPI = {
     }
   },
 
-  // updateOrderStatus: async (id, status) => {
-  //   try {
-  //     const response = await axiosInstance.patch(
-  //       `/orders/update-order-status`,
-  //       { id, status }
-  //     );
-  //     console.log("Raw API Response:", response); // Kiểm tra phản hồi API đầy đủ
-  //     return response; // Đảm bảo trả về dữ liệu cần thiết từ response
-  //   } catch (error) {
-  //     console.error("Error fetching order details:", error);
-  //     throw error; // Ném lỗi nếu có
-  //   }
-  // },
-
   updateOrder: async (data) => {
     try {
       const response = await axiosInstance.patch("/orders/update-order", data); // Giả định endpoint PATCH /orders
