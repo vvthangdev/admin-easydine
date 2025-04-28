@@ -24,7 +24,7 @@ const VoucherList = ({ selectedUser }) => {
     setLoading(true);
     try {
       const response = await voucherAPI.getAllVouchers();
-      setVouchers(response); // Response là mảng trực tiếp
+      setVouchers(response);
     } catch (error) {
       message.error("Lỗi khi tải danh sách voucher");
     } finally {
@@ -37,25 +37,51 @@ const VoucherList = ({ selectedUser }) => {
   }, []);
 
   const columns = [
-    { title: "Mã", dataIndex: "code", key: "code" },
-    { title: "Giảm giá", dataIndex: "discount", key: "discount" },
-    { title: "Loại", dataIndex: "discountType", key: "discountType" },
+    { 
+      title: "Mã", 
+      dataIndex: "code", 
+      key: "code", 
+      width: "20%", 
+      ellipsis: true 
+    },
+    { 
+      title: "Giảm giá", 
+      dataIndex: "discount", 
+      key: "discount", 
+      width: "15%", 
+      ellipsis: true 
+    },
+    { 
+      title: "Loại", 
+      dataIndex: "discountType", 
+      key: "discountType", 
+      width: "15%", 
+      ellipsis: true, 
+      className: "hidden sm:table-cell" 
+    },
     {
       title: "Giá trị tối thiểu",
       dataIndex: "minOrderValue",
       key: "minOrderValue",
+      width: "20%",
+      ellipsis: true,
+      className: "hidden lg:table-cell",
     },
     {
       title: "Người dùng áp dụng",
       dataIndex: "applicableUsers",
       key: "applicableUsers",
+      width: "25%",
+      ellipsis: true,
+      className: "hidden lg:table-cell",
       render: (users) => (users.length > 0 ? users.join(", ") : "Tất cả"),
     },
     {
       title: "Thao tác",
       key: "action",
+      width: "25%",
       render: (_, record) => (
-        <Space size="middle">
+        <Space size="small">
           <Button type="link" onClick={() => handleEdit(record)}>
             Sửa
           </Button>
@@ -139,18 +165,28 @@ const VoucherList = ({ selectedUser }) => {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 space-y-2 sm:space-y-0">
         <h2 className="text-xl font-semibold">Danh sách Voucher</h2>
         <Button type="primary" onClick={handleAdd}>
           Thêm Voucher
         </Button>
       </div>
-      <Table
-        columns={columns}
-        dataSource={vouchers}
-        rowKey="_id"
-        loading={loading}
-      />
+      <div className="overflow-x-auto">
+        <Table
+          columns={columns}
+          dataSource={vouchers}
+          rowKey="_id"
+          loading={loading}
+          pagination={{
+            pageSizeOptions: [5, 10], // Tùy chọn 5 hoặc 10 voucher mỗi trang
+            defaultPageSize: 5, // Mặc định 5 voucher mỗi trang
+            showSizeChanger: true, // Hiển thị tùy chọn thay đổi số lượng
+            showTotal: (total) => `Tổng cộng ${total} voucher`, // Hiển thị tổng số
+          }}
+          className="min-w-0"
+          tableLayout="fixed"
+        />
+      </div>
       <Modal
         title={editingVoucher ? "Sửa Voucher" : "Thêm Voucher"}
         open={isModalVisible}

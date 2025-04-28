@@ -25,4 +25,8 @@ export const userAPI = {
   getUserInfo: (data) => {
     return axiosInstance.get("/users/user-info", data);
   },
+  // Thêm phương thức mới cho admin update user
+  adminUpdateUser: (id, data) => {
+    return axiosInstance.patch(`/users/admin/update/${id}`, data);
+  },
 };

@@ -73,7 +73,7 @@ export default function Sidebar() {
     ];
 
     return (
-        <div className={`h-screen text-white transition-all duration-500 ease-in-out ${isCollapsed ? 'w-16' : 'w-64'} bg-gradient-to-b from-gray-900/90 to-black/90 backdrop-blur-xl border-r border-gray-800/20 shadow-lg`}>
+        <div className={`text-white transition-all duration-500 ease-in-out ${isCollapsed ? 'w-16' : 'w-64'} bg-gradient-to-b from-gray-900/90 to-black/90 backdrop-blur-xl border-r border-gray-800/20 shadow-lg`}>
             <div className="p-4 flex items-center justify-between">
                 {!isCollapsed && (
                     <div className="flex items-center gap-3">

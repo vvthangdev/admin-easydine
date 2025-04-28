@@ -1,14 +1,14 @@
 import Sidebar from "../../../components/Admin/sidebar";
-import { Outlet } from 'react-router-dom'; // Thêm import này
+import { Outlet } from 'react-router-dom';
 
 function AdminLayout() {
     return (
-        <div className="flex h-screen bg-gray-100">
+        <div className="flex min-h-screen bg-gray-100">
             {/* Sidebar Component */}
             <Sidebar />
 
             {/* Main Content Area */}
-            <div className="flex-1 flex flex-col overflow-hidden">
+            <div className="flex-1 flex flex-col">
                 {/* Top Header */}
                 <header className="bg-white shadow-sm h-16 flex items-center justify-between px-6">
                     <h1 className="text-2xl font-semibold text-gray-800">Dashboard</h1>
@@ -23,8 +23,8 @@ function AdminLayout() {
                 </header>
 
                 {/* Main Content */}
-                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
-                    <Outlet /> {/* Thêm Outlet ở đây để render các route con */}
+                <main className="flex-1 bg-gray-100 p-6">
+                    <Outlet />
                 </main>
 
                 {/* Footer */}
