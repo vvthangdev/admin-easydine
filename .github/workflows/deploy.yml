@@ -1,4 +1,4 @@
-name: Deploy Frontend to Ubuntu
+name: Deploy to Ubuntu with Docker Compose
 
 on:
   push:
@@ -15,39 +15,30 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Cài đặt Node.js
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.17.0'
-
-      # Cache node modules
-      - name: Cache node modules
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
-      # Cài đặt dependencies và build
-      - name: Install dependencies and build
-        env:
-          CI: false  # Vô hiệu hóa CI=true để bỏ qua ESLint warnings
+      # Cấu hình SSH để kết nối với server
+      - name: Setup SSH
         run: |
-          npm install
-          NODE_OPTIONS=--max-old-space-size=4096 npm run build
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
 
-      # Deploy qua SSH
+      # Deploy qua SSH và chạy Docker Compose
       - name: Deploy to server
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SERVER_IP }}
-          username: ${{ secrets.SERVER_USERNAME }}
-          password: ${{ secrets.SERVER_PASSWORD }}
-          script: |
-            cd ${{ secrets.SERVER_DESTINATION }}
+        run: |
+          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+            # Di chuyển đến thư mục ứng dụng
+            cd ${{ secrets.SERVER_PATH }}
+            
+            # Pull code mới từ GitHub
             git pull origin main
-            npm install
-            NODE_OPTIONS=--max-old-space-size=4096 npm run build
-            sudo systemctl restart nginx
+            
+            # Dừng và xóa các container cũ (nếu có)
+            docker-compose down
+            
+            # Build và chạy lại các container
+            docker-compose up -d --build
+            
+            # Xóa các image không sử dụng để tiết kiệm dung lượng
+            docker image prune -f
+          EOF
