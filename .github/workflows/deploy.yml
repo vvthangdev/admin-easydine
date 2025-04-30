@@ -1,4 +1,4 @@
-name: Deploy to Ubuntu with Docker Compose
+name: Deploy EasyDine Frontend to Ubuntu Server
 
 on:
   push:
@@ -9,36 +9,77 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       # Checkout mã nguồn
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Cấu hình SSH để kết nối với server
-      - name: Setup SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+      # Cài Node.js để build frontend
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.17.0"
 
-      # Deploy qua SSH và chạy Docker Compose
-      - name: Deploy to server
+      # Build frontend
+      - name: Build Frontend
+        env:
+          CI: false
         run: |
-          ssh ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-            # Di chuyển đến thư mục ứng dụng
-            cd ${{ secrets.SERVER_PATH }}
-            
-            # Pull code mới từ GitHub
+          npm install
+          npm run build
+
+      # Deploy qua SSH với password
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          script: |
+            # Kiểm tra và load nginx:alpine3.20
+            if ! docker image inspect nginx:alpine3.20 >/dev/null 2>&1; then
+              if [ -f /home/aris/nginx-alpine3.20.tar ]; then
+                docker load -i /home/aris/nginx-alpine3.20.tar
+              else
+                docker pull nginx:alpine3.20
+              fi
+            fi
+
+            # Tạo network admin-easydine
+            if ! docker network inspect admin-easydine >/dev/null 2>&1; then
+              docker network create admin-easydine
+            fi
+
+            # Pull code và triển khai frontend
+            cd /home/aris/admin-easydine
             git pull origin main
-            
-            # Dừng và xóa các container cũ (nếu có)
+            rm -rf build
+
+      # Sao chép thư mục build
+      - name: Copy Build to Server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          source: "./build/*"
+          target: "/home/aris/admin-easydine/build"
+
+      # Chạy Docker Compose
+      - name: Run Docker Compose
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          script: |
+            cd /home/aris/admin-easydine
             docker-compose down
-            
-            # Build và chạy lại các container
             docker-compose up -d --build
-            
-            # Xóa các image không sử dụng để tiết kiệm dung lượng
             docker image prune -f
-          EOF
+
+      # Kiểm tra sức khỏe
+      - name: Check Frontend Health
+        run: |
+          sleep 30
+          curl -f http://${{ secrets.SERVER_IP }}:3000 || exit 1
