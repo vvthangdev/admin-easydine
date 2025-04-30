@@ -18,15 +18,17 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20.17.0"
+          node-version: '20.17.0'
 
       # Build frontend
       - name: Build Frontend
         env:
           CI: false
+          REACT_APP_API_URL: ${{ secrets.API_URL }}  # Sử dụng secret
         run: |
           npm install
           npm run build
+          ls -la build  # Kiểm tra build output
 
       # Deploy qua SSH với password
       - name: Deploy to Server
@@ -50,10 +52,11 @@ jobs:
               docker network create admin-easydine
             fi
 
-            # Pull code và triển khai frontend
+            # Pull code và chuẩn bị thư mục
             cd /home/aris/admin-easydine
             git pull origin main
             rm -rf build
+            mkdir -p build
 
       # Sao chép thư mục build
       - name: Copy Build to Server
@@ -62,8 +65,8 @@ jobs:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USERNAME }}
           password: ${{ secrets.SERVER_PASSWORD }}
-          source: "./build/*"
-          target: "/home/aris/admin-easydine/build"
+          source: './build/*'
+          target: '/home/aris/admin-easydine/build'
 
       # Chạy Docker Compose
       - name: Run Docker Compose
@@ -75,8 +78,9 @@ jobs:
           script: |
             cd /home/aris/admin-easydine
             docker-compose down
-            docker-compose up -d --build
+            docker-compose up -d --build --force-recreate
             docker image prune -f
+            ls -la build
 
       # Kiểm tra sức khỏe
       - name: Check Frontend Health

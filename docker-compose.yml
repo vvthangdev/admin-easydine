@@ -12,4 +12,5 @@ services:
       - admin-easydine
 networks:
   admin-easydine:
+    name: admin-easydine
     driver: bridge
