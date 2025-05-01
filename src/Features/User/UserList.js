@@ -8,9 +8,12 @@ import {
   Space,
   message,
   Select,
+  Upload,
 } from "antd";
 import { userAPI } from "../../services/apis/User";
 import { adminAPI } from "../../services/apis/Admin";
+import { UploadOutlined } from "@ant-design/icons";
+import minioClient from "../../Server/minioClient.js";
 
 const UserList = ({ onSelectUser }) => {
   const [users, setUsers] = useState([]);
@@ -20,6 +23,7 @@ const UserList = ({ onSelectUser }) => {
   const [editingUser, setEditingUser] = useState(null);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [avatar, setAvatar] = useState([]); // State để lưu file ảnh upload
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -61,51 +65,51 @@ const UserList = ({ onSelectUser }) => {
   };
 
   const columns = [
-    { 
-      title: "Tên", 
-      dataIndex: "name", 
-      key: "name", 
-      width: "20%", 
-      ellipsis: true 
+    {
+      title: "Tên",
+      dataIndex: "name",
+      key: "name",
+      width: "15%",
+      ellipsis: true,
     },
-    { 
-      title: "Username", 
-      dataIndex: "username", 
-      key: "username", 
-      width: "20%", 
-      ellipsis: true, 
-      className: "hidden sm:table-cell" 
+    {
+      title: "Username",
+      dataIndex: "username",
+      key: "username",
+      width: "15%",
+      ellipsis: true,
+      className: "hidden sm:table-cell",
     },
-    { 
-      title: "Email", 
-      dataIndex: "email", 
-      key: "email", 
-      width: "25%", 
-      ellipsis: true, 
-      className: "hidden sm:table-cell" 
+    {
+      title: "Email",
+      dataIndex: "email",
+      key: "email",
+      width: "20%",
+      ellipsis: true,
+      className: "hidden sm:table-cell",
     },
-    { 
-      title: "Số điện thoại", 
-      dataIndex: "phone", 
-      key: "phone", 
-      width: "20%", 
-      ellipsis: true, 
-      className: "hidden sm:table-cell" 
+    {
+      title: "Số điện thoại",
+      dataIndex: "phone",
+      key: "phone",
+      width: "15%",
+      ellipsis: true,
+      className: "hidden sm:table-cell",
     },
-    { 
-      title: "Địa chỉ", 
-      dataIndex: "address", 
-      key: "address", 
-      width: "25%", 
-      ellipsis: true, 
-      className: "hidden lg:table-cell" 
+    {
+      title: "Địa chỉ",
+      dataIndex: "address",
+      key: "address",
+      width: "20%",
+      ellipsis: true,
+      className: "hidden lg:table-cell",
     },
-    { 
-      title: "Vai trò", 
-      dataIndex: "role", 
-      key: "role", 
-      width: "15%", 
-      ellipsis: true 
+    {
+      title: "Vai trò",
+      dataIndex: "role",
+      key: "role",
+      width: "10%",
+      ellipsis: true,
     },
     {
       title: "Thao tác",
@@ -133,6 +137,8 @@ const UserList = ({ onSelectUser }) => {
       ...record,
       password: "",
     });
+    // Khởi tạo avatar nếu có, để hiển thị ảnh hiện tại trong Upload component
+    setAvatar(record.avatar ? [{ url: record.avatar, uid: "1" }] : []);
     setIsModalVisible(true);
   };
 
@@ -147,9 +153,38 @@ const UserList = ({ onSelectUser }) => {
     }
   };
 
+  const handleUploadChange = ({ fileList }) => {
+    setAvatar(fileList);
+  };
+
   const handleModalOk = async () => {
     try {
       const values = await form.validateFields();
+      let imageUrl = editingUser.avatar || ""; // Giữ URL ảnh hiện tại nếu không upload ảnh mới
+
+      // Nếu có file ảnh mới được upload
+      if (avatar?.length > 0 && avatar?.[0]?.originFileObj) {
+        const timestamp = Date.now();
+        const file = avatar[0].originFileObj;
+        const fileName = `images/${timestamp}_${file.name}`;
+        const { error } = await minioClient.storage
+          .from("test01")
+          .upload(fileName, file);
+
+        if (error) {
+          throw new Error("Không thể upload file. Vui lòng thử lại.");
+        }
+
+        const { data: publicUrlData, error: publicUrlError } =
+          minioClient.storage.from("test01").getPublicUrl(fileName);
+
+        if (publicUrlError) {
+          throw new Error("Không thể tạo URL công khai cho ảnh.");
+        }
+
+        imageUrl = publicUrlData.publicUrl;
+      }
+
       const userData = {
         email: values.email,
         username: values.username,
@@ -157,7 +192,7 @@ const UserList = ({ onSelectUser }) => {
         phone: values.phone,
         role: values.role,
         address: values.address,
-        avatar: values.avatar || "",
+        avatar: imageUrl, // Cập nhật URL ảnh
         ...(values.password && { password: values.password }),
       };
 
@@ -178,9 +213,11 @@ const UserList = ({ onSelectUser }) => {
       }
       setIsModalVisible(false);
       form.resetFields();
+      setAvatar([]); // Reset avatar sau khi lưu
     } catch (error) {
       const errorMessage =
-        error.response?.data?.message || "Có lỗi xảy ra khi cập nhật người dùng";
+        error.response?.data?.message ||
+        "Có lỗi xảy ra khi cập nhật người dùng";
       message.error(errorMessage);
     }
   };
@@ -203,10 +240,10 @@ const UserList = ({ onSelectUser }) => {
           rowKey="_id"
           loading={loading}
           pagination={{
-            pageSizeOptions: [10, 20], // Tùy chọn 10 hoặc 20 người mỗi trang
-            defaultPageSize: 10, // Mặc định 10 người mỗi trang
-            showSizeChanger: true, // Hiển thị tùy chọn thay đổi số lượng
-            showTotal: (total) => `Tổng cộng ${total} người dùng`, // Hiển thị tổng số
+            pageSizeOptions: [10, 20],
+            defaultPageSize: 10,
+            showSizeChanger: true,
+            showTotal: (total) => `Tổng cộng ${total} người dùng`,
           }}
           className="min-w-0"
           tableLayout="fixed"
@@ -216,7 +253,13 @@ const UserList = ({ onSelectUser }) => {
         title="Sửa thông tin người dùng"
         open={isModalVisible}
         onOk={handleModalOk}
-        onCancel={() => setIsModalVisible(false)}
+        onCancel={() => {
+          setIsModalVisible(false);
+          form.resetFields();
+          setAvatar(
+            editingUser.avatar ? [{ url: editingUser.avatar, uid: "1" }] : []
+          );
+        }}
       >
         <Form form={form} layout="vertical" className="mt-4">
           <Form.Item
@@ -269,8 +312,15 @@ const UserList = ({ onSelectUser }) => {
               <Select.Option value="ADMIN">Quản trị viên</Select.Option>
             </Select>
           </Form.Item>
-          <Form.Item name="avatar" label="URL Avatar">
-            <Input />
+          <Form.Item label="Ảnh đại diện">
+            <Upload
+              listType="picture"
+              fileList={avatar}
+              onChange={handleUploadChange}
+              beforeUpload={() => false} // Ngăn upload tự động, xử lý trong handleModalOk
+            >
+              <Button icon={<UploadOutlined />}>Tải lên ảnh đại diện</Button>
+            </Upload>
           </Form.Item>
           <Form.Item
             name="password"
@@ -281,7 +331,9 @@ const UserList = ({ onSelectUser }) => {
                 message: "Mật khẩu phải có ít nhất 8 ký tự!",
                 validator: (_, value) =>
                   value && value.length < 8
-                    ? Promise.reject(new Error("Mật khẩu phải có ít nhất 8 ký tự!"))
+                    ? Promise.reject(
+                        new Error("Mật khẩu phải có ít nhất 8 ký tự!")
+                      )
                     : Promise.resolve(),
               },
             ]}

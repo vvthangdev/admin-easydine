@@ -1,40 +1,44 @@
 import React, { useEffect, useState } from "react";
 import { Button, Modal, Form, Input, message, Upload } from "antd";
-import { userAPI } from "../../services/apis/User"; // Giả sử bạn có một API cho hồ sơ cá nhân
+import { userAPI } from "../../services/apis/User";
 import { UploadOutlined } from "@ant-design/icons";
-import { supabase } from "../../supabase/supasbase"; // Đảm bảo bạn đã cấu hình Supabase
+import minioClient from "../../Server/minioClient.js";
 import { useNavigate } from "react-router-dom";
 
 export default function Profile() {
-  const [profile, setProfile] = useState(null); // Đặt mặc định là null
+  const [profile, setProfile] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false); // Modal xác nhận xóa
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [avatar, setAvatar] = useState([]);
+  const [password, setPassword] = useState("");
   const [form] = Form.useForm();
-  const [setLoading] = useState(false);
-  const [avatar, setAvatar] = useState([]); // Trạng thái cho ảnh đại diện
-  const [password, setPassword] = useState(""); // Trạng thái cho mật khẩu
   const navigate = useNavigate();
 
-  const fetchProfile = async () => {
-    setLoading(true);
-    try {
-      const response = await userAPI.getUserInfo();
-      console.log("check res:", response);
-      setProfile(response);
-      form.setFieldsValue(response); // Đặt giá trị cho form
-      // Chuyển đổi avatar thành mảng nếu cần
-      setAvatar(response.avatar ? [{ url: response.avatar }] : []); // Giả sử response có trường avatar
-    } catch (error) {
-      message.error("Lỗi khi tải thông tin hồ sơ");
-      navigate("/login");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchProfile = async () => {
+      setLoading(true);
+      try {
+        const response = await userAPI.getUserInfo();
+        setProfile(response);
+        form.setFieldsValue({
+          name: response.name,
+          email: response.email,
+          phone: response.phone,
+          address: response.address,
+        });
+        setAvatar(response.avatar ? [{ url: response.avatar, uid: "1" }] : []);
+      } catch (error) {
+        message.error("Lỗi khi tải thông tin hồ sơ");
+        navigate("/login");
+      } finally {
+        setLoading(false);
+      }
+    };
+  
     fetchProfile();
-  }, [fetchProfile]); // Thêm fetchProfile
+  }, [form, navigate]);
+  
 
   const handleEdit = () => {
     setIsModalVisible(true);
@@ -43,54 +47,46 @@ export default function Profile() {
   const handleModalOk = async () => {
     try {
       const values = await form.validateFields();
-      let imageUrl = "";
+      let imageUrl = profile.avatar || "";
 
-      // Nếu có file ảnh, upload lên Supabase và lấy URL
       if (avatar?.length > 0 && avatar?.[0]?.originFileObj) {
         const timestamp = Date.now();
-        const file = avatar?.[0]?.originFileObj;
+        const file = avatar[0].originFileObj;
         const fileName = `images/${timestamp}_${file.name}`;
-        const { data, error } = await supabase.storage
-          .from("test01") // Thay 'test01' bằng tên bucket thực tế của bạn
+        const { error } = await minioClient.storage
+          .from("test01")
           .upload(fileName, file);
 
         if (error) {
-          console.error("Lỗi khi upload file lên Supabase:", error);
           throw new Error("Không thể upload file. Vui lòng thử lại.");
         }
 
-        // Lấy URL công khai của ảnh
-        const { data: publicUrlData, error: publicUrlError } = supabase.storage
-          .from("test01")
-          .getPublicUrl(fileName);
+        const { data: publicUrlData, error: publicUrlError } =
+          minioClient.storage.from("test01").getPublicUrl(fileName);
 
         if (publicUrlError) {
-          console.error("Lỗi khi lấy URL công khai:", publicUrlError);
           throw new Error("Không thể tạo URL công khai cho ảnh.");
         }
 
-        imageUrl = publicUrlData.publicUrl; // Lưu URL ảnh vào biến
-      } else if (profile.avatar) {
-        imageUrl = profile.avatar;
+        imageUrl = publicUrlData.publicUrl;
       }
 
       const requestData = {
         name: values.name,
         email: values.email,
         phone: values.phone,
-        avatar: imageUrl, // Gửi ảnh đại diện
+        address: values.address,
+        avatar: imageUrl,
       };
 
-      // Cập nhật thông tin hồ sơ
       await userAPI.updateUser(requestData);
-      setProfile({ ...profile, ...requestData }); // Cập nhật state profile
+      setProfile({ ...profile, ...requestData });
       message.success("Cập nhật hồ sơ thành công");
       setIsModalVisible(false);
+      setAvatar(imageUrl ? [{ url: imageUrl, uid: "1" }] : []);
     } catch (error) {
       console.error("Lỗi khi cập nhật hồ sơ:", error);
       message.error("Có lỗi xảy ra. Vui lòng thử lại.");
-    } finally {
-      window.location.reload();
     }
   };
 
@@ -98,25 +94,27 @@ export default function Profile() {
     setAvatar(fileList);
   };
 
-  // Hàm xóa người dùng
   const handleDeleteUser = async () => {
+    if (!password) {
+      message.error("Vui lòng nhập mật khẩu!");
+      return;
+    }
     const token = localStorage.getItem("accessToken");
     try {
       const requestData = {
-        password: password,
+        password,
         accessToken: token,
       };
-      // Gọi API xóa người dùng với mật khẩu
-      await userAPI.deleteUser(requestData); // Giả sử bạn cần gửi mật khẩu
+      await userAPI.deleteUser(requestData);
       setProfile(null);
       setIsDeleteModalVisible(false);
       message.success("Xóa hồ sơ thành công!");
-      window.location.reload();
+      navigate("/login");
     } catch (error) {
       console.error("Lỗi khi xóa hồ sơ:", error);
-      message.error("Có lỗi xảy ra khi xóa hồ sơ. Vui lòng thử lại.");
-    } finally {
-      navigate("/login");
+      message.error(
+        error.response?.data?.message || "Có lỗi xảy ra khi xóa hồ sơ."
+      );
     }
   };
 
@@ -127,28 +125,29 @@ export default function Profile() {
           <h1 className="text-2xl font-semibold text-gray-800">
             Quản lý hồ sơ cá nhân
           </h1>
-          <Button
-            type="primary"
-            onClick={handleEdit}
-            className="bg-blue-500 hover:bg-blue-600 transition duration-300"
-          >
-            Chỉnh sửa hồ sơ
-          </Button>
-          <Button
-            type="danger"
-            onClick={() => setIsDeleteModalVisible(true)} // Mở modal xác nhận xóa
-          >
-            Xóa hồ sơ
-          </Button>
+          <div>
+            <Button
+              type="primary"
+              onClick={handleEdit}
+              className="bg-blue-500 hover:bg-blue-600 transition duration-300 mr-2"
+            >
+              Chỉnh sửa hồ sơ
+            </Button>
+            <Button type="danger" onClick={() => setIsDeleteModalVisible(true)}>
+              Xóa hồ sơ
+            </Button>
+          </div>
         </div>
 
-        {profile ? (
+        {loading ? (
+          <p className="text-gray-600">Đang tải thông tin hồ sơ...</p>
+        ) : profile ? (
           <div className="bg-white rounded-lg shadow p-4">
             <div className="flex items-center mb-4">
               <img
-                src={profile.avatar} // Hình ảnh đại diện
+                src={profile.avatar || "https://via.placeholder.com/150"} // Ảnh mặc định nếu không có avatar
                 alt="Avatar"
-                className="w-24 h-24 rounded-full border-2 border-gray-300 mr-4"
+                className="w-24 h-24 rounded-full border-2 border-gray-300 mr-4 object-cover"
               />
               <div>
                 <h2 className="text-xl font-semibold mb-2">
@@ -163,11 +162,14 @@ export default function Profile() {
                 <p className="text-gray-700">
                   <strong>Số điện thoại:</strong> {profile.phone}
                 </p>
+                <p className="text-gray-700">
+                  <strong>Địa chỉ:</strong> {profile.address}
+                </p>
               </div>
             </div>
           </div>
         ) : (
-          <p className="text-gray-600">Đang tải thông tin hồ sơ...</p>
+          <p className="text-gray-600">Không có thông tin hồ sơ.</p>
         )}
 
         <Modal
@@ -177,6 +179,9 @@ export default function Profile() {
           onCancel={() => {
             setIsModalVisible(false);
             form.resetFields();
+            setAvatar(
+              profile.avatar ? [{ url: profile.avatar, uid: "1" }] : []
+            );
           }}
           className="rounded-lg"
         >
@@ -207,12 +212,19 @@ export default function Profile() {
             >
               <Input placeholder="Nhập số điện thoại" />
             </Form.Item>
+            <Form.Item
+              name="address"
+              label="Địa chỉ"
+              rules={[{ required: true, message: "Vui lòng nhập địa chỉ!" }]}
+            >
+              <Input placeholder="Nhập địa chỉ" />
+            </Form.Item>
             <Form.Item label="Ảnh đại diện">
               <Upload
                 listType="picture"
                 fileList={avatar}
                 onChange={handleUploadChange}
-                beforeUpload={() => false} // Ngăn không cho tự động tải lên
+                beforeUpload={() => false}
               >
                 <Button icon={<UploadOutlined />}>Tải lên ảnh đại diện</Button>
               </Upload>
@@ -220,12 +232,14 @@ export default function Profile() {
           </Form>
         </Modal>
 
-        {/* Modal xác nhận xóa */}
         <Modal
           title="Xác nhận xóa hồ sơ"
           open={isDeleteModalVisible}
           onOk={handleDeleteUser}
-          onCancel={() => setIsDeleteModalVisible(false)}
+          onCancel={() => {
+            setIsDeleteModalVisible(false);
+            setPassword("");
+          }}
           okText="Xóa"
           cancelText="Hủy"
           className="rounded-lg"
