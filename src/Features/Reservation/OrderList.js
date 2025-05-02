@@ -415,7 +415,7 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
           setSelectedItems([]);
         }}
         width="80vw" // Cập nhật kích thước modal thành 80% chiều rộng màn hình
-        bodyStyle={{ padding: 0 }}
+        styles={{ padding: 0 }}
       >
         <div style={{ display: "flex", height: "80vh" }}> {/* Tùy chỉnh chiều cao modal */}
           <div

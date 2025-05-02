@@ -1,17 +1,10 @@
 import React, { useEffect, useState } from "react";
-import {
-  Table,
-  Button,
-  Modal,
-  Space,
-  message,
-  Tabs,
-  Select,
-} from "antd";
+import { Table, Button, Modal, Space, message, Tabs, Select } from "antd";
 import moment from "moment";
 import { orderAPI } from "../../services/apis/Order";
 import { adminAPI } from "../../services/apis/Admin";
 import { userAPI } from "../../services/apis/User";
+import { tableAPI } from "../../services/apis/Table";
 import OrderBasicInfo from "./OrderBasicInfo";
 import ItemSelector from "./ItemSelector";
 import SelectedItems from "./SelectedItems";
@@ -79,14 +72,20 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
   const fetchAvailableTables = async (date, startTime, endTime) => {
     try {
       if (!date || !startTime || !endTime) return;
-      const response = await orderAPI.getAvailableTables({
-        start_time: startTime,
-        end_time: endTime,
+
+      // Đảm bảo startTime và endTime đã ở định dạng UTC chuẩn
+      const startDateTime = moment
+        .utc(startTime)
+        .format("YYYY-MM-DDTHH:mm:ss[Z]");
+      const endDateTime = moment.utc(endTime).format("YYYY-MM-DDTHH:mm:ss[Z]");
+
+      const response = await tableAPI.getAvailableTables({
+        start_time: startDateTime,
+        end_time: endDateTime,
       });
       setAvailableTables(response.data || response);
     } catch (error) {
       console.error("Error fetching available tables:", error);
-      message.error("Không thể lấy danh sách bàn khả dụng");
     }
   };
 
@@ -103,19 +102,26 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
         message.error("Không tìm thấy đơn hàng để cập nhật");
         return;
       }
-
+  
+      // Kiểm tra nếu chuyển từ pending sang confirmed
+      if (currentOrder.status === "pending" && newStatus === "confirmed") {
+        await orderAPI.confirmOrder(orderId);
+        message.success("Xác nhận đơn hàng thành công");
+      }
+  
+      // Cập nhật trạng thái đơn hàng
       const updatedOrderData = {
         id: orderId,
         status: newStatus,
         type: currentOrder.type,
       };
-
+  
       await orderAPI.updateOrder(updatedOrderData);
       message.success("Cập nhật trạng thái thành công");
       fetchOrders(selectedCustomer?._id);
     } catch (error) {
       console.error("Error updating order status:", error);
-      message.error("Không thể cập nhật trạng thái");
+      message.error("Không thể cập nhật trạng thái hoặc xác nhận đơn hàng");
     }
   };
 
@@ -139,7 +145,8 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
       if (data.order?.staff_id) {
         try {
           const staffResponse = await userAPI.getUserById(data.order.staff_id);
-          staffName = staffResponse.username || staffResponse.name || "Không xác định";
+          staffName =
+            staffResponse.username || staffResponse.name || "Không xác định";
         } catch (error) {
           console.error("Error fetching staff details:", error);
         }
@@ -177,7 +184,10 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
     setSelectedItems([]);
     setIsModalVisible(true);
 
-    const startDateTime = moment(`${date} ${start_time}`, "DD/MM/YYYY HH:mm").utc();
+    const startDateTime = moment(
+      `${date} ${start_time}`,
+      "DD/MM/YYYY HH:mm"
+    ).utc();
     const endDateTime = moment(`${date} ${end_time}`, "DD/MM/YYYY HH:mm").utc();
     fetchAvailableTables(
       date,
@@ -192,27 +202,42 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
       const orderDetails = await orderAPI.getOrderDetails(record.id);
       const data = orderDetails.data || orderDetails;
 
-      const reservedTables = data.reservedTables?.map((table) => table.table_id) || [];
-      const items = data.itemOrders?.map((item) => ({
-        id: item.item_id,
-        name: item.itemName,
-        price: item.itemPrice,
-        quantity: item.quantity,
-        size: item.size || null,
-        note: item.note || "",
-      })) || [];
+      const reservedTables =
+        data.reservedTables?.map((table) => table.table_id) || [];
+      const items =
+        data.itemOrders?.map((item) => ({
+          id: item.item_id,
+          name: item.itemName,
+          price: item.itemPrice,
+          quantity: item.quantity,
+          size: item.size || null,
+          note: item.note || "",
+        })) || [];
 
       const newFormData = {
         type: record.type || "reservation",
         status: record.status || "pending",
         staff_id: data.order?.staff_id || undefined,
-        date: moment.utc(data.time || record.time).local().format("DD/MM/YYYY"),
+        date: moment
+          .utc(data.time || record.time)
+          .local()
+          .format("DD/MM/YYYY"),
         start_time: data.reservedTables?.[0]
-          ? moment.utc(data.reservedTables[0].start_time).local().format("HH:mm")
-          : moment.utc(data.time || record.time).local().format("HH:mm"),
+          ? moment
+              .utc(data.reservedTables[0].start_time)
+              .local()
+              .format("HH:mm")
+          : moment
+              .utc(data.time || record.time)
+              .local()
+              .format("HH:mm"),
         end_time: data.reservedTables?.[0]
           ? moment.utc(data.reservedTables[0].end_time).local().format("HH:mm")
-          : moment.utc(data.time || record.time).local().add(1, "hours").format("HH:mm"),
+          : moment
+              .utc(data.time || record.time)
+              .local()
+              .add(1, "hours")
+              .format("HH:mm"),
         tables: reservedTables,
       };
 
@@ -241,17 +266,31 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
   };
 
   const handleDelete = async (record) => {
-    try {
-      await orderAPI.deleteOrder({ id: record.id });
-      setOrders((prevOrders) => ({
-        ...prevOrders,
-        [record.type]: prevOrders[record.type].filter((order) => order.id !== record.id),
-      }));
-      message.success(`Xóa đơn hàng ${record.id} thành công`);
-    } catch (error) {
-      console.error("Error deleting order:", error);
-      message.error("Xóa đơn hàng không thành công");
-    }
+    Modal.confirm({
+      title: "Xác nhận xóa đơn hàng",
+      content: `Bạn có chắc chắn muốn xóa đơn hàng ${record.id}? Hành động này không thể hoàn tác.`,
+      okText: "Xóa",
+      okType: "danger",
+      cancelText: "Hủy",
+      onOk: async () => {
+        try {
+          await orderAPI.deleteOrder(record.id); // Gọi API xóa với ID
+          setOrders((prevOrders) => ({
+            ...prevOrders,
+            [record.type]: prevOrders[record.type].filter(
+              (order) => order.id !== record.id
+            ),
+          }));
+          message.success(`Xóa đơn hàng ${record.id} thành công`);
+        } catch (error) {
+          console.error("Error deleting order:", error);
+          message.error("Xóa đơn hàng không thành công");
+        }
+      },
+      onCancel: () => {
+        // Không làm gì khi người dùng hủy
+      },
+    });
   };
 
   const handleModalOk = async () => {
@@ -266,8 +305,13 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
         "DD/MM/YYYY HH:mm"
       ).utc();
       const endDateTime = formData.end_time
-        ? moment(`${formData.date} ${formData.end_time}`, "DD/MM/YYYY HH:mm").utc()
-        : moment(`${formData.date} ${formData.start_time}`, "DD/MM/YYYY HH:mm").add(1, "hours").utc();
+        ? moment(
+            `${formData.date} ${formData.end_time}`,
+            "DD/MM/YYYY HH:mm"
+          ).utc()
+        : moment(`${formData.date} ${formData.start_time}`, "DD/MM/YYYY HH:mm")
+            .add(1, "hours")
+            .utc();
 
       const orderData = {
         id: editingOrder ? editingOrder.id : undefined,
@@ -275,7 +319,7 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
         end_time: endDateTime.format("YYYY-MM-DDTHH:mm:ss[Z]"),
         type: formData.type,
         status: formData.status,
-        staff_id: formData.staff_id || undefined,
+        staff_id: formData.staff_id || null,
         customer_id: selectedCustomer?._id,
         items: selectedItems.map((item) => ({
           id: item.id,
@@ -340,7 +384,8 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
       title: "Ngày",
       dataIndex: "time",
       key: "time",
-      render: (text) => (text ? moment.utc(text).local().format("DD/MM/YY HH:mm") : "N/A"),
+      render: (text) =>
+        text ? moment.utc(text).local().format("DD/MM/YY HH:mm") : "N/A",
     },
     {
       title: "Trạng Thái",
@@ -399,7 +444,9 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
   return (
     <div className="p-4 bg-white h-full overflow-y-auto">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold text-gray-900">Danh sách đơn hàng</h2>
+        <h2 className="text-lg font-semibold text-gray-900">
+          Danh sách đơn hàng
+        </h2>
         <Space>
           {selectedCustomer && (
             <>
@@ -461,7 +508,7 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
         }}
         width="90vw"
         className="rounded-xl"
-        bodyStyle={{ padding: 0, background: "transparent" }}
+        styles={{ padding: 0, background: "transparent" }}
         footer={[
           <Button
             key="cancel"
@@ -527,12 +574,22 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
                 alt={customerDetails.name}
                 className="w-20 h-20 rounded-full object-cover"
               />
-              <h3 className="text-lg font-semibold text-gray-900">{customerDetails.name}</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                {customerDetails.name}
+              </h3>
             </div>
-            <p><b>Địa Chỉ:</b> {customerDetails.address || "Chưa cung cấp"}</p>
-            <p><b>Email:</b> {customerDetails.email || "Chưa cung cấp"}</p>
-            <p><b>Số Điện Thoại:</b> {customerDetails.phone || "Chưa cung cấp"}</p>
-            <p><b>Username:</b> {customerDetails.username || "Chưa cung cấp"}</p>
+            <p>
+              <b>Địa Chỉ:</b> {customerDetails.address || "Chưa cung cấp"}
+            </p>
+            <p>
+              <b>Email:</b> {customerDetails.email || "Chưa cung cấp"}
+            </p>
+            <p>
+              <b>Số Điện Thoại:</b> {customerDetails.phone || "Chưa cung cấp"}
+            </p>
+            <p>
+              <b>Username:</b> {customerDetails.username || "Chưa cung cấp"}
+            </p>
           </div>
         ) : (
           <p className="text-sm text-gray-600">Đang tải thông tin...</p>

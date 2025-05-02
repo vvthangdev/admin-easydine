@@ -19,13 +19,13 @@ const OrderFormModal = ({
 
   const fetchOrderDetails = useCallback(async () => {
     if (!editingOrder) return;
-
+  
     try {
       const orderDetails = await orderAPI.getOrderDetails(editingOrder.id);
       const data = orderDetails.data || orderDetails;
-
+  
       const reservedTables = data.reservedTables?.map((table) => table.table_id) || [];
-
+  
       const items = data.itemOrders?.map((item) => ({
         id: item.item_id,
         name: item.itemName,
@@ -34,10 +34,12 @@ const OrderFormModal = ({
         size: item.size || null,
         note: item.note || "",
       })) || [];
-
+  
       const newFormData = {
         type: editingOrder.type || "reservation",
         status: editingOrder.status || "pending",
+        // Đặt staff_id là undefined nếu không có nhân viên (hoặc null từ server)
+        staff_id: data.order?.staff_id || undefined,
         date: moment.utc(data.time || editingOrder.time).local().format("DD/MM/YYYY"),
         start_time: data.reservedTables?.[0]
           ? moment.utc(data.reservedTables[0].start_time).local().format("HH:mm")
@@ -47,13 +49,19 @@ const OrderFormModal = ({
           : moment.utc(data.time || editingOrder.time).local().add(1, "hours").format("HH:mm"),
         tables: reservedTables,
       };
-
+  
       setFormData(newFormData);
       setSelectedItems(items);
-
-      const startDateTime = moment(`${newFormData.date} ${newFormData.start_time}`, "DD/MM/YYYY HH:mm").utc();
-      const endDateTime = moment(`${newFormData.date} ${newFormData.end_time}`, "DD/MM/YYYY HH:mm").utc();
-
+  
+      const startDateTime = moment(
+        `${newFormData.date} ${newFormData.start_time}`,
+        "DD/MM/YYYY HH:mm"
+      ).utc();
+      const endDateTime = moment(
+        `${newFormData.date} ${newFormData.end_time}`,
+        "DD/MM/YYYY HH:mm"
+      ).utc();
+  
       fetchAvailableTables(
         newFormData.date,
         startDateTime.format("YYYY-MM-DDTHH:mm:ss[Z]"),
@@ -110,7 +118,8 @@ const OrderFormModal = ({
     ) {
       return;
     }
-
+  
+    // Chuyển đổi thời gian sang UTC
     const startDateTime = moment(
       `${formData.date} ${formData.start_time}`,
       "DD/MM/YYYY HH:mm"
@@ -119,7 +128,7 @@ const OrderFormModal = ({
       `${formData.date} ${formData.end_time}`,
       "DD/MM/YYYY HH:mm"
     ).utc();
-
+  
     const orderData = {
       id: editingOrder ? editingOrder.id : undefined,
       start_time: startDateTime.format("YYYY-MM-DDTHH:mm:ss[Z]"),
@@ -134,8 +143,10 @@ const OrderFormModal = ({
         note: item.note || "",
       })),
       customer_id: selectedCustomer?._id,
+      // Gửi staff_id là null nếu không có nhân viên được chọn
+      staff_id: formData.staff_id || null,
     };
-
+  
     onSubmit(orderData);
   };
 

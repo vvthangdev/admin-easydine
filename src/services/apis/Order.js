@@ -51,21 +51,7 @@ export const orderAPI = {
     }
   },
 
-  getAvailableTables: async (params) => {
-    try {
-      const response = await axiosInstance.get("/orders/available-tables", {
-        params: {
-          start_time: params.start_time,
-          end_time: params.end_time,
-        },
-      });
-      console.log("Available Tables API Response:", response); // Kiểm tra phản hồi API
-      return response; // Trả về dữ liệu
-    } catch (error) {
-      console.error("Error fetching available tables:", error);
-      throw error; // Ném lỗi nếu có
-    }
-  },
+  
 
   addItem: (data) => {
     return axiosInstance.post("/item/create-item", data);
@@ -81,8 +67,20 @@ export const orderAPI = {
   searchItem: (data) => {
     return axiosInstance.get("/item/delete-item");
   },
-  deleteOrder: (data) => {
-    return axiosInstance.delete(`/orders/delete-order/${data}`);
+  deleteOrder: (id) => {
+    return axiosInstance.delete(`/orders/delete-order/${id}`);
+  },
+  // Thêm hàm mới để xác nhận đơn hàng
+  confirmOrder: async (orderId) => {
+    try {
+      const response = await axiosInstance.post("/orders/confirm-order", {
+        order_id: orderId,
+      });
+      return response;
+    } catch (error) {
+      console.error("Error confirming order:", error);
+      throw error;
+    }
   },
   // Thêm hàm mới để tìm kiếm đơn hàng theo customer_id
   searchOrdersByCustomer: async (customerId) => {

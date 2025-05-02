@@ -21,9 +21,20 @@ export const tableAPI = {
   },
   releaseTable: (data) => {
     return axiosInstance.post("/tables/release-table", data);
-    // const response = axios.post(`${API_URL}/release-table`, data, {
-    //   headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-    // });
-    // return response.data;
-  }
+  },
+  getAvailableTables: async (params) => {
+    try {
+      const response = await axiosInstance.get("/tables/available-tables", {
+        params: {
+          start_time: params.start_time,
+          end_time: params.end_time,
+        },
+      });
+      console.log("Available Tables API Response:", response); // Kiểm tra phản hồi API
+      return response; // Trả về dữ liệu
+    } catch (error) {
+      console.error("Error fetching available tables:", error);
+      throw error; // Ném lỗi nếu có
+    }
+  },
 };

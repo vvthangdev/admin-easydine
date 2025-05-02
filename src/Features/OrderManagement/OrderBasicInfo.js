@@ -33,9 +33,10 @@ const OrderBasicInfo = ({
   }, []);
 
   const handleChange = (field, value) => {
+    console.log(`Changing ${field} to:`, value); // Thêm log để debug
     setFormData((prev) => {
       const newData = { ...prev, [field]: value };
-
+  
       if (newData.date && newData.start_time) {
         const isValidDate = moment(newData.date, "DD/MM/YYYY", true).isValid();
         const isValidStartTime = moment(newData.start_time, "HH:mm", true).isValid();
@@ -43,24 +44,24 @@ const OrderBasicInfo = ({
           console.error("Invalid date or start time format");
           return newData;
         }
-
+  
         const startDateTime = moment(`${newData.date} ${newData.start_time}`, "DD/MM/YYYY HH:mm").utc();
         const endDateTime = newData.end_time
           ? moment(`${newData.date} ${newData.end_time}`, "DD/MM/YYYY HH:mm").utc()
           : moment(`${newData.date} ${newData.start_time}`, "DD/MM/YYYY HH:mm").add(1, "hours").utc();
-
+  
         if (!endDateTime.isValid()) {
           console.error("Invalid end time format");
           return newData;
         }
-
+  
         fetchAvailableTables(
           newData.date,
-          startDateTime.format("YYYY-MM-DDTHH:mm:ss"),
-          endDateTime.format("YYYY-MM-DDTHH:mm:ss")
+          startDateTime.format("YYYY-MM-DDTHH:mm:ss[Z]"), // Thêm [Z] để chuẩn hóa UTC
+          endDateTime.format("YYYY-MM-DDTHH:mm:ss[Z]")
         );
       }
-
+  
       return newData;
     });
   };
@@ -68,7 +69,7 @@ const OrderBasicInfo = ({
   return (
     <div className="flex flex-col gap-6 w-full p-4">
       <h3 className="text-lg font-semibold text-gray-900">Thông tin cơ bản</h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
         <div className="min-w-0">
           <label className="text-sm font-medium text-gray-900">
             Loại Đơn Hàng <span className="text-red-500">*</span>
@@ -153,7 +154,7 @@ const OrderBasicInfo = ({
           />
         </div>
         {formData.type === "reservation" && (
-          <div className="sm:col-span-2 lg:col-span-3 min-w-0">
+          <div className="sm:col-span-2 min-w-0">
             <label className="text-sm font-medium text-gray-900">Chọn Bàn</label>
             <Select
               mode="multiple"
