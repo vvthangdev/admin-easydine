@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, message } from "antd";
+import { Button, message, Modal } from "antd";
 import { tableAPI } from "../../services/apis/Table";
 import TableCard from "./TableCardView/TableCard";
 import TableFormModal from "./TableFormModal";
@@ -11,6 +11,7 @@ export default function TableManagement() {
   const [tables, setTables] = useState([]);
   const [isFormModalVisible, setIsFormModalVisible] = useState(false);
   const [isReleaseModalVisible, setIsReleaseModalVisible] = useState(false);
+  const [isTableListModalVisible, setIsTableListModalVisible] = useState(false);
   const [editingTable, setEditingTable] = useState(null);
   const [releasingTable, setReleasingTable] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -122,19 +123,12 @@ export default function TableManagement() {
               : table
           )
         );
-        message.success(
-          `Cập nhật bàn số ${requestData.table_number} thành công`
-        );
+        message.success(`Cập nhật bàn số ${requestData.table_number} thành công`);
       } else {
         const newTable = await tableAPI.addTable(requestData);
         setTables([
           ...tables,
-          {
-            ...newTable,
-            status: "Available",
-            same_order_tables: null,
-            order_number: null,
-          },
+          { ...newTable, status: "Available", same_order_tables: null, order_number: null },
         ]);
         message.success(`Thêm bàn số ${requestData.table_number} thành công`);
       }
@@ -142,9 +136,7 @@ export default function TableManagement() {
     } catch (error) {
       console.error("Error saving table:", error);
       message.error(
-        editingTable
-          ? "Cập nhật bàn không thành công"
-          : "Thêm bàn không thành công"
+        editingTable ? "Cập nhật bàn không thành công" : "Thêm bàn không thành công"
       );
     }
   };
@@ -171,8 +163,7 @@ export default function TableManagement() {
 
     return Object.values(orders).map((order) => (
       <div key={order.order_number} className="order-summary-item">
-        Đơn #{order.order_number}: Bàn{" "}
-        {order.tables.sort((a, b) => a - b).join(", ")}
+        Đơn #{order.order_number}: Bàn {order.tables.sort((a, b) => a - b).join(", ")}
       </div>
     ));
   };
@@ -181,13 +172,22 @@ export default function TableManagement() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold text-gray-800">Quản lý bàn</h1>
-        <Button
-          type="primary"
-          onClick={handleAdd}
-          className="px-4 py-1 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
-        >
-          Thêm bàn mới
-        </Button>
+        <div className="flex gap-4">
+          <Button
+            type="primary"
+            onClick={() => setIsTableListModalVisible(true)}
+            className="px-4 py-1 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+          >
+            Quản lý danh sách bàn
+          </Button>
+          <Button
+            type="primary"
+            onClick={handleAdd}
+            className="px-4 py-1 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+          >
+            Thêm bàn mới
+          </Button>
+        </div>
       </div>
 
       {/* Tóm tắt đơn hàng */}
@@ -218,17 +218,20 @@ export default function TableManagement() {
         )}
       </div>
 
-      {/* Phần quản lý sửa/xóa bàn */}
-      <div className="mt-6">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">
-          Quản lý danh sách bàn
-        </h2>
+      <Modal
+        title="Quản lý danh sách bàn"
+        open={isTableListModalVisible}
+        onCancel={() => setIsTableListModalVisible(false)}
+        footer={null}
+        width={800}
+        className="rounded-xl"
+      >
         <TableAdmin
           tables={tables}
           onEdit={handleEdit}
           onDelete={handleDelete}
         />
-      </div>
+      </Modal>
 
       <TableFormModal
         visible={isFormModalVisible}
@@ -239,9 +242,7 @@ export default function TableManagement() {
 
       <ReleaseTableModal
         visible={isReleaseModalVisible}
-        onCancel={() =>
-          setIsReleaseModalVisible(false) || setReleasingTable(null)
-        }
+        onCancel={() => setIsReleaseModalVisible(false) || setReleasingTable(null)}
         onConfirm={handleReleaseTable}
         tableNumber={releasingTable?.table_number}
       />

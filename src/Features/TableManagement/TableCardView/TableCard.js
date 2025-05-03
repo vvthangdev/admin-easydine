@@ -4,7 +4,7 @@ import moment from "moment";
 import { orderAPI } from "../../../services/apis/Order";
 import { userAPI } from "../../../services/apis/User";
 import { adminAPI } from "../../../services/apis/Admin";
-import { getTableImage, getSourceTables, handleMergeOrder } from "./TableCardUtils";
+import { getTableImage, getSourceTables, handleMergeOrder, getVietnameseStatus } from "./TableCardUtils";
 import TableCardDetails from "./TableCardDetails";
 
 const TableCard = ({ table, onRelease, tables, onMergeSuccess }) => {
@@ -42,7 +42,6 @@ const TableCard = ({ table, onRelease, tables, onMergeSuccess }) => {
     }
   };
 
-  // Fetch staff and customer information when orderDetails changes
   useEffect(() => {
     const fetchStaffName = async () => {
       if (orderDetails?.order?.staff_id) {
@@ -109,7 +108,10 @@ const TableCard = ({ table, onRelease, tables, onMergeSuccess }) => {
           <div className="text-sm text-gray-600 bg-white p-2 rounded">
             <p><span className="font-medium text-gray-900">Số bàn:</span> {table.table_number}</p>
             <p><span className="font-medium text-gray-900">Sức chứa:</span> {table.capacity}</p>
-            <p><span className="font-medium text-gray-900">Trạng thái:</span> {table.status}</p>
+            <p>
+              <span className="font-medium text-gray-900">Trạng thái:</span>{" "}
+              {getVietnameseStatus(table.status)}
+            </p>
             {table.same_order_tables && (
               <p>
                 <span className="font-medium text-gray-900">Bàn gộp:</span> Bàn {table.same_order_tables.join(", ")} (Đơn #{table.order_number})

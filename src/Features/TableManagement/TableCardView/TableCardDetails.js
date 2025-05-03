@@ -1,5 +1,6 @@
 import React from "react";
 import moment from "moment";
+import { getVietnameseStatus } from "./TableCardUtils";
 
 const TableCardDetails = ({ orderDetails, customerInfo, staffName }) => {
   return (
@@ -47,7 +48,7 @@ const TableCardDetails = ({ orderDetails, customerInfo, staffName }) => {
             </p>
             <p>
               <span className="font-medium text-gray-900">Trạng Thái:</span>{" "}
-              {orderDetails.order.status}
+              {getVietnameseStatus(orderDetails.order.status)}
             </p>
             <p>
               <span className="font-medium text-gray-900">Nhân viên phục vụ:</span>{" "}

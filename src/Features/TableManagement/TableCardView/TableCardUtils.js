@@ -18,6 +18,20 @@ export const getTableImage = (status) => {
   }
 };
 
+// Hàm chuyển đổi trạng thái sang tiếng Việt
+export const getVietnameseStatus = (status) => {
+  switch (status) {
+    case "Available":
+      return "Trống";
+    case "Reserved":
+      return "Đã đặt";
+    case "Occupied":
+      return "Đang sử dụng";
+    default:
+      return status;
+  }
+};
+
 // Lấy danh sách bàn nguồn (chỉ lấy bàn đại diện cho mỗi đơn hàng)
 export const getSourceTables = (tables, currentReservationId) => {
   if (!currentReservationId) return [];
