@@ -51,8 +51,6 @@ export const orderAPI = {
     }
   },
 
-  
-
   addItem: (data) => {
     return axiosInstance.post("/item/create-item", data);
   },
@@ -85,12 +83,9 @@ export const orderAPI = {
   // Thêm hàm mới để tìm kiếm đơn hàng theo customer_id
   searchOrdersByCustomer: async (customerId) => {
     try {
-      const response = await axiosInstance.get(
-        `/orders/search-by-customer`,
-        {
-          params: { customer_id: customerId },
-        }
-      );
+      const response = await axiosInstance.get(`/orders/search-by-customer`, {
+        params: { customer_id: customerId },
+      });
       return response;
     } catch (error) {
       console.error("Error searching orders by customer:", error);
@@ -100,7 +95,7 @@ export const orderAPI = {
   splitOrder: async (data) => {
     try {
       const response = await axiosInstance.post("/orders/split-order", data);
-      console.log(`${response}`)
+      console.log(`${response}`);
       return response;
     } catch (error) {
       console.error("Error splitting order:", error);
@@ -111,6 +106,13 @@ export const orderAPI = {
     try {
       const response = await axiosInstance.post("/orders/merge-order", data);
       return response.data || response;
+    } catch (error) {
+      throw error;
+    }
+  },
+  getOrderInfo: async (table_number) => {
+    try {
+      return await axiosInstance.get("/orders/order-info", { params: table_number });
     } catch (error) {
       throw error;
     }

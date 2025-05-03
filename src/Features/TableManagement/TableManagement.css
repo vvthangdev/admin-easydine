@@ -1,0 +1,40 @@
+.table-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+    padding: 12px;
+  }
+  
+  .table-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    background-color: #ffffff; /* Nền trắng cố định */
+    border: 1px solid #e5e7eb; /* Viền xám nhạt để phân biệt */
+  }
+  
+  .table-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  }
+  
+  .table-icon {
+    margin-bottom: 8px;
+  }
+  
+  .table-img {
+    width: 36px;
+    height: 36px;
+    object-fit: contain; /* Đảm bảo ảnh không bị méo */
+  }
+  
+  .table-info h3 {
+    margin: 0;
+    font-size: 1rem;
+    text-align: center;
+  }
