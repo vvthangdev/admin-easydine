@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { Modal } from "antd";
-import { orderAPI } from "../../../services/apis/Order";
+import { Modal, message } from "antd";
+import { tableAPI } from "../../../services/apis/Table"; // Sử dụng tableAPI thay vì orderAPI
 import OrderBasicInfo from "./OrderBasicInfo";
 import ItemSelector from "./ItemSelector";
 import SelectedItems from "./SelectedItems";
@@ -12,6 +12,7 @@ const OrderFormModal = ({
   selectedCustomer,
   onCancel,
   onSubmit,
+  table,
 }) => {
   const [availableTables, setAvailableTables] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
@@ -21,7 +22,7 @@ const OrderFormModal = ({
     if (!editingOrder) return;
 
     try {
-      const orderDetails = await orderAPI.getOrderDetails(editingOrder.id);
+      const orderDetails = await tableAPI.getOrderDetails(editingOrder.id);
       const data = orderDetails.data || orderDetails;
 
       const reservedTables =
@@ -40,7 +41,6 @@ const OrderFormModal = ({
       const newFormData = {
         type: editingOrder.type || "reservation",
         status: editingOrder.status || "pending",
-        // Đặt staff_id là undefined nếu không có nhân viên (hoặc null từ server)
         staff_id: data.order?.staff_id || undefined,
         date: moment
           .utc(data.time || editingOrder.time)
@@ -87,32 +87,50 @@ const OrderFormModal = ({
     }
   }, [editingOrder]);
 
-  const resetForm = () => {
-    const now = moment(); // Local time
-    setFormData({
-      date: now.format("DD/MM/YYYY"),
-      start_time: now.format("HH:mm"),
-      end_time: now.add(1, "hours").format("HH:mm"),
-      type: "reservation",
-      status: "pending",
-    });
-    setAvailableTables([]);
-    setSelectedItems([]);
-  };
-
   const fetchAvailableTables = async (date, startTime, endTime) => {
     try {
       if (!date || !startTime || !endTime) return;
 
-      const response = await orderAPI.getAvailableTables({
+      const response = await tableAPI.getAvailableTables({
         start_time: startTime,
         end_time: endTime,
       });
       setAvailableTables(response.data || response);
     } catch (error) {
       console.error("Error fetching available tables:", error);
+      setAvailableTables([]);
     }
   };
+
+  const resetForm = useCallback(() => {
+    const now = moment();
+    const newFormData = {
+      date: now.format("DD/MM/YYYY"),
+      start_time: now.format("HH:mm"),
+      end_time: now.add(1, "hours").format("HH:mm"),
+      type: "reservation",
+      status: "pending",
+      tables: table ? [table.table_number] : [],
+    };
+    setFormData(newFormData);
+    setAvailableTables([]);
+    setSelectedItems([]);
+  
+    const startDateTime = moment(
+      `${newFormData.date} ${newFormData.start_time}`,
+      "DD/MM/YYYY HH:mm"
+    ).utc();
+    const endDateTime = moment(
+      `${newFormData.date} ${newFormData.end_time}`,
+      "DD/MM/YYYY HH:mm"
+    ).utc();
+  
+    fetchAvailableTables(
+      newFormData.date,
+      startDateTime.format("YYYY-MM-DDTHH:mm:ss[Z]"),
+      endDateTime.format("YYYY-MM-DDTHH:mm:ss[Z]")
+    );
+  }, [table]); // Dependencies của resetForm chỉ là table
 
   useEffect(() => {
     if (visible) {
@@ -122,7 +140,7 @@ const OrderFormModal = ({
         resetForm();
       }
     }
-  }, [visible, editingOrder, fetchOrderDetails]);
+  }, [visible, editingOrder,  fetchOrderDetails, resetForm]);
 
   const handleModalOk = async () => {
     if (
@@ -131,10 +149,20 @@ const OrderFormModal = ({
       !formData.start_time ||
       !formData.end_time
     ) {
+      message.error("Vui lòng điền đầy đủ thông tin bắt buộc");
       return;
     }
 
-    // Chuyển đổi thời gian sang UTC
+    if (!formData.tables || formData.tables.length === 0) {
+      message.error("Vui lòng chọn ít nhất một bàn");
+      return;
+    }
+
+    if (!selectedItems || selectedItems.length === 0) {
+      message.error("Vui lòng chọn ít nhất một món ăn");
+      return;
+    }
+
     const startDateTime = moment(
       `${formData.date} ${formData.start_time}`,
       "DD/MM/YYYY HH:mm"
@@ -158,7 +186,6 @@ const OrderFormModal = ({
         note: item.note || "",
       })),
       customer_id: selectedCustomer?._id,
-      // Gửi staff_id là null nếu không có nhân viên được chọn
       staff_id: formData.staff_id || null,
     };
 

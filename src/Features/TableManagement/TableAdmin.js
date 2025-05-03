@@ -2,7 +2,7 @@ import React from "react";
 import { Table, Button } from "antd";
 import { getVietnameseStatus } from "./TableCardView/TableCardUtils";
 
-const TableAdmin = ({ tables, onEdit, onDelete }) => {
+const TableAdmin = ({ tables, onEdit, onDelete, onAdd }) => {
   const columns = [
     {
       title: "Số bàn",
@@ -59,13 +59,24 @@ const TableAdmin = ({ tables, onEdit, onDelete }) => {
   ];
 
   return (
-    <Table
-      columns={columns}
-      dataSource={tables}
-      rowKey="table_number"
-      pagination={{ pageSize: 10 }}
-      className="mt-4"
-    />
+    <div>
+      <div className="flex justify-end mb-4">
+        <Button
+          type="primary"
+          onClick={onAdd}
+          className="px-4 py-1 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+        >
+          Thêm bàn mới
+        </Button>
+      </div>
+      <Table
+        columns={columns}
+        dataSource={tables}
+        rowKey="table_number"
+        pagination={{ pageSize: 10 }}
+        className="mt-4"
+      />
+    </div>
   );
 };
 

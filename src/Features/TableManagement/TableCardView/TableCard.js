@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { Modal, Button, Tooltip, Spin, List } from "antd";
+import { Modal, Button, Tooltip, Spin, List, message } from "antd";
 import moment from "moment";
 import { orderAPI } from "../../../services/apis/Order";
 import { userAPI } from "../../../services/apis/User";
 import { adminAPI } from "../../../services/apis/Admin";
 import { getTableImage, getSourceTables, handleMergeOrder, getVietnameseStatus } from "./TableCardUtils";
 import TableCardDetails from "./TableCardDetails";
+import OrderFormModal from "../../OrderManagement/OrderFormMoDal/OrderFormModal";
 
-const TableCard = ({ table, onRelease, tables, onMergeSuccess }) => {
+const TableCard = ({ table, onRelease, tables, onMergeSuccess, onOrderSuccess }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isMergeModalVisible, setIsMergeModalVisible] = useState(false);
+  const [isOrderModalVisible, setIsOrderModalVisible] = useState(false);
   const [orderDetails, setOrderDetails] = useState(null);
   const [loading, setLoading] = useState(false);
   const [staffName, setStaffName] = useState("N/A");
@@ -31,12 +33,20 @@ const TableCard = ({ table, onRelease, tables, onMergeSuccess }) => {
       const response = await orderAPI.getOrderInfo({
         table_number: table.table_number,
       });
-      setOrderDetails(response.data || response);
+      // Kiểm tra phản hồi API
+      if (response && response.status === "SUCCESS") {
+        setOrderDetails(response);
+      } else {
+        // Xử lý trường hợp API trả về status không phải SUCCESS
+        setOrderDetails(null);
+        message.error(response?.message || "Không tìm thấy thông tin đơn hàng");
+      }
     } catch (error) {
       console.error("Error fetching order details:", error);
       setOrderDetails(null);
       setStaffName("N/A");
       setCustomerInfo({ name: "N/A", phone: "N/A", address: "N/A" });
+      message.error("Không thể tải thông tin đơn hàng");
     } finally {
       setLoading(false);
     }
@@ -97,8 +107,24 @@ const TableCard = ({ table, onRelease, tables, onMergeSuccess }) => {
   }, [orderDetails]);
 
   const handleCardClick = () => {
-    setIsModalVisible(true);
-    fetchOrderDetails();
+    if (table.status === "Available") {
+      setIsOrderModalVisible(true);
+    } else {
+      setIsModalVisible(true);
+      fetchOrderDetails();
+    }
+  };
+
+  const handleOrderSubmit = async (orderData) => {
+    try {
+      await orderAPI.createOrder(orderData); // Chỉ thêm mới, không cập nhật
+      message.success("Đặt bàn thành công");
+      setIsOrderModalVisible(false);
+      onOrderSuccess();
+    } catch (error) {
+      console.error("Error submitting order:", error);
+      message.error("Đặt bàn không thành công");
+    }
   };
 
   return (
@@ -205,7 +231,7 @@ const TableCard = ({ table, onRelease, tables, onMergeSuccess }) => {
             </div>
           ) : orderDetails ? (
             <TableCardDetails
-              orderDetails={orderDetails}
+              orderData={orderDetails}
               customerInfo={customerInfo}
               staffName={staffName}
             />
@@ -255,6 +281,15 @@ const TableCard = ({ table, onRelease, tables, onMergeSuccess }) => {
           )}
         />
       </Modal>
+
+      <OrderFormModal
+        visible={isOrderModalVisible}
+        editingOrder={null}
+        selectedCustomer={null}
+        onCancel={() => setIsOrderModalVisible(false)}
+        onSubmit={handleOrderSubmit}
+        table={table} // Truyền bàn hiện tại để tự động chọn
+      />
     </>
   );
 };

@@ -2,7 +2,17 @@ import React from "react";
 import moment from "moment";
 import { getVietnameseStatus } from "./TableCardUtils";
 
-const TableCardDetails = ({ orderDetails, customerInfo, staffName }) => {
+const TableCardDetails = ({ orderData, customerInfo, staffName }) => {
+  // Kiểm tra nếu orderData là null hoặc undefined
+  if (!orderData) {
+    return <p>Không có thông tin đơn hàng.</p>;
+  }
+
+  // Kiểm tra nếu orderData.order không tồn tại
+  if (!orderData.order) {
+    return <p>Thông tin đơn hàng không hợp lệ.</p>;
+  }
+
   return (
     <div className="flex gap-6">
       {/* Cột trái: Thông tin đơn hàng và danh sách bàn đặt */}
@@ -12,7 +22,7 @@ const TableCardDetails = ({ orderDetails, customerInfo, staffName }) => {
           <div className="grid grid-cols-2 gap-2 text-sm text-gray-600 mt-2">
             <p>
               <span className="font-medium text-gray-900">Mã Đơn Hàng:</span>{" "}
-              #{orderDetails.order.id.slice(-4)}
+              #{orderData.order.id.slice(-4)}
             </p>
             <p>
               <span className="font-medium text-gray-900">Tên Khách Hàng:</span>{" "}
@@ -20,7 +30,7 @@ const TableCardDetails = ({ orderDetails, customerInfo, staffName }) => {
             </p>
             <p>
               <span className="font-medium text-gray-900">Ngày:</span>{" "}
-              {moment.utc(orderDetails.order.time).local().format("DD/MM/YYYY")}
+              {moment.utc(orderData.order.time).local().format("DD/MM/YYYY")}
             </p>
             <p>
               <span className="font-medium text-gray-900">Số Điện Thoại:</span>{" "}
@@ -28,8 +38,8 @@ const TableCardDetails = ({ orderDetails, customerInfo, staffName }) => {
             </p>
             <p>
               <span className="font-medium text-gray-900">Thời gian bắt đầu:</span>{" "}
-              {orderDetails.reservedTables?.[0]?.start_time
-                ? moment.utc(orderDetails.reservedTables[0].start_time).local().format("HH:mm")
+              {orderData.reservedTables?.[0]?.start_time
+                ? moment.utc(orderData.reservedTables[0].start_time).local().format("HH:mm")
                 : "N/A"}
             </p>
             <p>
@@ -38,17 +48,17 @@ const TableCardDetails = ({ orderDetails, customerInfo, staffName }) => {
             </p>
             <p>
               <span className="font-medium text-gray-900">Thời gian kết thúc:</span>{" "}
-              {orderDetails.reservedTables?.[0]?.end_time
-                ? moment.utc(orderDetails.reservedTables[0].end_time).local().format("HH:mm")
+              {orderData.reservedTables?.[0]?.end_time
+                ? moment.utc(orderData.reservedTables[0].end_time).local().format("HH:mm")
                 : "N/A"}
             </p>
             <p>
               <span className="font-medium text-gray-900">Loại:</span>{" "}
-              {orderDetails.order.type}
+              {orderData.order.type}
             </p>
             <p>
               <span className="font-medium text-gray-900">Trạng Thái:</span>{" "}
-              {getVietnameseStatus(orderDetails.order.status)}
+              {getVietnameseStatus(orderData.order.status)}
             </p>
             <p>
               <span className="font-medium text-gray-900">Nhân viên phục vụ:</span>{" "}
@@ -59,9 +69,9 @@ const TableCardDetails = ({ orderDetails, customerInfo, staffName }) => {
 
         <div>
           <h3 className="text-lg font-semibold text-gray-900">Danh Sách Bàn Đặt</h3>
-          {orderDetails.reservedTables?.length > 0 ? (
+          {orderData.reservedTables?.length > 0 ? (
             <ul className="list-disc pl-5 text-sm text-gray-600 mt-2">
-              {orderDetails.reservedTables.map((table) => (
+              {orderData.reservedTables.map((table) => (
                 <li key={table._id}>
                   <span className="font-medium text-gray-900">Bàn:</span>{" "}
                   {table.table_id},{" "}
@@ -85,9 +95,9 @@ const TableCardDetails = ({ orderDetails, customerInfo, staffName }) => {
       <div className="flex-1 flex flex-col gap-6">
         <div className="max-h-[50vh] overflow-y-auto pr-2">
           <h3 className="text-lg font-semibold text-gray-900">Danh Sách Mặt Hàng</h3>
-          {orderDetails.itemOrders?.length > 0 ? (
+          {orderData.itemOrders?.length > 0 ? (
             <div className="grid grid-cols-2 gap-4 mt-2">
-              {orderDetails.itemOrders.map((item) => (
+              {orderData.itemOrders.map((item) => (
                 <div
                   key={item._id}
                   className="flex flex-row items-start border border-gray-200 rounded-lg p-3 bg-white shadow-sm hover:shadow-md transition-all duration-300"
@@ -141,7 +151,7 @@ const TableCardDetails = ({ orderDetails, customerInfo, staffName }) => {
           <div className="text-sm text-gray-600 mt-2">
             {(() => {
               const totalAmount =
-                orderDetails.itemOrders?.reduce(
+                orderData.itemOrders?.reduce(
                   (acc, item) => acc + (item.itemPrice || 0) * (item.quantity || 0),
                   0
                 ) || 0;

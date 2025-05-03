@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Button, message, Modal } from "antd";
 import { tableAPI } from "../../services/apis/Table";
-import TableCard from "./TableCardView/TableCard";
+import TableCard from "../TableManagement/TableCardView/TableCard";
 import TableFormModal from "./TableFormModal";
+import OrderFormModal from "../OrderManagement/OrderFormMoDal/OrderFormModal";
 import ReleaseTableModal from "./ReleaseTableModal";
 import TableAdmin from "./TableAdmin";
 import "./TableManagement.css";
@@ -12,6 +13,7 @@ export default function TableManagement() {
   const [isFormModalVisible, setIsFormModalVisible] = useState(false);
   const [isReleaseModalVisible, setIsReleaseModalVisible] = useState(false);
   const [isTableListModalVisible, setIsTableListModalVisible] = useState(false);
+  const [isOrderModalVisible, setIsOrderModalVisible] = useState(false);
   const [editingTable, setEditingTable] = useState(null);
   const [releasingTable, setReleasingTable] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -123,12 +125,19 @@ export default function TableManagement() {
               : table
           )
         );
-        message.success(`Cập nhật bàn số ${requestData.table_number} thành công`);
+        message.success(
+          `Cập nhật bàn số ${requestData.table_number} thành công`
+        );
       } else {
         const newTable = await tableAPI.addTable(requestData);
         setTables([
           ...tables,
-          { ...newTable, status: "Available", same_order_tables: null, order_number: null },
+          {
+            ...newTable,
+            status: "Available",
+            same_order_tables: null,
+            order_number: null,
+          },
         ]);
         message.success(`Thêm bàn số ${requestData.table_number} thành công`);
       }
@@ -136,17 +145,30 @@ export default function TableManagement() {
     } catch (error) {
       console.error("Error saving table:", error);
       message.error(
-        editingTable ? "Cập nhật bàn không thành công" : "Thêm bàn không thành công"
+        editingTable
+          ? "Cập nhật bàn không thành công"
+          : "Thêm bàn không thành công"
       );
     }
   };
 
-  // Callback khi ghép đơn thành công
   const handleMergeSuccess = () => {
-    fetchTables(); // Làm mới danh sách bàn
+    fetchTables();
   };
 
-  // Tóm tắt đơn hàng
+  const handleOrderSuccess = () => {
+    fetchTables();
+  };
+
+  const handleNewOrder = () => {
+    setIsOrderModalVisible(true);
+  };
+
+  const handleOrderSubmit = (orderData) => {
+    fetchTables();
+    setIsOrderModalVisible(false);
+  };
+
   const orderSummary = () => {
     const orders = {};
     tables.forEach((table) => {
@@ -163,7 +185,8 @@ export default function TableManagement() {
 
     return Object.values(orders).map((order) => (
       <div key={order.order_number} className="order-summary-item">
-        Đơn #{order.order_number}: Bàn {order.tables.sort((a, b) => a - b).join(", ")}
+        Đơn #{order.order_number}: Bàn{" "}
+        {order.tables.sort((a, b) => a - b).join(", ")}
       </div>
     ));
   };
@@ -182,15 +205,14 @@ export default function TableManagement() {
           </Button>
           <Button
             type="primary"
-            onClick={handleAdd}
-            className="px-4 py-1 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+            onClick={handleNewOrder}
+            className="px-4 py-1 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700"
           >
-            Thêm bàn mới
+            Đặt đơn hàng mới
           </Button>
         </div>
       </div>
 
-      {/* Tóm tắt đơn hàng */}
       {tables.some((table) => table.reservation_id) && (
         <div className="order-summary mb-4">
           <h3 className="text-lg font-medium">Tóm tắt đơn hàng</h3>
@@ -212,6 +234,7 @@ export default function TableManagement() {
                   setReleasingTable(table) || setIsReleaseModalVisible(true)
                 }
                 onMergeSuccess={handleMergeSuccess}
+                onOrderSuccess={handleOrderSuccess}
               />
             ))}
           </div>
@@ -230,6 +253,7 @@ export default function TableManagement() {
           tables={tables}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          onAdd={handleAdd} // Pass handleAdd to TableAdmin
         />
       </Modal>
 
@@ -242,9 +266,20 @@ export default function TableManagement() {
 
       <ReleaseTableModal
         visible={isReleaseModalVisible}
-        onCancel={() => setIsReleaseModalVisible(false) || setReleasingTable(null)}
+        onCancel={() =>
+          setIsReleaseModalVisible(false) || setReleasingTable(null)
+        }
         onConfirm={handleReleaseTable}
         tableNumber={releasingTable?.table_number}
+      />
+
+      <OrderFormModal
+        visible={isOrderModalVisible}
+        editingOrder={null}
+        selectedCustomer={null}
+        onCancel={() => setIsOrderModalVisible(false)}
+        onSubmit={handleOrderSubmit}
+        table={null}
       />
     </div>
   );

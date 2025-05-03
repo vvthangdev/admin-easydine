@@ -14,13 +14,12 @@ const OrderBasicInfo = ({
   const [staffList, setStaffList] = useState([]);
   const [loadingStaff, setLoadingStaff] = useState(false);
 
-  // Lấy danh sách nhân viên khi component mount
   useEffect(() => {
     const fetchStaffList = async () => {
       setLoadingStaff(true);
       try {
         const response = await userAPI.getAllUser();
-        const users = response.data || response; // Giả định API trả về danh sách users
+        const users = response.data || response;
         setStaffList(users);
       } catch (error) {
         console.error("Error fetching staff list:", error);
@@ -33,7 +32,7 @@ const OrderBasicInfo = ({
   }, []);
 
   const handleChange = (field, value) => {
-    console.log(`Changing ${field} to:`, value); // Thêm log để debug
+    console.log(`Changing ${field} to:`, value);
     setFormData((prev) => {
       const newData = { ...prev, [field]: value };
 
@@ -69,7 +68,7 @@ const OrderBasicInfo = ({
 
         fetchAvailableTables(
           newData.date,
-          startDateTime.format("YYYY-MM-DDTHH:mm:ss[Z]"), // Thêm [Z] để chuẩn hóa UTC
+          startDateTime.format("YYYY-MM-DDTHH:mm:ss[Z]"),
           endDateTime.format("YYYY-MM-DDTHH:mm:ss[Z]")
         );
       }
