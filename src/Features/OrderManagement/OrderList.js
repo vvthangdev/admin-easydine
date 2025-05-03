@@ -5,12 +5,12 @@ import { orderAPI } from "../../services/apis/Order";
 import { adminAPI } from "../../services/apis/Admin";
 import { userAPI } from "../../services/apis/User";
 import { tableAPI } from "../../services/apis/Table";
-import OrderBasicInfo from "./OrderBasicInfo";
-import ItemSelector from "./ItemSelector";
-import SelectedItems from "./SelectedItems";
-import OrderDetailsModal from "./OrderDetailsModal";
-import SplitOrderModal from "./SplitOrderModal";
-import MergeOrderModal from "./MergeOrderModal"; // Import modal mới
+import OrderBasicInfo from "./OrderFormMoDal/OrderBasicInfo";
+import ItemSelector from "./OrderFormMoDal/ItemSelector";
+import SelectedItems from "./OrderFormMoDal/SelectedItems";
+import OrderDetailsModal from "./Modals/OrderDetailsModal";
+import SplitOrderModal from "./Modals/SplitOrderModal";
+import MergeOrderModal from "./Modals/MergeOrderModal"; // Import modal mới
 
 const { TabPane } = Tabs;
 
@@ -145,7 +145,7 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
 
   const handleViewDetails = async (id) => {
     try {
-      const response = await orderAPI.getOrderDetails(id);
+      const response = await orderAPI.getOrderInfo({ id: id });
       const data = response.data || response;
 
       let staffName = "Chưa phân công";
@@ -175,7 +175,7 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
 
   const handleSplitOrder = async (record) => {
     try {
-      const response = await orderAPI.getOrderDetails(record.id);
+      const response = await orderAPI.getOrderInfo({ id: record.id });
       const data = response.data || response;
       setOrderDetails(data);
       setSplitModalVisible(true);
@@ -218,7 +218,7 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
   const handleEdit = async (record) => {
     setEditingOrder(record);
     try {
-      const orderDetails = await orderAPI.getOrderDetails(record.id);
+      const orderDetails = await orderAPI.getOrderInfo({ id: record.id });
       const data = orderDetails.data || orderDetails;
 
       const reservedTables =

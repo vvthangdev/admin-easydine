@@ -1,11 +1,17 @@
 import React, { useState } from "react";
 import { Modal, Button, Select, message } from "antd";
-import { orderAPI } from "../../services/apis/Order";
+import { orderAPI } from "../../../services/apis/Order";
 import moment from "moment";
 
 const { Option } = Select;
 
-const MergeOrderModal = ({ visible, sourceOrder, orders, onCancel, onSuccess }) => {
+const MergeOrderModal = ({
+  visible,
+  sourceOrder,
+  orders,
+  onCancel,
+  onSuccess,
+}) => {
   const [targetOrderId, setTargetOrderId] = useState(null);
 
   // Lọc danh sách đơn hàng đích (loại reservation, không phải đơn nguồn)
@@ -30,10 +36,16 @@ const MergeOrderModal = ({ visible, sourceOrder, orders, onCancel, onSuccess }) 
         onSuccess();
         onCancel();
       } else {
-        message.error(`Gộp đơn thất bại: ${responseData.message || "Phản hồi API không hợp lệ."}`);
+        message.error(
+          `Gộp đơn thất bại: ${
+            responseData.message || "Phản hồi API không hợp lệ."
+          }`
+        );
       }
     } catch (error) {
-      message.error(`Gộp đơn thất bại: ${error.message || "Lỗi không xác định."}`);
+      message.error(
+        `Gộp đơn thất bại: ${error.message || "Lỗi không xác định."}`
+      );
     }
   };
 

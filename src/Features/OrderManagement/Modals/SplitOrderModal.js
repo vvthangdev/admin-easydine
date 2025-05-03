@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Table, Input, message } from "antd";
-import { orderAPI } from "../../services/apis/Order";
+import { orderAPI } from "../../../services/apis/Order";
 
 const SplitOrderModal = ({ visible, orderDetails, onCancel, onSuccess }) => {
   const [splitItems, setSplitItems] = useState([]);
@@ -61,14 +61,22 @@ const SplitOrderModal = ({ visible, orderDetails, onCancel, onSuccess }) => {
         new_items: newItems,
       });
       if (responseData.status === "SUCCESS") {
-        message.success(`Tách đơn thành công! Mã đơn mới: ${responseData.newOrder.id}`);
+        message.success(
+          `Tách đơn thành công! Mã đơn mới: ${responseData.newOrder.id}`
+        );
         onSuccess();
         onCancel();
       } else {
-        message.error(`Tách đơn thất bại: ${responseData.message || "Phản hồi API không hợp lệ."}`);
+        message.error(
+          `Tách đơn thất bại: ${
+            responseData.message || "Phản hồi API không hợp lệ."
+          }`
+        );
       }
     } catch (error) {
-      message.error(`Tách đơn thất bại: ${error.message || "Lỗi không xác định."}`);
+      message.error(
+        `Tách đơn thất bại: ${error.message || "Lỗi không xác định."}`
+      );
     }
   };
 
@@ -155,7 +163,9 @@ const SplitOrderModal = ({ visible, orderDetails, onCancel, onSuccess }) => {
     >
       <div className="flex flex-col gap-4">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">Chọn Món để Tách</h3>
+          <h3 className="text-lg font-semibold text-gray-900">
+            Chọn Món để Tách
+          </h3>
           <Table
             columns={columns}
             dataSource={splitItems}

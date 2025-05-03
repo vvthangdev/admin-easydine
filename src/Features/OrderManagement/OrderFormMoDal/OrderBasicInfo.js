@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Select, Input } from "antd";
 import moment from "moment";
-import { userAPI } from "../../services/apis/User";
+import { userAPI } from "../../../services/apis/User";
 
 const { Option } = Select;
 
@@ -36,32 +36,44 @@ const OrderBasicInfo = ({
     console.log(`Changing ${field} to:`, value); // Thêm log để debug
     setFormData((prev) => {
       const newData = { ...prev, [field]: value };
-  
+
       if (newData.date && newData.start_time) {
         const isValidDate = moment(newData.date, "DD/MM/YYYY", true).isValid();
-        const isValidStartTime = moment(newData.start_time, "HH:mm", true).isValid();
+        const isValidStartTime = moment(
+          newData.start_time,
+          "HH:mm",
+          true
+        ).isValid();
         if (!isValidDate || !isValidStartTime) {
           console.error("Invalid date or start time format");
           return newData;
         }
-  
-        const startDateTime = moment(`${newData.date} ${newData.start_time}`, "DD/MM/YYYY HH:mm").utc();
+
+        const startDateTime = moment(
+          `${newData.date} ${newData.start_time}`,
+          "DD/MM/YYYY HH:mm"
+        ).utc();
         const endDateTime = newData.end_time
-          ? moment(`${newData.date} ${newData.end_time}`, "DD/MM/YYYY HH:mm").utc()
-          : moment(`${newData.date} ${newData.start_time}`, "DD/MM/YYYY HH:mm").add(1, "hours").utc();
-  
+          ? moment(
+              `${newData.date} ${newData.end_time}`,
+              "DD/MM/YYYY HH:mm"
+            ).utc()
+          : moment(`${newData.date} ${newData.start_time}`, "DD/MM/YYYY HH:mm")
+              .add(1, "hours")
+              .utc();
+
         if (!endDateTime.isValid()) {
           console.error("Invalid end time format");
           return newData;
         }
-  
+
         fetchAvailableTables(
           newData.date,
           startDateTime.format("YYYY-MM-DDTHH:mm:ss[Z]"), // Thêm [Z] để chuẩn hóa UTC
           endDateTime.format("YYYY-MM-DDTHH:mm:ss[Z]")
         );
       }
-  
+
       return newData;
     });
   };
@@ -155,7 +167,9 @@ const OrderBasicInfo = ({
         </div>
         {formData.type === "reservation" && (
           <div className="sm:col-span-2 min-w-0">
-            <label className="text-sm font-medium text-gray-900">Chọn Bàn</label>
+            <label className="text-sm font-medium text-gray-900">
+              Chọn Bàn
+            </label>
             <Select
               mode="multiple"
               value={formData.tables || []}

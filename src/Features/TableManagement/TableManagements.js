@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button, message } from "antd";
 import { tableAPI } from "../../services/apis/Table";
-// import { orderAPI } from "../../services/apis/Order";
-import TableCard from "./TableCard";
+import TableCard from "./TableCardView/TableCard";
 import TableFormModal from "./TableFormModal";
 import ReleaseTableModal from "./ReleaseTableModal";
 import TableAdmin from "./TableAdmin";
@@ -123,12 +122,19 @@ export default function TableManagement() {
               : table
           )
         );
-        message.success(`Cập nhật bàn số ${requestData.table_number} thành công`);
+        message.success(
+          `Cập nhật bàn số ${requestData.table_number} thành công`
+        );
       } else {
         const newTable = await tableAPI.addTable(requestData);
         setTables([
           ...tables,
-          { ...newTable, status: "Available", same_order_tables: null, order_number: null },
+          {
+            ...newTable,
+            status: "Available",
+            same_order_tables: null,
+            order_number: null,
+          },
         ]);
         message.success(`Thêm bàn số ${requestData.table_number} thành công`);
       }
@@ -136,9 +142,16 @@ export default function TableManagement() {
     } catch (error) {
       console.error("Error saving table:", error);
       message.error(
-        editingTable ? "Cập nhật bàn không thành công" : "Thêm bàn không thành công"
+        editingTable
+          ? "Cập nhật bàn không thành công"
+          : "Thêm bàn không thành công"
       );
     }
+  };
+
+  // Callback khi ghép đơn thành công
+  const handleMergeSuccess = () => {
+    fetchTables(); // Làm mới danh sách bàn
   };
 
   // Tóm tắt đơn hàng
@@ -158,7 +171,8 @@ export default function TableManagement() {
 
     return Object.values(orders).map((order) => (
       <div key={order.order_number} className="order-summary-item">
-        Đơn #{order.order_number}: Bàn {order.tables.sort((a, b) => a - b).join(", ")}
+        Đơn #{order.order_number}: Bàn{" "}
+        {order.tables.sort((a, b) => a - b).join(", ")}
       </div>
     ));
   };
@@ -193,9 +207,11 @@ export default function TableManagement() {
               <TableCard
                 key={table.table_number}
                 table={table}
+                tables={tables}
                 onRelease={() =>
                   setReleasingTable(table) || setIsReleaseModalVisible(true)
                 }
+                onMergeSuccess={handleMergeSuccess}
               />
             ))}
           </div>
@@ -204,7 +220,9 @@ export default function TableManagement() {
 
       {/* Phần quản lý sửa/xóa bàn */}
       <div className="mt-6">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">Quản lý danh sách bàn</h2>
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">
+          Quản lý danh sách bàn
+        </h2>
         <TableAdmin
           tables={tables}
           onEdit={handleEdit}
@@ -221,7 +239,9 @@ export default function TableManagement() {
 
       <ReleaseTableModal
         visible={isReleaseModalVisible}
-        onCancel={() => setIsReleaseModalVisible(false) || setReleasingTable(null)}
+        onCancel={() =>
+          setIsReleaseModalVisible(false) || setReleasingTable(null)
+        }
         onConfirm={handleReleaseTable}
         tableNumber={releasingTable?.table_number}
       />

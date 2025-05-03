@@ -38,19 +38,6 @@ export const orderAPI = {
     }
   },
 
-  getOrderDetails: async (id) => {
-    try {
-      const response = await axiosInstance.get(`/orders/order-info`, {
-        params: { id },
-      });
-      console.log("Raw API Response:", response); // Kiểm tra phản hồi API đầy đủ
-      return response; // Đảm bảo trả về dữ liệu cần thiết từ response
-    } catch (error) {
-      console.error("Error fetching order details:", error);
-      throw error; // Ném lỗi nếu có
-    }
-  },
-
   addItem: (data) => {
     return axiosInstance.post("/item/create-item", data);
   },
@@ -110,10 +97,12 @@ export const orderAPI = {
       throw error;
     }
   },
-  getOrderInfo: async (table_number) => {
+  getOrderInfo: async (data) => {
     try {
-      return await axiosInstance.get("/orders/order-info", { params: table_number });
+      const response = await axiosInstance.get("/orders/order-info", { params: data });
+      return response;
     } catch (error) {
+      console.error("Error fetching order info:", error);
       throw error;
     }
   },

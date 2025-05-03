@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Table, Input, Button, Select } from "antd";
-import { itemAPI } from "../../services/apis/Item";
+import { itemAPI } from "../../../services/apis/Item";
 
 const { Option } = Select;
 
@@ -62,7 +62,9 @@ const ItemSelector = ({ setSelectedItems }) => {
 
   const handleAddItem = (record) => {
     setSelectedItems((prev) => {
-      const existing = prev.find((item) => item.id === record._id && item.size === null);
+      const existing = prev.find(
+        (item) => item.id === record._id && item.size === null
+      );
       if (existing) {
         return prev.map((item) =>
           item.id === record._id && item.size === null
@@ -98,7 +100,9 @@ const ItemSelector = ({ setSelectedItems }) => {
       key: "sizes",
       render: (sizes) =>
         sizes?.length > 0
-          ? sizes.map((s) => `${s.name} (${s.price.toLocaleString()} VND)`).join(", ")
+          ? sizes
+              .map((s) => `${s.name} (${s.price.toLocaleString()} VND)`)
+              .join(", ")
           : "Mặc định",
     },
     {
