@@ -9,9 +9,9 @@ import {
   message,
   Tag,
 } from "antd";
-import { tableAPI } from "../../../services/apis/Table";
-import { orderAPI } from "../../../services/apis/Order";
-import { userAPI } from "../../../services/apis/User";
+import { tableAPI } from "../../services/apis/Table";
+import { orderAPI } from "../../services/apis/Order";
+import { userAPI } from "../../services/apis/User";
 import moment from "moment";
 
 export default function TableManagement() {

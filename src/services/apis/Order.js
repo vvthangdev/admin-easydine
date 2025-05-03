@@ -97,4 +97,22 @@ export const orderAPI = {
       throw error;
     }
   },
+  splitOrder: async (data) => {
+    try {
+      const response = await axiosInstance.post("/orders/split-order", data);
+      console.log(`${response}`)
+      return response;
+    } catch (error) {
+      console.error("Error splitting order:", error);
+      throw error;
+    }
+  },
+  mergeOrder: async (data) => {
+    try {
+      const response = await axiosInstance.post("/orders/merge-order", data);
+      return response.data || response;
+    } catch (error) {
+      throw error;
+    }
+  },
 };

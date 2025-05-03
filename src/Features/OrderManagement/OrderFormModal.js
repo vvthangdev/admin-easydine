@@ -158,7 +158,7 @@ const OrderFormModal = ({
       onCancel={onCancel}
       width="90vw"
       className="rounded-xl"
-      bodyStyle={{ padding: 0, background: "transparent" }}
+      styles={{ padding: 0, background: "transparent" }}
       footer={[
         <button
           key="cancel"

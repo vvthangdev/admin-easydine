@@ -11,7 +11,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import Profile from "./Features/Profile/profile";
 import AdminLayout from "./Features/Admin/layouts/AdminLayout";
 import BanKhongPhaiLaAdmin from "./Features/BanKhongPhaiLaAdmin/BanKhongPhaiLaAdmin";
-import TableManagement from "./Features/Admin/pages/TableManagements";
+import TableManagement from "./Features/TableManagement/TableManagements";
 import ItemManagements from "./Features/ItemManagement/ItemManagements";
 import UserManagement from "./Features/User/UserManagement";
 import Header from "../src/components/HomePage/header";

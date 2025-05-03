@@ -9,6 +9,8 @@ import OrderBasicInfo from "./OrderBasicInfo";
 import ItemSelector from "./ItemSelector";
 import SelectedItems from "./SelectedItems";
 import OrderDetailsModal from "./OrderDetailsModal";
+import SplitOrderModal from "./SplitOrderModal";
+import MergeOrderModal from "./MergeOrderModal"; // Import modal mới
 
 const { TabPane } = Tabs;
 
@@ -22,9 +24,17 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
   const [customerModalVisible, setCustomerModalVisible] = useState(false);
   const [orderDetails, setOrderDetails] = useState(null);
   const [detailsModalVisible, setDetailsModalVisible] = useState(false);
+  const [splitModalVisible, setSplitModalVisible] = useState(false); // State cho SplitOrderModal
   const [availableTables, setAvailableTables] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
   const [formData, setFormData] = useState({});
+  const [mergeModalVisible, setMergeModalVisible] = useState(false); // State cho MergeOrderModal
+  const [mergeSourceOrder, setMergeSourceOrder] = useState(null); // Đơn hàng nguồn
+
+  const handleMergeOrder = (record) => {
+    setMergeSourceOrder(record);
+    setMergeModalVisible(true);
+  };
 
   const fetchOrders = async (customerId = null) => {
     setLoading(true);
@@ -73,7 +83,6 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
     try {
       if (!date || !startTime || !endTime) return;
 
-      // Đảm bảo startTime và endTime đã ở định dạng UTC chuẩn
       const startDateTime = moment
         .utc(startTime)
         .format("YYYY-MM-DDTHH:mm:ss[Z]");
@@ -102,20 +111,18 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
         message.error("Không tìm thấy đơn hàng để cập nhật");
         return;
       }
-  
-      // Kiểm tra nếu chuyển từ pending sang confirmed
+
       if (currentOrder.status === "pending" && newStatus === "confirmed") {
         await orderAPI.confirmOrder(orderId);
         message.success("Xác nhận đơn hàng thành công");
       }
-  
-      // Cập nhật trạng thái đơn hàng
+
       const updatedOrderData = {
         id: orderId,
         status: newStatus,
         type: currentOrder.type,
       };
-  
+
       await orderAPI.updateOrder(updatedOrderData);
       message.success("Cập nhật trạng thái thành công");
       fetchOrders(selectedCustomer?._id);
@@ -163,6 +170,18 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
     } catch (error) {
       console.error("Error fetching order details:", error);
       message.error("Không thể lấy thông tin chi tiết đơn hàng");
+    }
+  };
+
+  const handleSplitOrder = async (record) => {
+    try {
+      const response = await orderAPI.getOrderDetails(record.id);
+      const data = response.data || response;
+      setOrderDetails(data);
+      setSplitModalVisible(true);
+    } catch (error) {
+      console.error("Error fetching order details for split:", error);
+      message.error("Không thể lấy thông tin chi tiết đơn hàng để tách");
     }
   };
 
@@ -274,7 +293,7 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
       cancelText: "Hủy",
       onOk: async () => {
         try {
-          await orderAPI.deleteOrder(record.id); // Gọi API xóa với ID
+          await orderAPI.deleteOrder(record.id);
           setOrders((prevOrders) => ({
             ...prevOrders,
             [record.type]: prevOrders[record.type].filter(
@@ -287,9 +306,7 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
           message.error("Xóa đơn hàng không thành công");
         }
       },
-      onCancel: () => {
-        // Không làm gì khi người dùng hủy
-      },
+      onCancel: () => {},
     });
   };
 
@@ -366,7 +383,6 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
   };
 
   const columns = [
-    { title: "Mã Đơn Hàng", dataIndex: "id", key: "id" },
     {
       title: "Họ tên - Số điện thoại",
       key: "customer_info",
@@ -423,6 +439,22 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
           >
             Xem Chi Tiết
           </Button>
+          {record.type === "reservation" && (
+            <>
+              <Button
+                className="px-4 py-1 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-all duration-300"
+                onClick={() => handleSplitOrder(record)}
+              >
+                Tách Đơn
+              </Button>
+              <Button
+                className="px-4 py-1 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition-all duration-300"
+                onClick={() => handleMergeOrder(record)}
+              >
+                Gộp Đơn
+              </Button>
+            </>
+          )}
         </Space>
       ),
     },
@@ -600,6 +632,21 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
         visible={detailsModalVisible}
         orderDetails={orderDetails}
         onCancel={() => setDetailsModalVisible(false)}
+      />
+
+      <SplitOrderModal
+        visible={splitModalVisible}
+        orderDetails={orderDetails}
+        onCancel={() => setSplitModalVisible(false)}
+        onSuccess={() => fetchOrders(selectedCustomer?._id)}
+      />
+
+      <MergeOrderModal
+        visible={mergeModalVisible}
+        sourceOrder={mergeSourceOrder}
+        orders={orders.reservation}
+        onCancel={() => setMergeModalVisible(false)}
+        onSuccess={() => fetchOrders(selectedCustomer?._id)}
       />
     </div>
   );
