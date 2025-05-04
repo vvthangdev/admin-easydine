@@ -26,7 +26,7 @@ const AppRoutes = () => {
   return (
     <AuthProvider>
       <Router>
-        <Header logo="/Assets/Header/logoRestaurant.png" navLinks={navLinks} />
+        <Header logo="/Assets/Header/logo2.png" navLinks={navLinks} />
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<HomePage />} />
