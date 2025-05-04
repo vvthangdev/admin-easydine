@@ -18,11 +18,13 @@ const TableCardDetails = ({ orderData, customerInfo, staffName }) => {
       {/* Cột trái: Thông tin đơn hàng và danh sách bàn đặt */}
       <div className="flex-1 flex flex-col gap-6">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">Thông Tin Đơn Hàng</h3>
+          <h3 className="text-lg font-semibold text-gray-900">
+            Thông Tin Đơn Hàng
+          </h3>
           <div className="grid grid-cols-2 gap-2 text-sm text-gray-600 mt-2">
             <p>
-              <span className="font-medium text-gray-900">Mã Đơn Hàng:</span>{" "}
-              #{orderData.order.id.slice(-4)}
+              <span className="font-medium text-gray-900">Mã Đơn Hàng:</span> #
+              {orderData.order.id.slice(-4)}
             </p>
             <p>
               <span className="font-medium text-gray-900">Tên Khách Hàng:</span>{" "}
@@ -37,9 +39,14 @@ const TableCardDetails = ({ orderData, customerInfo, staffName }) => {
               {customerInfo.phone}
             </p>
             <p>
-              <span className="font-medium text-gray-900">Thời gian bắt đầu:</span>{" "}
+              <span className="font-medium text-gray-900">
+                Thời gian bắt đầu:
+              </span>{" "}
               {orderData.reservedTables?.[0]?.start_time
-                ? moment.utc(orderData.reservedTables[0].start_time).local().format("HH:mm")
+                ? moment
+                    .utc(orderData.reservedTables[0].start_time)
+                    .local()
+                    .format("HH:mm")
                 : "N/A"}
             </p>
             <p>
@@ -47,9 +54,14 @@ const TableCardDetails = ({ orderData, customerInfo, staffName }) => {
               {customerInfo.address}
             </p>
             <p>
-              <span className="font-medium text-gray-900">Thời gian kết thúc:</span>{" "}
+              <span className="font-medium text-gray-900">
+                Thời gian kết thúc:
+              </span>{" "}
               {orderData.reservedTables?.[0]?.end_time
-                ? moment.utc(orderData.reservedTables[0].end_time).local().format("HH:mm")
+                ? moment
+                    .utc(orderData.reservedTables[0].end_time)
+                    .local()
+                    .format("HH:mm")
                 : "N/A"}
             </p>
             <p>
@@ -61,14 +73,18 @@ const TableCardDetails = ({ orderData, customerInfo, staffName }) => {
               {getVietnameseStatus(orderData.order.status)}
             </p>
             <p>
-              <span className="font-medium text-gray-900">Nhân viên phục vụ:</span>{" "}
+              <span className="font-medium text-gray-900">
+                Nhân viên phục vụ:
+              </span>{" "}
               {staffName}
             </p>
           </div>
         </div>
 
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">Danh Sách Bàn Đặt</h3>
+          <h3 className="text-lg font-semibold text-gray-900">
+            Danh Sách Bàn Đặt
+          </h3>
           {orderData.reservedTables?.length > 0 ? (
             <ul className="list-disc pl-5 text-sm text-gray-600 mt-2">
               {orderData.reservedTables.map((table) => (
@@ -77,7 +93,10 @@ const TableCardDetails = ({ orderData, customerInfo, staffName }) => {
                   {table.table_id},{" "}
                   <span className="font-medium text-gray-900">Thời gian:</span>{" "}
                   {table.start_time && table.end_time
-                    ? `${moment.utc(table.start_time).local().format("HH:mm, DD/MM/YYYY")} - ${moment
+                    ? `${moment
+                        .utc(table.start_time)
+                        .local()
+                        .format("HH:mm, DD/MM/YYYY")} - ${moment
                         .utc(table.end_time)
                         .local()
                         .format("HH:mm, DD/MM/YYYY")}`
@@ -94,7 +113,9 @@ const TableCardDetails = ({ orderData, customerInfo, staffName }) => {
       {/* Cột phải: Danh sách món ăn và tổng hóa đơn */}
       <div className="flex-1 flex flex-col gap-6">
         <div className="max-h-[50vh] overflow-y-auto pr-2">
-          <h3 className="text-lg font-semibold text-gray-900">Danh Sách Mặt Hàng</h3>
+          <h3 className="text-lg font-semibold text-gray-900">
+            Danh Sách Mặt Hàng
+          </h3>
           {orderData.itemOrders?.length > 0 ? (
             <div className="grid grid-cols-2 gap-4 mt-2">
               {orderData.itemOrders.map((item) => (
@@ -115,23 +136,32 @@ const TableCardDetails = ({ orderData, customerInfo, staffName }) => {
                       {item.itemName || "N/A"}
                     </p>
                     <p>
-                      <span className="font-medium text-gray-900">Kích thước:</span>{" "}
+                      <span className="font-medium text-gray-900">
+                        Kích thước:
+                      </span>{" "}
                       {item.size || "Mặc định"}
                     </p>
                     <p>
-                      <span className="font-medium text-gray-900">Ghi chú:</span>{" "}
+                      <span className="font-medium text-gray-900">
+                        Ghi chú:
+                      </span>{" "}
                       {item.note || "Không có"}
                     </p>
                     <p>
                       <span className="font-medium text-gray-900">Giá:</span>{" "}
-                      {item.itemPrice ? item.itemPrice.toLocaleString() : "N/A"} VND
+                      {item.itemPrice ? item.itemPrice.toLocaleString() : "N/A"}{" "}
+                      VND
                     </p>
                     <p>
-                      <span className="font-medium text-gray-900">Số Lượng:</span>{" "}
+                      <span className="font-medium text-gray-900">
+                        Số Lượng:
+                      </span>{" "}
                       {item.quantity || "N/A"}
                     </p>
                     <p>
-                      <span className="font-medium text-gray-900">Tổng Tiền:</span>{" "}
+                      <span className="font-medium text-gray-900">
+                        Tổng Tiền:
+                      </span>{" "}
                       {item.itemPrice && item.quantity
                         ? (item.itemPrice * item.quantity).toLocaleString()
                         : "N/A"}{" "}
@@ -142,17 +172,22 @@ const TableCardDetails = ({ orderData, customerInfo, staffName }) => {
               ))}
             </div>
           ) : (
-            <p className="text-sm text-gray-600">Không có mặt hàng nào được đặt.</p>
+            <p className="text-sm text-gray-600">
+              Không có mặt hàng nào được đặt.
+            </p>
           )}
         </div>
 
         <div className="border-t border-gray-200 pt-4">
-          <h3 className="text-lg font-semibold text-gray-900">Tính Tổng Hóa Đơn</h3>
+          <h3 className="text-lg font-semibold text-gray-900">
+            Tính Tổng Hóa Đơn
+          </h3>
           <div className="text-sm text-gray-600 mt-2">
             {(() => {
               const totalAmount =
                 orderData.itemOrders?.reduce(
-                  (acc, item) => acc + (item.itemPrice || 0) * (item.quantity || 0),
+                  (acc, item) =>
+                    acc + (item.itemPrice || 0) * (item.quantity || 0),
                   0
                 ) || 0;
               const vat = totalAmount * 0.1;
@@ -160,15 +195,21 @@ const TableCardDetails = ({ orderData, customerInfo, staffName }) => {
               return (
                 <>
                   <p>
-                    <span className="font-medium text-gray-900">Tổng Tiền:</span>{" "}
+                    <span className="font-medium text-gray-900">
+                      Tổng Tiền:
+                    </span>{" "}
                     {totalAmount.toLocaleString()} VND
                   </p>
                   <p>
-                    <span className="font-medium text-gray-900">VAT (10%):</span>{" "}
+                    <span className="font-medium text-gray-900">
+                      VAT (10%):
+                    </span>{" "}
                     {vat.toLocaleString()} VND
                   </p>
                   <p className="font-semibold text-blue-600">
-                    <span className="font-medium text-gray-900">Tổng Cộng:</span>{" "}
+                    <span className="font-medium text-gray-900">
+                      Tổng Cộng:
+                    </span>{" "}
                     {grandTotal.toLocaleString()} VND
                   </p>
                 </>

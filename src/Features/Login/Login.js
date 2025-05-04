@@ -1,5 +1,5 @@
 import { Form, Input, Button, Card, Checkbox, message } from 'antd';
-import { UserOutlined, LockOutlined, MailOutlined, HomeOutlined } from '@ant-design/icons';
+import { LockOutlined, MailOutlined, HomeOutlined } from '@ant-design/icons';
 import { authAPI } from "../../services/apis/Auth";
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';

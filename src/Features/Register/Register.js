@@ -1,4 +1,4 @@
-import { Form, Input, Button, Card, Checkbox, message } from 'antd';
+import { Form, Input, Button, Card, message } from 'antd';
 import { UserOutlined, LockOutlined, MailOutlined, PhoneOutlined, HomeOutlined } from '@ant-design/icons';
 import { authAPI } from "../../services/apis/Auth";
 import React, { useState } from 'react';

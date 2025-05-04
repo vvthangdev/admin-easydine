@@ -1,5 +1,4 @@
 import HeroSection from "../../components/HomePage/heroSection"
-import Menu from "../../components/HomePage/menu"
 import WhyChoseUs from "../../components/HomePage/whyChoseUs"
 export default function HomePage() {
 
