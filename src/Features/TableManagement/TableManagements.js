@@ -7,6 +7,7 @@ import OrderFormModal from "../OrderManagement/OrderFormMoDal/OrderFormModal";
 import ReleaseTableModal from "./ReleaseTableModal";
 import TableAdmin from "./TableAdmin";
 import "./TableManagement.css";
+import { orderAPI} from "../../services/apis/Order"
 
 export default function TableManagement() {
   const [tables, setTables] = useState([]);
@@ -164,9 +165,16 @@ export default function TableManagement() {
     setIsOrderModalVisible(true);
   };
 
-  const handleOrderSubmit = (orderData) => {
-    fetchTables();
-    setIsOrderModalVisible(false);
+  const handleOrderSubmit = async (orderData) => {
+    try {
+      await orderAPI.createOrder(orderData);
+      message.success("Thêm đơn hàng mới thành công");
+      fetchTables(); // Cập nhật lại danh sách bàn
+      setIsOrderModalVisible(false);
+    } catch (error) {
+      console.error("Error creating order:", error);
+      message.error("Thêm đơn hàng không thành công");
+    }
   };
 
   const orderSummary = () => {
@@ -177,16 +185,29 @@ export default function TableManagement() {
           orders[table.reservation_id] = {
             order_number: table.order_number,
             tables: [],
+            full_id: table.reservation_id, // Lưu mã đơn hàng đầy đủ
           };
         }
         orders[table.reservation_id].tables.push(table.table_number);
       }
     });
-
+  
     return Object.values(orders).map((order) => (
       <div key={order.order_number} className="order-summary-item">
-        Đơn #{order.order_number}: Bàn{" "}
-        {order.tables.sort((a, b) => a - b).join(", ")}
+        Đơn #
+        <span
+          className="text-blue-600 cursor-pointer hover:underline"
+          onClick={() => {
+            navigator.clipboard.writeText(order.full_id).then(() => {
+              message.success(`Đã sao chép mã đơn hàng: ${order.full_id}`);
+            }).catch(() => {
+              message.error("Không thể sao chép mã đơn hàng");
+            });
+          }}
+        >
+          {order.order_number}
+        </span>
+        : Bàn {order.tables.sort((a, b) => a - b).join(", ")}
       </div>
     ));
   };

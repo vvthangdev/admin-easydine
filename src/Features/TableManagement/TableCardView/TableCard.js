@@ -15,6 +15,7 @@ const TableCard = ({ table, onRelease, tables, onMergeSuccess, onOrderSuccess })
   const [orderDetails, setOrderDetails] = useState(null);
   const [loading, setLoading] = useState(false);
   const [staffName, setStaffName] = useState("N/A");
+  const [editingOrder, setEditingOrder] = useState(null);
   const [customerInfo, setCustomerInfo] = useState({
     name: "N/A",
     phone: "N/A",
@@ -106,26 +107,60 @@ const TableCard = ({ table, onRelease, tables, onMergeSuccess, onOrderSuccess })
     }
   }, [orderDetails]);
 
-  const handleCardClick = () => {
-    if (table.status === "Available") {
-      setIsOrderModalVisible(true);
-    } else {
-      setIsModalVisible(true);
-      fetchOrderDetails();
-    }
-  };
+  
 
-  const handleOrderSubmit = async (orderData) => {
+const handleCardClick = async () => {
+  if (table.status === "Available") {
+    setIsOrderModalVisible(true);
+    setEditingOrder(null); // Thêm mới đơn hàng
+  } else {
+    setLoading(true);
     try {
-      await orderAPI.createOrder(orderData); // Chỉ thêm mới, không cập nhật
-      message.success("Đặt bàn thành công");
-      setIsOrderModalVisible(false);
-      onOrderSuccess();
+      const response = await orderAPI.getOrderInfo({
+        table_number: table.table_number,
+      });
+      if (response && response.status === "SUCCESS") {
+        setEditingOrder({
+          id: response.order.id,
+          type: response.order.type,
+          status: response.order.status,
+          time: response.order.time,
+          customer_id: response.order.customer_id || response.customer_id,
+          reservedTables: response.reservedTables,
+          itemOrders: response.itemOrders,
+        });
+        setIsOrderModalVisible(true);
+      } else {
+        message.error("Không tìm thấy thông tin đơn hàng");
+      }
     } catch (error) {
-      console.error("Error submitting order:", error);
-      message.error("Đặt bàn không thành công");
+      console.error("Error fetching order details:", error);
+      message.error("Không thể tải thông tin đơn hàng");
+    } finally {
+      setLoading(false);
     }
-  };
+  }
+};
+
+const handleOrderSubmit = async (orderData) => {
+  try {
+    if (orderData.id) {
+      // Cập nhật đơn hàng
+      await orderAPI.updateOrder(orderData);
+      message.success("Cập nhật đơn hàng thành công");
+    } else {
+      // Thêm đơn hàng mới
+      await orderAPI.createOrder(orderData);
+      message.success("Thêm đơn hàng mới thành công");
+    }
+    setIsOrderModalVisible(false);
+    setEditingOrder(null);
+    onOrderSuccess(); // Cập nhật danh sách bàn
+  } catch (error) {
+    console.error("Error submitting order:", error);
+    message.error("Không thể lưu đơn hàng");
+  }
+};
 
   return (
     <>
@@ -186,60 +221,7 @@ const TableCard = ({ table, onRelease, tables, onMergeSuccess, onOrderSuccess })
         </div>
       </Tooltip>
 
-      <Modal
-        title={`Chi Tiết Đơn Hàng - Bàn ${table.table_number}`}
-        open={isModalVisible}
-        onCancel={() => setIsModalVisible(false)}
-        className="rounded-xl"
-        footer={[
-          table.status !== "Available" && (
-            <Button
-              key="merge"
-              onClick={() => setIsMergeModalVisible(true)}
-              className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-100 rounded-lg hover:bg-blue-200 transition-all duration-300"
-            >
-              Ghép đơn
-            </Button>
-          ),
-          table.status !== "Available" && (
-            <Button
-              key="release"
-              onClick={() => {
-                setIsModalVisible(false);
-                onRelease();
-              }}
-              className="px-4 py-2 text-sm font-medium text-green-600 bg-green-100 rounded-lg hover:bg-green-200 transition-all duration-300"
-            >
-              Trả bàn
-            </Button>
-          ),
-          <Button
-            key="cancel"
-            onClick={() => setIsModalVisible(false)}
-            className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition-all duration-300"
-          >
-            Đóng
-          </Button>,
-        ]}
-        width="80vw"
-        styles={{ padding: 0, background: "transparent" }}
-      >
-        <div className="bg-white p-6 rounded-xl min-h-[70vh]">
-          {loading ? (
-            <div className="text-center">
-              <Spin />
-            </div>
-          ) : orderDetails ? (
-            <TableCardDetails
-              orderData={orderDetails}
-              customerInfo={customerInfo}
-              staffName={staffName}
-            />
-          ) : (
-            <p className="text-sm text-gray-600">Không có thông tin đơn hàng (Bàn trống).</p>
-          )}
-        </div>
-      </Modal>
+      
 
       <Modal
         title="Chọn bàn nguồn để ghép đơn"
@@ -283,13 +265,16 @@ const TableCard = ({ table, onRelease, tables, onMergeSuccess, onOrderSuccess })
       </Modal>
 
       <OrderFormModal
-        visible={isOrderModalVisible}
-        editingOrder={null}
-        selectedCustomer={null}
-        onCancel={() => setIsOrderModalVisible(false)}
-        onSubmit={handleOrderSubmit}
-        table={table} // Truyền bàn hiện tại để tự động chọn
-      />
+  visible={isOrderModalVisible}
+  editingOrder={editingOrder}
+  selectedCustomer={editingOrder?.customer_id ? { _id: editingOrder.customer_id } : null}
+  onCancel={() => {
+    setIsOrderModalVisible(false);
+    setEditingOrder(null);
+  }}
+  onSubmit={handleOrderSubmit}
+  table={table}
+/>
     </>
   );
 };

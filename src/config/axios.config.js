@@ -4,7 +4,7 @@ import axios from "axios";
 // http://localhost:8080
 // http://128.199.246.55:8080
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
+const API_URL = process.env.REACT_APP_API_URL;
 
 const axiosInstance = axios.create({
   baseURL: API_URL, // Thay đổi baseURL theo API của bạn
@@ -13,7 +13,6 @@ const axiosInstance = axios.create({
     "Content-Type": "application/json",
   },
 });
-
 
 // Request interceptor
 axiosInstance.interceptors.request.use(
