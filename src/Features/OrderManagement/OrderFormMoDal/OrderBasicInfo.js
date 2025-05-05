@@ -81,7 +81,7 @@ const OrderBasicInfo = ({
     <div className="flex flex-col gap-6 w-full p-4">
       <h3 className="text-lg font-semibold text-gray-900">Thông tin cơ bản</h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
-        <div className="min-w-0">
+        <div className=":min-w-0">
           <label className="text-sm font-medium text-gray-900">
             Loại Đơn Hàng <span className="text-red-500">*</span>
           </label>
@@ -95,6 +95,7 @@ const OrderBasicInfo = ({
             <Option value="ship">Giao Hàng</Option>
           </Select>
         </div>
+        {/* Làm nổi bật trường Trạng Thái */}
         <div className="min-w-0">
           <label className="text-sm font-medium text-gray-900">
             Trạng Thái <span className="text-red-500">*</span>
@@ -102,13 +103,22 @@ const OrderBasicInfo = ({
           <Select
             value={formData.status || "pending"}
             onChange={(value) => handleChange("status", value)}
-            className="w-full mt-2"
+            className="w-full mt-2 border-2 border-blue-500 rounded-lg shadow-md"
             popupClassName="border-gray-300 rounded-lg"
+            style={{ fontWeight: "bold", color: "#1E40AF" }} // Màu chữ đậm và nổi bật
           >
-            <Option value="pending">Pending</Option>
-            <Option value="confirmed">Confirmed</Option>
-            <Option value="completed">Completed</Option>
-            <Option value="canceled">Canceled</Option>
+            <Option value="pending" style={{ color: "#D97706" }}>
+              Pending
+            </Option>
+            <Option value="confirmed" style={{ color: "#059669" }}>
+              Confirmed
+            </Option>
+            <Option value="completed" style={{ color: "#1E40AF" }}>
+              Completed
+            </Option>
+            <Option value="canceled" style={{ color: "#DC2626" }}>
+              Canceled
+            </Option>
           </Select>
         </div>
         <div className="min-w-0">

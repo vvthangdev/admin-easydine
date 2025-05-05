@@ -32,18 +32,29 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
       const response = customerId
         ? await orderAPI.searchOrdersByCustomer(customerId)
         : await orderAPI.getAllOrders();
-      const ordersData = response; // Response trả về trực tiếp
+      const ordersData = response || []; // Đảm bảo response không undefined
 
       const ordersWithCustomerDetails = await Promise.all(
         ordersData.map(async (order) => {
-          const customerResponse = await adminAPI.getCustomerDetails(order.customer_id);
-          return {
-            ...order,
-            id: order._id,
-            customerName: customerResponse.name || "Không xác định",
-            customerPhone: customerResponse.phone || "Không xác định",
-            customerId: order.customer_id,
-          };
+          try {
+            const customerResponse = await adminAPI.getCustomerDetails(order.customer_id);
+            return {
+              ...order,
+              id: order._id,
+              customerName: customerResponse.name || "Không xác định",
+              customerPhone: customerResponse.phone || "Không xác định",
+              customerId: order.customer_id,
+            };
+          } catch (error) {
+            console.error(`Error fetching customer for order ${order._id}:`, error);
+            return {
+              ...order,
+              id: order._id,
+              customerName: "Không xác định",
+              customerPhone: "Không xác định",
+              customerId: order.customer_id,
+            };
+          }
         })
       );
 
@@ -57,6 +68,7 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
     } catch (error) {
       console.error("Error loading orders:", error);
       message.error("Lỗi khi tải danh sách đơn hàng");
+      setOrders({ ship: [], reservation: [] }); // Đặt lại orders để tránh lỗi
     } finally {
       setLoading(false);
     }
@@ -68,20 +80,45 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
 
   // Xử lý thay đổi trạng thái đơn hàng
   const handleStatusChange = async (orderId, newStatus) => {
+    if (!orderId || !newStatus) {
+      message.error("Dữ liệu trạng thái hoặc ID đơn hàng không hợp lệ");
+      return;
+    }
+
     try {
+      // Tìm đơn hàng trong danh sách
       const currentOrder =
         orders.reservation.find((o) => o.id === orderId) ||
         orders.ship.find((o) => o.id === orderId);
+
       if (!currentOrder) {
-        message.error("Không tìm thấy đơn hàng để cập nhật");
+        // Nếu không tìm thấy trong state, thử lấy trực tiếp từ API
+        try {
+          const response = await orderAPI.getOrderInfo({ id: orderId });
+          if (response && response.order) {
+            const updatedOrderData = {
+              id: orderId,
+              status: newStatus,
+              type: response.order.type,
+            };
+            await orderAPI.updateOrder(updatedOrderData);
+            message.success("Cập nhật trạng thái thành công");
+            fetchOrders(selectedCustomer?._id);
+          } else {
+            message.error("Không tìm thấy đơn hàng để cập nhật");
+          }
+        } catch (error) {
+          console.error("Error fetching order info:", error);
+          message.error("Không thể lấy thông tin đơn hàng");
+        }
         return;
       }
 
-      if (currentOrder.status === "pending" && newStatus === "confirmed") {
-        await orderAPI.confirmOrder(orderId);
-      }
-
-      const updatedOrderData = { id: orderId, status: newStatus, type: currentOrder.type };
+      const updatedOrderData = {
+        id: orderId,
+        status: newStatus,
+        type: currentOrder.type,
+      };
       await orderAPI.updateOrder(updatedOrderData);
       message.success("Cập nhật trạng thái thành công");
       fetchOrders(selectedCustomer?._id);
@@ -107,7 +144,7 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
   const handleViewDetails = async (id) => {
     try {
       const response = await orderAPI.getOrderInfo({ id });
-      const data = response; // Response trả về trực tiếp
+      const data = response;
 
       let staffName = "Chưa phân công";
       if (data.order?.staff_id) {
@@ -127,7 +164,7 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
   const handleSplitOrder = async (record) => {
     try {
       const response = await orderAPI.getOrderInfo({ id: record.id });
-      setOrderDetails(response); // Response trả về trực tiếp
+      setOrderDetails(response);
       setSplitModalVisible(true);
     } catch (error) {
       console.error("Error fetching order details for split:", error);
@@ -181,13 +218,14 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
   const handleSubmitOrder = async (orderData) => {
     try {
       if (orderData.id) {
-        // Sửa đơn hàng
         await orderAPI.updateOrder(orderData);
         message.success("Cập nhật đơn hàng thành công");
       } else {
-        // Thêm đơn hàng mới
         const response = await orderAPI.createOrder(orderData);
-        const newOrder = response.newOrder; // Lấy từ response.newOrder
+        if (!response.Order) {
+          throw new Error("Invalid response: Order object not found");
+        }
+        const newOrder = response.Order;
         setOrders((prev) => ({
           ...prev,
           [newOrder.type]: [
@@ -241,6 +279,7 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
           onChange={(value) => handleStatusChange(record.id, value)}
           className="w-32 border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
           popupMatchSelectWidth={false}
+          disabled={loading} // Vô hiệu hóa khi đang tải
         >
           <Select.Option value="pending">Pending</Select.Option>
           <Select.Option value="confirmed">Confirmed</Select.Option>
@@ -258,12 +297,14 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
           <Button
             className="px-4 py-1 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all duration-300"
             onClick={() => handleEdit(record)}
+            disabled={loading}
           >
             Sửa
           </Button>
           <Button
             className="px-4 py-1 text-sm font-medium text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition-all duration-300"
             onClick={() => handleViewDetails(record.id)}
+            disabled={loading}
           >
             Xem Chi Tiết
           </Button>
@@ -272,12 +313,14 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
               <Button
                 className="px-4 py-1 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-all duration-300"
                 onClick={() => handleSplitOrder(record)}
+                disabled={loading}
               >
                 Tách Đơn
               </Button>
               <Button
                 className="px-4 py-1 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition-all duration-300"
                 onClick={() => handleMergeOrder(record)}
+                disabled={loading}
               >
                 Gộp Đơn
               </Button>
@@ -294,6 +337,7 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
           type="link"
           className="text-red-600 hover:text-red-700"
           onClick={() => handleDelete(record)}
+          disabled={loading}
         >
           Xóa
         </Button>
@@ -314,6 +358,7 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
               <Button
                 className="px-4 py-1 text-sm font-medium text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition-all duration-300"
                 onClick={onClearFilter}
+                disabled={loading}
               >
                 Xóa bộ lọc
               </Button>
@@ -322,6 +367,7 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
           <Button
             className="px-4 py-1 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all duration-300"
             onClick={handleAdd}
+            disabled={loading}
           >
             Thêm Đơn Hàng Mới
           </Button>
