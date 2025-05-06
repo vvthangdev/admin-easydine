@@ -1,35 +1,14 @@
-import  axiosInstance from "../../config/axios.config"
+import axiosInstance from "../../config/axios.config";
+import {handleApiResponse} from "./handleApiResponse";
 
 export const authAPI = {
-    // Đăng ký
-    register: (data) => {
-        return axiosInstance.post('/users/signup', data);
-    },
-
-    // Đăng nhập
-    login: (data) => {
-        return axiosInstance.post('/users/login', data);
-    },
-
-    // Đăng xuất
-    logout: () => {
-        return axiosInstance.post('/users/logout');
-    },
-
-    // Refresh token
-    refreshToken: () => {
-        return axiosInstance.post('/users/refresh-token');
-    }
+  register: (data) => axiosInstance.post("/users/signup", data).then(handleApiResponse),
+  login: (data) => axiosInstance.post("/users/login", data).then(handleApiResponse),
+  logout: () => axiosInstance.post("/users/logout").then(handleApiResponse),
+  refreshToken: () => axiosInstance.post("/users/refresh-token").then(handleApiResponse),
 };
 
 export const userAPI = {
-    // Cập nhật thông tin user
-    updateProfile: (data) => {
-        return axiosInstance.put('/users/update-user', data);
-    },
-
-    // Xóa tài khoản
-    deleteAccount: (password) => {
-        return axiosInstance.delete('/users/delete', { data: { password } });
-    }
+  updateProfile: (data) => axiosInstance.put("/users/update-user", data).then(handleApiResponse),
+  deleteAccount: (password) => axiosInstance.delete("/users/delete", { data: { password } }).then(handleApiResponse),
 };

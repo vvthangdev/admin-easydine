@@ -7,7 +7,7 @@ import OrderFormModal from "../OrderManagement/OrderFormMoDal/OrderFormModal";
 import ReleaseTableModal from "./ReleaseTableModal";
 import TableAdmin from "./TableAdmin";
 import "./TableManagement.css";
-import { orderAPI} from "../../services/apis/Order"
+import { orderAPI } from "../../services/apis/Order";
 
 export default function TableManagement() {
   const [tables, setTables] = useState([]);
@@ -23,8 +23,13 @@ export default function TableManagement() {
     setLoading(true);
     try {
       const response = await tableAPI.getAllTablesStatus();
-      const formattedTables = response.tables.map((table) => {
-        const sameOrderTables = response.tables
+      console.log("API Response (getAllTablesStatus):", JSON.stringify(response, null, 2)); // Log phản hồi API
+      if (!Array.isArray(response)) {
+        throw new Error("Dữ liệu bàn không phải mảng hoặc không hợp lệ");
+      }
+      const formattedTables = response.map((table) => {
+        console.log("Processing table:", table); // Log từng bàn
+        const sameOrderTables = response
           .filter(
             (t) =>
               t.reservation_id === table.reservation_id &&
@@ -35,12 +40,15 @@ export default function TableManagement() {
         const orderNumber = table.reservation_id
           ? table.reservation_id.slice(-4)
           : null;
-        return {
+        const formattedTable = {
           ...table,
           same_order_tables: sameOrderTables.length ? sameOrderTables : null,
           order_number: orderNumber,
         };
+        console.log("Formatted table:", formattedTable); // Log bàn sau khi format
+        return formattedTable;
       });
+      console.log("Formatted tables:", formattedTables); // Log danh sách bàn hoàn chỉnh
       setTables(formattedTables);
     } catch (error) {
       console.error("Error fetching tables:", error);
@@ -169,7 +177,7 @@ export default function TableManagement() {
     try {
       await orderAPI.createOrder(orderData);
       message.success("Thêm đơn hàng mới thành công");
-      fetchTables(); // Cập nhật lại danh sách bàn
+      fetchTables();
       setIsOrderModalVisible(false);
     } catch (error) {
       console.error("Error creating order:", error);
@@ -185,13 +193,13 @@ export default function TableManagement() {
           orders[table.reservation_id] = {
             order_number: table.order_number,
             tables: [],
-            full_id: table.reservation_id, // Lưu mã đơn hàng đầy đủ
+            full_id: table.reservation_id,
           };
         }
         orders[table.reservation_id].tables.push(table.table_number);
       }
     });
-  
+
     return Object.values(orders).map((order) => (
       <div key={order.order_number} className="order-summary-item">
         Đơn #
@@ -244,6 +252,8 @@ export default function TableManagement() {
       <div className="bg-white rounded-lg shadow p-4 table-container">
         {loading ? (
           <div className="text-center">Đang tải...</div>
+        ) : tables.length === 0 ? (
+          <div className="text-center">Không có bàn nào</div>
         ) : (
           <div className="table-grid">
             {tables.map((table) => (
@@ -274,7 +284,7 @@ export default function TableManagement() {
           tables={tables}
           onEdit={handleEdit}
           onDelete={handleDelete}
-          onAdd={handleAdd} // Pass handleAdd to TableAdmin
+          onAdd={handleAdd}
         />
       </Modal>
 

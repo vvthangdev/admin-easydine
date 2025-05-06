@@ -1,23 +1,27 @@
-import  axiosInstance from "../../config/axios.config"
+import axiosInstance from "../../config/axios.config";
+import {handleApiResponse} from "./handleApiResponse";
 
 export const itemCategoryAPI = {
-    getAllItemCategory: () => {
-        return axiosInstance.get('/item-category');
-    },
+  getAllItemCategory: () =>
+    axiosInstance.get("/item-category").then(handleApiResponse),
 
-    createItemCategory: (data) => {
-        return axiosInstance.post('/item-category/create-item-category', data);
-    },
+  createItemCategory: (data) =>
+    axiosInstance
+      .post("/item-category/create-item-category", data)
+      .then(handleApiResponse),
 
-    updateItem: (data) => {
-        return axiosInstance.patch('/item/update-item', data);
-    },
+  updateItemCategory: (data) =>
+    axiosInstance
+      .patch("/item-category/update-item-category", data)
+      .then(handleApiResponse),
 
-    deleteItem: (data) => {
-        return axiosInstance.delete('/item/delete-item',{data});
-    },
-    searchItem: (data) => {
-        return axiosInstance.get('/item/delete-item');
-    }
+  deleteItemCategory: (data) =>
+    axiosInstance
+      .delete("/item-category/delete-item-category", { data })
+      .then(handleApiResponse),
+
+  searchItemCategory: (data) =>
+    axiosInstance
+      .get("/item-category/search-item-category", { params: data })
+      .then(handleApiResponse),
 };
-

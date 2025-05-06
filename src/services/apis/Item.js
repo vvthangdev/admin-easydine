@@ -1,47 +1,39 @@
 import axiosInstance from "../../config/axios.config";
+import {handleApiResponse} from "./handleApiResponse";
 
 export const itemAPI = {
-  getAllItem: (data) => {
-    return axiosInstance.get("/item");
-  },
+  getAllItem: () =>
+    axiosInstance.get("/item").then(handleApiResponse),
 
-  addItem: (data) => {
-    return axiosInstance.post("/item/create-item", data);
-  },
+  addItem: (data) =>
+    axiosInstance.post("/item/create-item", data).then(handleApiResponse),
 
-  updateItem: (data) => {
-    return axiosInstance.patch("/item/update-item", data);
-  },
+  updateItem: (data) =>
+    axiosInstance.patch("/item/update-item", data).then(handleApiResponse),
 
-  deleteItem: (data) => {
-    return axiosInstance.delete("/item/delete-item", { data });
-  },
+  deleteItem: (data) =>
+    axiosInstance
+      .delete("/item/delete-item", { data })
+      .then(handleApiResponse),
 
-  searchItem: (data) => {
-    return axiosInstance.get("/item/search-item", { params: data }); // Sửa endpoint
-  },
+  searchItem: (data) =>
+    axiosInstance
+      .get("/item/search-item", { params: data })
+      .then(handleApiResponse),
 
-  // API mới: Lọc món ăn theo danh mục
-  filterItemsByCategory: (categoryId) => {
-    return axiosInstance.get("/item/filter-by-category", {
-      params: { categoryId },
-    });
-  },
+  filterItemsByCategory: (categoryId) =>
+    axiosInstance
+      .get("/item/filter-by-category", { params: { categoryId } })
+      .then(handleApiResponse),
 
-  // API mới: Lấy danh sách danh mục
-  getAllCategories: () => {
-    return axiosInstance.get("/item/categories");
-  },
+  getAllCategories: () =>
+    axiosInstance.get("/item/categories").then(handleApiResponse),
 
-  // API mới: Tạo danh mục
-  createCategory: (data) => {
-    return axiosInstance.post("/item/create-category", data);
-  },
+  createCategory: (data) =>
+    axiosInstance.post("/item/create-category", data).then(handleApiResponse),
 
-  // API mới: Xóa danh mục
-  deleteCategory: (categoryId) => {
-    return axiosInstance.delete("/item/delete-category", {
-      data: { categoryId },
-    });
-  },
+  deleteCategory: (categoryId) =>
+    axiosInstance
+      .delete("/item/delete-category", { data: { categoryId } })
+      .then(handleApiResponse),
 };

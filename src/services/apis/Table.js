@@ -1,40 +1,34 @@
 import axiosInstance from "../../config/axios.config";
+import {handleApiResponse} from "./handleApiResponse";
 
 export const tableAPI = {
-  getAllTable: (data) => {
-    return axiosInstance.get("/tables");
-  },
+  getAllTable: () =>
+    axiosInstance.get("/tables").then(handleApiResponse),
 
-  addTable: (data) => {
-    return axiosInstance.post("/tables/create-table", data);
-  },
+  addTable: (data) =>
+    axiosInstance.post("/tables/create-table", data).then(handleApiResponse),
 
-  updateTable: (data) => {
-    return axiosInstance.patch("/tables/update-table", data);
-  },
+  updateTable: (data) =>
+    axiosInstance.patch("/tables/update-table", data).then(handleApiResponse),
 
-  deleteTable: (data) => {
-    return axiosInstance.delete("/tables/delete-table", { data });
-  },
-  getAllTablesStatus: (data) => {
-    return axiosInstance.get("/tables/tables-status")
-  },
-  releaseTable: (data) => {
-    return axiosInstance.post("/tables/release-table", data);
-  },
-  getAvailableTables: async (params) => {
-    try {
-      const response = await axiosInstance.get("/tables/available-tables", {
+  deleteTable: (data) =>
+    axiosInstance
+      .delete("/tables/delete-table", { data })
+      .then(handleApiResponse),
+
+  getAllTablesStatus: () =>
+    axiosInstance.get("/tables/tables-status").then(handleApiResponse),
+
+  releaseTable: (data) =>
+    axiosInstance.post("/tables/release-table", data).then(handleApiResponse),
+
+  getAvailableTables: (params) =>
+    axiosInstance
+      .get("/tables/available-tables", {
         params: {
           start_time: params.start_time,
           end_time: params.end_time,
         },
-      });
-      console.log("Available Tables API Response:", response); // Kiểm tra phản hồi API
-      return response; // Trả về dữ liệu
-    } catch (error) {
-      console.error("Error fetching available tables:", error);
-      throw error; // Ném lỗi nếu có
-    }
-  },
+      })
+      .then(handleApiResponse),
 };

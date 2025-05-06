@@ -1,15 +1,17 @@
 import axiosInstance from "../../config/axios.config";
+import {handleApiResponse} from "./handleApiResponse";
 
 export const adminAPI = {
-  updateUser: (id, data) => {
-    return axiosInstance.patch(`/admin/update-user/${id}`, data);
-  },
+  updateUser: (id, data) =>
+    axiosInstance.patch(`/admin/update-user/${id}`, data).then(handleApiResponse),
 
-  deleteUser: (username) => {
-    return axiosInstance.delete("/admin/delete-user", username);
-  },
+  deleteUser: (username) =>
+    axiosInstance
+      .delete("/admin/delete-user", { data: { username } })
+      .then(handleApiResponse),
 
-  getCustomerDetails: (customerId) => {
-    return axiosInstance.get(`/admin/customer?id=${customerId}`);
-  },
+  getCustomerDetails: (customerId) =>
+    axiosInstance
+      .get(`/admin/customer?id=${customerId}`)
+      .then(handleApiResponse),
 };
