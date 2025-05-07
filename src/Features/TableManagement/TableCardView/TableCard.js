@@ -30,7 +30,7 @@ const TableCard = ({
         const response = await orderAPI.getOrderInfo({
           table_number: table.table_number,
         });
-        if (response && response.status === "SUCCESS") {
+        if (response) {
           setEditingOrder({
             id: response.order.id,
             type: response.order.type,

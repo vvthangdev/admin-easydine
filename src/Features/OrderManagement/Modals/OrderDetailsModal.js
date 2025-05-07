@@ -17,16 +17,8 @@ const OrderDetailsModal = ({ visible, orderDetails, onCancel }) => {
     const fetchStaffName = async () => {
       if (orderDetails?.order?.staff_id) {
         try {
-          const response = await userAPI.getUserById(
-            orderDetails.order.staff_id
-          );
-          if (response.data?.status === "SUCCESS") {
-            setStaffName(response.data.user.name || "N/A");
-          } else if (response.status === "SUCCESS") {
-            setStaffName(response.user?.name || response.name || "N/A");
-          } else {
-            setStaffName("N/A");
-          }
+          const response = await userAPI.getUserById(orderDetails.order.staff_id);
+          setStaffName(response.user?.name || response.name || "N/A");
         } catch (error) {
           console.error("Error fetching staff information:", error);
           setStaffName("N/A");
