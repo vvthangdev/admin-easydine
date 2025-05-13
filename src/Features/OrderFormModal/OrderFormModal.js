@@ -6,6 +6,8 @@ import ItemSelector from "./ItemSelector";
 import SelectedItems from "./SelectedItems";
 import { tableAPI } from "../../services/apis/Table";
 import { orderAPI } from "../../services/apis/Order";
+import MergeOrderModal from "../OrderUpdate/MergeOrderModal";
+import SplitOrderModal from "../OrderUpdate/SplitOrderModal";
 
 const OrderFormModal = ({
   visible,
@@ -23,11 +25,15 @@ const OrderFormModal = ({
     status: "pending",
     date: moment().format("DD/MM/YYYY"),
     start_time: moment().format("HH:mm"),
-    end_time: "23:59", // Mặc định là 23:59
+    end_time: "23:59",
     tables: table ? [table.table_id] : [],
   });
   const [loading, setLoading] = useState(false);
   const [showItemSelector, setShowItemSelector] = useState(false);
+  const [splitModalVisible, setSplitModalVisible] = useState(false);
+  const [mergeModalVisible, setMergeModalVisible] = useState(false);
+  const [orderDetails, setOrderDetails] = useState(null);
+  const [currentOrderId, setCurrentOrderId] = useState(null);
 
   const fetchAvailableTables = useCallback(async (date, startTime, endTime) => {
     if (!date || !startTime || !endTime) return;
@@ -47,93 +53,106 @@ const OrderFormModal = ({
   }, []);
 
   const fetchOrderDetails = useCallback(async () => {
-  if (!editingOrder) return;
-  setLoading(true);
-  try {
-    const data = await orderAPI.getOrderInfo({ id: editingOrder.id });
+    if (!editingOrder) return;
+    setLoading(true);
+    try {
+      const data = await orderAPI.getOrderInfo({ id: editingOrder.id });
 
-    const reservedTables =
-      data.reservedTables?.map((table) => ({
-        _id: table.table_id,
-        table_number: table.table_number,
-        area: table.area,
-        capacity: table.capacity,
-        status: table.status,
-      })) || [];
+      const reservedTables =
+        data.reservedTables?.map((table) => ({
+          _id: table.table_id,
+          table_id: table.table_id,
+          table_number: table.table_number,
+          area: table.area,
+          capacity: table.capacity,
+          status: table.status,
+          start_time: table.start_time,
+          end_time: table.end_time,
+        })) || [];
 
-    const items =
-      data.itemOrders?.map((item) => ({
-        id: item.item_id,
-        name: item.itemName,
-        price: item.itemPrice,
-        quantity: item.quantity,
-        size: item.size || null,
-        note: item.note || "",
-      })) || [];
+      const items =
+        data.itemOrders?.map((item) => ({
+          id: item.item_id,
+          name: item.itemName,
+          price: item.itemPrice,
+          quantity: item.quantity,
+          size: item.size || null,
+          note: item.note || "",
+          itemName: item.itemName,
+          itemImage: item.itemImage || "https://via.placeholder.com/80",
+          itemPrice: item.itemPrice,
+        })) || [];
 
-    const newFormData = {
-      type: data.order?.type || "reservation",
-      status: data.order?.status || "pending",
-      staff_id: data.order?.staff_id || undefined,
-      date: moment
-        .utc(data.order?.time || editingOrder.time)
-        .local()
-        .format("DD/MM/YYYY"),
-      start_time: data.reservedTables?.[0]
-        ? moment
-            .utc(data.reservedTables[0].start_time)
-            .local()
-            .format("HH:mm")
-        : moment
-            .utc(data.order?.time || editingOrder.time)
-            .local()
-            .format("HH:mm"),
-      end_time: "23:59", // Mặc định là 23:59
-      tables: reservedTables.map((table) => table._id),
-    };
+      const newFormData = {
+        type: data.order?.type || "reservation",
+        status: data.order?.status || "pending",
+        staff_id: data.order?.staff_id || undefined,
+        date: moment
+          .utc(data.order?.time || editingOrder.time)
+          .local()
+          .format("DD/MM/YYYY"),
+        start_time: data.reservedTables?.[0]
+          ? moment
+              .utc(data.reservedTables[0].start_time)
+              .local()
+              .format("HH:mm")
+          : moment
+              .utc(data.order?.time || editingOrder.time)
+              .local()
+              .format("HH:mm"),
+        end_time: "23:59",
+        tables: reservedTables.map((table) => table._id),
+      };
 
-    setFormData(newFormData);
-    setSelectedItems(items);
+      setFormData(newFormData);
+      setSelectedItems(items);
+      setOrderDetails({
+        ...data,
+        order: {
+          ...data.order,
+          id: editingOrder.id,
+          customer_id: editingOrder.customerId,
+          time: editingOrder.time,
+        },
+      });
+      setCurrentOrderId(editingOrder.id);
 
-    // Lấy danh sách bàn trống
-    const startDateTime = moment(
-      `${newFormData.date} ${newFormData.start_time}`,
-      "DD/MM/YYYY HH:mm"
-    ).utc();
-    const endDateTime = moment(
-      `${newFormData.date} 23:59`,
-      "DD/MM/YYYY HH:mm"
-    ).utc();
-    
-    // Gọi API lấy bàn trống
-    const response = await tableAPI.getAvailableTables({
-      start_time: startDateTime.format("YYYY-MM-DDTHH:mm:ss[Z]"),
-      end_time: endDateTime.format("YYYY-MM-DDTHH:mm:ss[Z]"),
-    });
+      const startDateTime = moment(
+        `${newFormData.date} ${newFormData.start_time}`,
+        "DD/MM/YYYY HH:mm"
+      ).utc();
+      const endDateTime = moment(
+        `${newFormData.date} 23:59`,
+        "DD/MM/YYYY HH:mm"
+      ).utc();
 
-    // Kết hợp danh sách bàn trống với các bàn đã đặt của đơn hàng
-    const availableTablesFromAPI = Array.isArray(response) ? response : [];
-    const existingTableIds = availableTablesFromAPI.map((table) => table._id);
-    const additionalReservedTables = reservedTables.filter(
-      (table) => !existingTableIds.includes(table._id)
-    );
-    const mergedTables = [...availableTablesFromAPI, ...additionalReservedTables];
+      const response = await tableAPI.getAvailableTables({
+        start_time: startDateTime.format("YYYY-MM-DDTHH:mm:ss[Z]"),
+        end_time: endDateTime.format("YYYY-MM-DDTHH:mm:ss[Z]"),
+      });
 
-    setAvailableTables(mergedTables);
-  } catch (error) {
-    console.error("Error loading order for edit:", error);
-    message.error("Không thể tải thông tin đơn hàng");
-  } finally {
-    setLoading(false);
-  }
-}, [editingOrder]);
+      const availableTablesFromAPI = Array.isArray(response) ? response : [];
+      const existingTableIds = availableTablesFromAPI.map((table) => table._id);
+      const additionalReservedTables = reservedTables.filter(
+        (table) => !existingTableIds.includes(table._id)
+      );
+      const mergedTables = [...availableTablesFromAPI, ...additionalReservedTables];
+
+      setAvailableTables(mergedTables);
+    } catch (error) {
+      console.error("Error loading order for edit:", error);
+      message.error("Không thể tải thông tin đơn hàng");
+    } finally {
+      setLoading(false);
+    }
+  }, [editingOrder]);
 
   const resetForm = useCallback(() => {
     const now = moment();
     const newFormData = {
       date: now.format("DD/MM/YYYY"),
       start_time: now.format("HH:mm"),
-      end_time: "23:59", // Mặc định là 23:59
+      end_time: "23:59",
       type: "reservation",
       status: "pending",
       tables: table ? [table.table_id] : [],
@@ -143,6 +162,8 @@ const OrderFormModal = ({
     setAvailableTables([]);
     setMenuItems([]);
     setShowItemSelector(false);
+    setOrderDetails(null);
+    setCurrentOrderId(null);
 
     const startDateTime = moment(
       `${newFormData.date} ${newFormData.start_time}`,
@@ -227,13 +248,44 @@ const OrderFormModal = ({
         staff_id: formData.staff_id || null,
       };
 
-      await onSubmit(orderData);
-      setFormData({});
-      setSelectedItems([]);
-      setAvailableTables([]);
-      setMenuItems([]);
-      setShowItemSelector(false);
-      onCancel();
+      const response = await onSubmit(orderData);
+      if (!editingOrder && response?._id) {
+        setCurrentOrderId(response._id);
+        setOrderDetails({
+          order: {
+            id: response._id,
+            customer_id: selectedCustomer?._id,
+            time: startDateTime.toISOString(),
+            type: formData.type,
+            status: formData.status,
+          },
+          reservedTables: formData.tables.map((tableId) => ({
+            table_id: tableId,
+            start_time: startDateTime.toISOString(),
+            end_time: endDateTime.toISOString(),
+          })),
+          itemOrders: selectedItems.map((item) => ({
+            item_id: item.id,
+            itemName: item.itemName,
+            itemPrice: item.itemPrice,
+            itemImage: item.itemImage,
+            quantity: item.quantity,
+            size: item.size || null,
+            note: item.note || "",
+          })),
+        });
+      }
+
+      if (!splitModalVisible && !mergeModalVisible) {
+        setFormData({});
+        setSelectedItems([]);
+        setAvailableTables([]);
+        setMenuItems([]);
+        setShowItemSelector(false);
+        setCurrentOrderId(null);
+        setOrderDetails(null);
+        onCancel();
+      }
     } catch (error) {
       console.error("Error submitting order:", error);
       message.error("Có lỗi xảy ra. Vui lòng thử lại.");
@@ -250,6 +302,44 @@ const OrderFormModal = ({
     setShowItemSelector(false);
   };
 
+  const handleSplitSuccess = () => {
+    if (editingOrder || currentOrderId) {
+      fetchOrderDetails();
+      onSubmit({ id: currentOrderId || editingOrder.id });
+    }
+  };
+
+  const handleMergeSuccess = () => {
+    if (editingOrder || currentOrderId) {
+      fetchOrderDetails();
+      onSubmit({ id: currentOrderId || editingOrder.id });
+    }
+  };
+
+  const handleOpenSplitModal = async () => {
+    if (!currentOrderId && !editingOrder) {
+      message.info("Vui lòng lưu đơn hàng trước khi tách!");
+      await handleModalOk();
+      if (currentOrderId) {
+        setSplitModalVisible(true);
+      }
+    } else {
+      setSplitModalVisible(true);
+    }
+  };
+
+  const handleOpenMergeModal = async () => {
+    if (!currentOrderId && !editingOrder) {
+      message.info("Vui lòng lưu đơn hàng trước khi gộp!");
+      await handleModalOk();
+      if (currentOrderId) {
+        setMergeModalVisible(true);
+      }
+    } else {
+      setMergeModalVisible(true);
+    }
+  };
+
   return (
     <Modal
       title={editingOrder ? "Sửa Đơn Hàng" : "Thêm Đơn Hàng Mới"}
@@ -258,6 +348,7 @@ const OrderFormModal = ({
       width="90vw"
       className="rounded-xl"
       styles={{ padding: 0, background: "transparent" }}
+      zIndex={1000}
       footer={[
         <Button
           key="cancel"
@@ -295,17 +386,17 @@ const OrderFormModal = ({
           )}
         </div>
         <div className="w-1/2 p-4 overflow-y-auto">
-          <div className="flex justify-between items-center mb-4">
-            <div>
-              {showItemSelector ? (
-                <Button
-                  className="px-6 py-2 text-base font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition-all duration-300 shadow-md"
-                  onClick={handleDoneSelectingItems}
-                  disabled={loading}
-                >
-                  Xong
-                </Button>
-              ) : (
+          <div className="flex gap-2 items-center mb-4">
+            {showItemSelector ? (
+              <Button
+                className="px-6 py-2 text-base font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition-all duration-300 shadow-md"
+                onClick={handleDoneSelectingItems}
+                disabled={loading}
+              >
+                Xong
+              </Button>
+            ) : (
+              <>
                 <Button
                   className="px-6 py-2 text-base font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all duration-300 shadow-md"
                   onClick={handleAddItemClick}
@@ -313,8 +404,26 @@ const OrderFormModal = ({
                 >
                   Thêm Món
                 </Button>
-              )}
-            </div>
+                {formData.type === "reservation" && (
+                  <>
+                    <Button
+                      className="px-6 py-2 text-base font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition-all duration-300 shadow-md"
+                      onClick={handleOpenSplitModal}
+                      disabled={loading}
+                    >
+                      Tách Đơn
+                    </Button>
+                    <Button
+                      className="px-6 py-2 text-base font-semibold text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition-all duration-300 shadow-md"
+                      onClick={handleOpenMergeModal}
+                      disabled={loading}
+                    >
+                      Gộp Đơn
+                    </Button>
+                  </>
+                )}
+              </>
+            )}
           </div>
           <SelectedItems
             selectedItems={selectedItems}
@@ -323,6 +432,24 @@ const OrderFormModal = ({
           />
         </div>
       </div>
+
+      {/* Modal tách đơn */}
+      <SplitOrderModal
+        visible={splitModalVisible}
+        orderDetails={orderDetails}
+        onCancel={() => setSplitModalVisible(false)}
+        onSuccess={handleSplitSuccess}
+        zIndex={1001}
+      />
+
+      {/* Modal gộp đơn */}
+      <MergeOrderModal
+        visible={mergeModalVisible}
+        targetOrder={{ id: currentOrderId || editingOrder?.id }}
+        onCancel={() => setMergeModalVisible(false)}
+        onSuccess={handleMergeSuccess}
+        zIndex={1001}
+      />
     </Modal>
   );
 };

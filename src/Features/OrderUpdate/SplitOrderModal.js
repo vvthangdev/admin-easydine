@@ -1,21 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Table, Input, message } from "antd";
-import { orderAPI } from "../../../services/apis/Order";
+import { orderAPI } from "../../services/apis/Order";
 
-const SplitOrderModal = ({ visible, orderDetails, onCancel, onSuccess }) => {
+const SplitOrderModal = ({ visible, orderDetails, onCancel, onSuccess, zIndex }) => {
   const [splitItems, setSplitItems] = useState([]);
 
-  // Khởi tạo splitItems khi orderDetails thay đổi
   useEffect(() => {
     if (orderDetails?.itemOrders) {
-      const initialItems = orderDetails.itemOrders.map((item) => ({
-        id: item.item_id || item._id,
+      const initialItems = orderDetails.itemOrders.map((item, index) => ({
+        key: `${item.item_id || item._id}-${item.size || "default"}-${index}`, // Khóa duy nhất
+        item_id: item.item_id || item._id,
         itemName: item.itemName || "N/A",
         itemImage: item.itemImage || "https://via.placeholder.com/80",
         itemPrice: item.itemPrice || 0,
         size: item.size || "Mặc định",
-        quantity: 0, // Số lượng cần tách, mặc định là 0
-        maxQuantity: item.quantity || 0, // Số lượng tối đa có thể tách
+        note: item.note || "",
+        quantity: 0,
+        maxQuantity: item.quantity || 0,
       }));
       setSplitItems(initialItems);
     } else {
@@ -23,24 +24,20 @@ const SplitOrderModal = ({ visible, orderDetails, onCancel, onSuccess }) => {
     }
   }, [orderDetails]);
 
-  // Cập nhật số lượng món cần tách
-  const handleQuantityChange = (id, value) => {
+  const handleQuantityChange = (key, value) => {
     const quantity = parseInt(value) || 0;
     setSplitItems((prev) =>
       prev.map((item) =>
-        item.id === id
+        item.key === key
           ? { ...item, quantity: Math.min(quantity, item.maxQuantity) }
           : item
       )
     );
   };
 
-  // Xử lý tách đơn
   const handleSplitOrder = async () => {
-    // Lấy bàn đầu tiên từ reservedTables
-    const selectedTable = orderDetails?.reservedTables?.[0]?.table_id;
-    if (!selectedTable) {
-      message.error("Đơn hàng không có thông tin bàn để tách!");
+    if (!orderDetails?.order?.id) {
+      message.error("Không tìm thấy ID đơn hàng để tách!");
       return;
     }
     if (splitItems.every((item) => item.quantity === 0)) {
@@ -51,32 +48,26 @@ const SplitOrderModal = ({ visible, orderDetails, onCancel, onSuccess }) => {
     const newItems = splitItems
       .filter((item) => item.quantity > 0)
       .map((item) => ({
-        id: item.id,
+        id: item.item_id,
         quantity: item.quantity,
+        size: item.size !== "Mặc định" ? item.size : undefined,
+        note: item.note || undefined,
       }));
 
     try {
-      const responseData = await orderAPI.splitOrder({
-        table_number: selectedTable,
+      const data = await orderAPI.splitOrder({
+        order_id: orderDetails.order.id,
         new_items: newItems,
       });
-      if (responseData.status === "SUCCESS") {
-        message.success(
-          `Tách đơn thành công! Mã đơn mới: ${responseData.newOrder.id}`
-        );
-        onSuccess();
-        onCancel();
+      if (data?.newOrder?.id) {
+        message.success(`Tách đơn thành công! Mã đơn mới: ${data.newOrder.id}`);
       } else {
-        message.error(
-          `Tách đơn thất bại: ${
-            responseData.message || "Phản hồi API không hợp lệ."
-          }`
-        );
+        message.success("Tách đơn thành công!");
       }
+      onSuccess();
+      onCancel();
     } catch (error) {
-      message.error(
-        `Tách đơn thất bại: ${error.message || "Lỗi không xác định."}`
-      );
+      message.error(`Tách đơn thất bại: ${error.message || "Lỗi không xác định."}`);
     }
   };
 
@@ -113,6 +104,12 @@ const SplitOrderModal = ({ visible, orderDetails, onCancel, onSuccess }) => {
       width: 100,
     },
     {
+      title: "Ghi Chú",
+      dataIndex: "note",
+      key: "note",
+      width: 100,
+    },
+    {
       title: "Số Lượng Tối Đa",
       dataIndex: "maxQuantity",
       key: "maxQuantity",
@@ -129,7 +126,7 @@ const SplitOrderModal = ({ visible, orderDetails, onCancel, onSuccess }) => {
           value={quantity}
           min={0}
           max={record.maxQuantity}
-          onChange={(e) => handleQuantityChange(record.id, e.target.value)}
+          onChange={(e) => handleQuantityChange(record.key, e.target.value)}
           style={{ width: 80 }}
         />
       ),
@@ -161,6 +158,7 @@ const SplitOrderModal = ({ visible, orderDetails, onCancel, onSuccess }) => {
       ]}
       width="80vw"
       style={{ top: 50 }}
+      zIndex={zIndex || 1001}
     >
       <div className="flex flex-col gap-4">
         <div>
@@ -170,7 +168,7 @@ const SplitOrderModal = ({ visible, orderDetails, onCancel, onSuccess }) => {
           <Table
             columns={columns}
             dataSource={splitItems}
-            rowKey="id"
+            rowKey="key"
             pagination={false}
             size="middle"
             className="text-base text-gray-600 mt-2"

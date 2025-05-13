@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Modal, Button } from "antd";
 import moment from "moment";
-import { userAPI } from "../../../services/apis/User";
-import { adminAPI } from "../../../services/apis/Admin";
+import { userAPI } from "../../services/apis/User";
+import { adminAPI } from "../../services/apis/Admin";
 
 const OrderDetailsModal = ({ visible, orderDetails, onCancel }) => {
   const [staffName, setStaffName] = useState("N/A");
@@ -17,7 +17,9 @@ const OrderDetailsModal = ({ visible, orderDetails, onCancel }) => {
     const fetchStaffName = async () => {
       if (orderDetails?.order?.staff_id) {
         try {
-          const response = await userAPI.getUserById(orderDetails.order.staff_id);
+          const response = await userAPI.getUserById(
+            orderDetails.order.staff_id
+          );
           setStaffName(response.user?.name || response.name || "N/A");
         } catch (error) {
           console.error("Error fetching staff information:", error);
@@ -65,6 +67,7 @@ const OrderDetailsModal = ({ visible, orderDetails, onCancel }) => {
       title="Chi Tiết Đơn Hàng"
       open={visible}
       onCancel={onCancel}
+      zIndex={1001}
       className="rounded-xl"
       footer={[
         <Button

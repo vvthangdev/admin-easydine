@@ -3,10 +3,6 @@ import { Table, Button, Modal, message, Tabs, Space, Select } from "antd";
 import moment from "moment";
 import { orderAPI } from "../../services/apis/Order";
 import { adminAPI } from "../../services/apis/Admin";
-import { userAPI } from "../../services/apis/User";
-import OrderDetailsModal from "./Modals/OrderDetailsModal";
-import SplitOrderModal from "./Modals/SplitOrderModal";
-import MergeOrderModal from "./Modals/MergeOrderModal";
 import OrderFormModal from "../OrderFormModal/OrderFormModal";
 
 const { TabPane } = Tabs;
@@ -19,14 +15,8 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
   const [activeTab, setActiveTab] = useState("reservation");
   const [customerDetails, setCustomerDetails] = useState(null);
   const [customerModalVisible, setCustomerModalVisible] = useState(false);
-  const [orderDetails, setOrderDetails] = useState(null);
-  const [detailsModalVisible, setDetailsModalVisible] = useState(false);
-  const [splitModalVisible, setSplitModalVisible] = useState(false);
-  const [mergeModalVisible, setMergeModalVisible] = useState(false);
-  const [mergeSourceOrder, setMergeSourceOrder] = useState(null);
-  const customerCache = useRef({}); // Sử dụng useRef thay vì useState
+  const customerCache = useRef({});
 
-  // Lấy danh sách đơn hàng
   const fetchOrders = useCallback(async (customerId = null) => {
     setLoading(true);
     try {
@@ -35,19 +25,17 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
         : await orderAPI.getAllOrders();
       const ordersData = response || [];
 
-      // Thu thập các customer_id duy nhất
       const uniqueCustomerIds = [
         ...new Set(ordersData.map((order) => order.customer_id)),
       ];
 
-      // Lấy thông tin khách hàng cho các customer_id duy nhất
       const customerDetailsPromises = uniqueCustomerIds.map(async (id) => {
         if (customerCache.current[id]) {
           return { id, data: customerCache.current[id] };
         }
         try {
           const customerResponse = await adminAPI.getCustomerDetails(id);
-          customerCache.current[id] = customerResponse; // Cập nhật cache
+          customerCache.current[id] = customerResponse;
           return { id, data: customerResponse };
         } catch (error) {
           console.error(`Error fetching customer ${id}:`, error);
@@ -64,7 +52,6 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
         return acc;
       }, {});
 
-      // Gắn thông tin khách hàng vào đơn hàng
       const ordersWithCustomerDetails = ordersData.map((order) => ({
         ...order,
         id: order._id,
@@ -89,13 +76,12 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
     } finally {
       setLoading(false);
     }
-  }, []); // Không phụ thuộc vào customerCache
+  }, []);
 
   useEffect(() => {
     fetchOrders(selectedCustomer?._id);
   }, [selectedCustomer, fetchOrders]);
 
-  // Xử lý thay đổi trạng thái đơn hàng
   const handleStatusChange = async (orderId, newStatus) => {
     if (!orderId || !newStatus) {
       message.error("Dữ liệu trạng thái hoặc ID đơn hàng không hợp lệ");
@@ -143,7 +129,6 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
     }
   };
 
-  // Xem chi tiết khách hàng
   const handleViewCustomerDetails = async (customerId) => {
     try {
       let customerData;
@@ -161,58 +146,16 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
     }
   };
 
-  // Xem chi tiết đơn hàng
-  const handleViewDetails = async (id) => {
-    try {
-      const response = await orderAPI.getOrderInfo({ id });
-      const data = response;
-
-      let staffName = "Chưa phân công";
-      if (data.order?.staff_id) {
-        const staffResponse = await userAPI.getUserById(data.order.staff_id);
-        staffName =
-          staffResponse.username || staffResponse.name || "Không xác định";
-      }
-
-      setOrderDetails({ ...data, order: { ...data.order, staffName } });
-      setDetailsModalVisible(true);
-    } catch (error) {
-      console.error("Error fetching order details:", error);
-      message.error("Không thể lấy thông tin chi tiết đơn hàng");
-    }
-  };
-
-  // Tách đơn hàng
-  const handleSplitOrder = async (record) => {
-    try {
-      const response = await orderAPI.getOrderInfo({ id: record.id });
-      setOrderDetails(response);
-      setSplitModalVisible(true);
-    } catch (error) {
-      console.error("Error fetching order details for split:", error);
-      message.error("Không thể lấy thông tin chi tiết đơn hàng để tách");
-    }
-  };
-
-  // Gộp đơn hàng
-  const handleMergeOrder = (record) => {
-    setMergeSourceOrder(record);
-    setMergeModalVisible(true);
-  };
-
-  // Thêm đơn hàng mới
   const handleAdd = () => {
     setEditingOrder(null);
     setIsModalVisible(true);
   };
 
-  // Sửa đơn hàng
   const handleEdit = (record) => {
     setEditingOrder(record);
     setIsModalVisible(true);
   };
 
-  // Xóa đơn hàng
   const handleDelete = (record) => {
     Modal.confirm({
       title: "Xác nhận xóa đơn hàng",
@@ -238,7 +181,6 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
     });
   };
 
-  // Xử lý submit đơn hàng (thêm/sửa)
   const handleSubmitOrder = async (orderData) => {
     try {
       if (orderData.id) {
@@ -246,11 +188,10 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
         message.success("Cập nhật đơn hàng thành công");
       } else {
         const response = await orderAPI.createOrder(orderData);
-        // Kiểm tra response trực tiếp vì handleApiResponse đã trả về data
         if (!response || !response._id) {
           throw new Error("Invalid response: Order object not found");
         }
-        const newOrder = response; // response là đối tượng đơn hàng
+        const newOrder = response;
         setOrders((prev) => ({
           ...prev,
           [newOrder.type]: [
@@ -327,31 +268,6 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
           >
             Sửa
           </Button>
-          <Button
-            className="px-4 py-1 text-sm font-medium text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition-all duration-300"
-            onClick={() => handleViewDetails(record.id)}
-            disabled={loading}
-          >
-            Xem Chi Tiết
-          </Button>
-          {record.type === "reservation" && (
-            <>
-              <Button
-                className="px-4 py-1 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-all duration-300"
-                onClick={() => handleSplitOrder(record)}
-                disabled={loading}
-              >
-                Tách Đơn
-              </Button>
-              <Button
-                className="px-4 py-1 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition-all duration-300"
-                onClick={() => handleMergeOrder(record)}
-                disabled={loading}
-              >
-                Gộp Đơn
-              </Button>
-            </>
-          )}
         </Space>
       ),
     },
@@ -434,6 +350,7 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
         selectedCustomer={selectedCustomer}
         onCancel={() => setIsModalVisible(false)}
         onSubmit={handleSubmitOrder}
+        orders={orders}
       />
 
       <Modal
@@ -479,27 +396,6 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
           <p className="text-sm text-gray-600">Đang tải thông tin...</p>
         )}
       </Modal>
-
-      <OrderDetailsModal
-        visible={detailsModalVisible}
-        orderDetails={orderDetails}
-        onCancel={() => setDetailsModalVisible(false)}
-      />
-
-      <SplitOrderModal
-        visible={splitModalVisible}
-        orderDetails={orderDetails}
-        onCancel={() => setSplitModalVisible(false)}
-        onSuccess={() => fetchOrders(selectedCustomer?._id)}
-      />
-
-      <MergeOrderModal
-        visible={mergeModalVisible}
-        sourceOrder={mergeSourceOrder}
-        orders={orders.reservation}
-        onCancel={() => setMergeModalVisible(false)}
-        onSuccess={() => fetchOrders(selectedCustomer?._id)}
-      />
     </div>
   );
 };
