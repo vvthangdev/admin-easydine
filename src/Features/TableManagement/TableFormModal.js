@@ -1,7 +1,7 @@
 import React from "react";
-import { Modal, Form, InputNumber, Button } from "antd";
+import { Modal, Form, InputNumber, Button, Select } from "antd";
 
-const TableFormModal = ({ visible, onCancel, onSubmit, editingTable }) => {
+const TableFormModal = ({ visible, onCancel, onSubmit, editingTable, areas }) => {
   const [form] = Form.useForm();
 
   return (
@@ -62,6 +62,20 @@ const TableFormModal = ({ visible, onCancel, onSubmit, editingTable }) => {
             type="number"
             placeholder="Nhập sức chứa"
             min={1}
+          />
+        </Form.Item>
+        <Form.Item
+          name="area"
+          label="Khu vực (Tầng)"
+          rules={[{ required: true, message: "Vui lòng chọn hoặc nhập khu vực!" }]}
+        >
+          <Select
+            className="w-full"
+            placeholder="Chọn hoặc nhập khu vực (ví dụ: Tầng 1)"
+            mode="tags"
+            options={areas.map((area) => ({ label: area, value: area }))}
+            maxTagCount={1} // Chỉ cho phép chọn/nhập một khu vực
+            allowClear
           />
         </Form.Item>
       </Form>

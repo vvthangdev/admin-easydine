@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Table,
   Button,
@@ -15,6 +15,8 @@ import { adminAPI } from "../../services/apis/Admin";
 import { UploadOutlined } from "@ant-design/icons";
 import minioClient from "../../Server/minioClient.js";
 
+import placeholderImage from "../../assets/images/user_place_holder.jpg";
+
 const UserList = ({ onSelectUser }) => {
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -29,42 +31,68 @@ const UserList = ({ onSelectUser }) => {
     setLoading(true);
     try {
       const response = await userAPI.getAllUser();
-      setUsers(response);
-      setFilteredUsers(response);
+      const data = Array.isArray(response) ? response : [];
+      console.log("Fetched users:", data);
+      setUsers(data);
+      setFilteredUsers(data);
     } catch (error) {
-      message.error("Lỗi khi tải danh sách người dùng");
+      message.error("Lỗi khi tải danh sách người dùng: " + error.message);
+      setUsers([]);
+      setFilteredUsers([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const searchUsers = async (query) => {
+  const searchUsers = useCallback(async (query) => {
     setLoading(true);
     try {
       if (!query) {
         setFilteredUsers(users);
       } else {
         const response = await userAPI.searchUsers(query);
-        setFilteredUsers(response);
+        const data = Array.isArray(response) ? response : [];
+        console.log("Searched users:", data);
+        setFilteredUsers(data);
       }
     } catch (error) {
-      message.error("Lỗi khi tìm kiếm người dùng");
+      message.error("Lỗi khi tìm kiếm người dùng: " + error.message);
+      setFilteredUsers([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [users]); // Thêm dependency `users`
 
   useEffect(() => {
     fetchUsers();
   }, []);
 
+  useEffect(() => {
+    searchUsers(searchTerm);
+  }, [searchTerm, searchUsers]); // Tự động gọi searchUsers khi searchTerm thay đổi
+
   const handleSearch = (e) => {
     const value = e.target.value;
     setSearchTerm(value);
-    searchUsers(value);
   };
 
   const columns = [
+    {
+      title: "Ảnh",
+      dataIndex: "avatar",
+      key: "avatar",
+      width: "10%",
+      render: (avatar) => (
+        <img
+          src={avatar || ''}
+          alt="Avatar"
+          className="w-10 h-10 rounded-full object-cover"
+          onError={(e) => {
+            e.target.src = `${placeholderImage}`;
+          }}
+        />
+      ),
+    },
     {
       title: "Tên",
       dataIndex: "name",
@@ -137,7 +165,6 @@ const UserList = ({ onSelectUser }) => {
       ...record,
       password: "",
     });
-    // Khởi tạo avatar nếu có, để hiển thị ảnh hiện tại trong Upload component
     setAvatar(record.avatar ? [{ url: record.avatar, uid: "1" }] : []);
     setIsModalVisible(true);
   };
@@ -145,11 +172,12 @@ const UserList = ({ onSelectUser }) => {
   const handleDelete = async (record) => {
     try {
       await adminAPI.deleteUser(record.username);
-      setUsers(users.filter((user) => user._id !== record._id));
-      setFilteredUsers(filteredUsers.filter((user) => user._id !== record._id));
+      const updatedUsers = users.filter((user) => user._id !== record._id);
+      setUsers(updatedUsers);
+      setFilteredUsers(updatedUsers);
       message.success("Xóa người dùng thành công");
     } catch (error) {
-      message.error("Xóa người dùng không thành công");
+      message.error("Xóa người dùng không thành công: " + error.message);
     }
   };
 
@@ -160,26 +188,23 @@ const UserList = ({ onSelectUser }) => {
   const handleModalOk = async () => {
     try {
       const values = await form.validateFields();
-      let imageUrl = editingUser.avatar || ""; // Giữ URL ảnh hiện tại nếu không upload ảnh mới
+      let imageUrl = editingUser?.avatar || "";
 
-      // Nếu có file ảnh mới được upload
       if (avatar?.length > 0 && avatar?.[0]?.originFileObj) {
         const timestamp = Date.now();
         const file = avatar[0].originFileObj;
         const fileName = `images/${timestamp}_${file.name}`;
-        const { error } = await minioClient.storage
-          .from("test01")
-          .upload(fileName, file);
+        
+        const minioStorage = minioClient.storage.from("test01");
+        const { error } = await minioStorage.upload(fileName, file);
 
         if (error) {
-          throw new Error("Không thể upload file. Vui lòng thử lại.");
+          throw new Error(`Không thể upload file: ${error.message}`);
         }
 
-        const { data: publicUrlData, error: publicUrlError } =
-          minioClient.storage.from("test01").getPublicUrl(fileName);
-
-        if (publicUrlError) {
-          throw new Error("Không thể tạo URL công khai cho ảnh.");
+        const { data: publicUrlData } = minioStorage.getPublicUrl(fileName);
+        if (!publicUrlData.publicUrl) {
+          throw new Error("Không thể lấy URL công khai cho ảnh.");
         }
 
         imageUrl = publicUrlData.publicUrl;
@@ -192,32 +217,26 @@ const UserList = ({ onSelectUser }) => {
         phone: values.phone,
         role: values.role,
         address: values.address,
-        avatar: imageUrl, // Cập nhật URL ảnh
+        avatar: imageUrl,
         ...(values.password && { password: values.password }),
       };
 
       if (editingUser) {
         await userAPI.adminUpdateUser(editingUser._id, userData);
         const updatedUser = { ...editingUser, ...userData };
-        setUsers(
-          users.map((user) =>
-            user._id === editingUser._id ? updatedUser : user
-          )
+        const updatedUsers = users.map((user) =>
+          user._id === editingUser._id ? updatedUser : user
         );
-        setFilteredUsers(
-          filteredUsers.map((user) =>
-            user._id === editingUser._id ? updatedUser : user
-          )
-        );
+        setUsers(updatedUsers);
+        setFilteredUsers(updatedUsers);
         message.success("Cập nhật người dùng thành công");
       }
       setIsModalVisible(false);
       form.resetFields();
-      setAvatar([]); // Reset avatar sau khi lưu
+      setAvatar([]);
     } catch (error) {
       const errorMessage =
-        error.response?.data?.message ||
-        "Có lỗi xảy ra khi cập nhật người dùng";
+        error.response?.data?.message || error.message || "Có lỗi xảy ra khi cập nhật người dùng";
       message.error(errorMessage);
     }
   };
@@ -236,7 +255,7 @@ const UserList = ({ onSelectUser }) => {
       <div className="overflow-x-auto">
         <Table
           columns={columns}
-          dataSource={filteredUsers}
+          dataSource={Array.isArray(filteredUsers) ? filteredUsers : []}
           rowKey="_id"
           loading={loading}
           pagination={{
@@ -256,9 +275,7 @@ const UserList = ({ onSelectUser }) => {
         onCancel={() => {
           setIsModalVisible(false);
           form.resetFields();
-          setAvatar(
-            editingUser.avatar ? [{ url: editingUser.avatar, uid: "1" }] : []
-          );
+          setAvatar(editingUser?.avatar ? [{ url: editingUser.avatar, uid: "1" }] : []);
         }}
       >
         <Form form={form} layout="vertical" className="mt-4">
@@ -317,7 +334,7 @@ const UserList = ({ onSelectUser }) => {
               listType="picture"
               fileList={avatar}
               onChange={handleUploadChange}
-              beforeUpload={() => false} // Ngăn upload tự động, xử lý trong handleModalOk
+              beforeUpload={() => false}
             >
               <Button icon={<UploadOutlined />}>Tải lên ảnh đại diện</Button>
             </Upload>
@@ -331,9 +348,7 @@ const UserList = ({ onSelectUser }) => {
                 message: "Mật khẩu phải có ít nhất 8 ký tự!",
                 validator: (_, value) =>
                   value && value.length < 8
-                    ? Promise.reject(
-                        new Error("Mật khẩu phải có ít nhất 8 ký tự!")
-                      )
+                    ? Promise.reject(new Error("Mật khẩu phải có ít nhất 8 ký tự!"))
                     : Promise.resolve(),
               },
             ]}

@@ -76,7 +76,7 @@ const OrderDetailsModal = ({ visible, orderDetails, onCancel }) => {
         </Button>,
       ]}
       width="80vw"
-      styles={{ padding: 0, background: "transparent" }}
+      style={{ top: 50 }}
     >
       <div className="bg-white/80 backdrop-blur-md p-6 rounded-xl min-h-[70vh]">
         {orderDetails ? (

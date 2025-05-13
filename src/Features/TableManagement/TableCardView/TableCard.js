@@ -8,7 +8,7 @@ import {
   handleMergeOrder,
   getVietnameseStatus,
 } from "./TableCardUtils";
-import OrderFormModal from "../../OrderManagement/OrderFormMoDal/OrderFormModal";
+import OrderFormModal from "../../OrderFormModal/OrderFormModal";
 
 const TableCard = ({
   table,
@@ -28,7 +28,7 @@ const TableCard = ({
     } else {
       try {
         const response = await orderAPI.getOrderInfo({
-          table_number: table.table_number,
+          table_id: table.table_id, // Sử dụng table_id
         });
         if (response) {
           setEditingOrder({
@@ -54,17 +54,15 @@ const TableCard = ({
   const handleOrderSubmit = async (orderData) => {
     try {
       if (orderData.id) {
-        // Cập nhật đơn hàng
         await orderAPI.updateOrder(orderData);
         message.success("Cập nhật đơn hàng thành công");
       } else {
-        // Thêm đơn hàng mới
         await orderAPI.createOrder(orderData);
         message.success("Thêm đơn hàng mới thành công");
       }
       setIsOrderModalVisible(false);
       setEditingOrder(null);
-      onOrderSuccess(); // Cập nhật danh sách bàn
+      onOrderSuccess();
     } catch (error) {
       console.error("Error submitting order:", error);
       message.error("Không thể lưu đơn hàng");
@@ -130,6 +128,19 @@ const TableCard = ({
               Bàn {table.table_number}
             </h3>
           </div>
+          {(table.status === "Reserved" || table.status === "Occupied") && (
+            <Button
+              type="primary"
+              danger
+              onClick={(e) => {
+                e.stopPropagation(); // Ngăn sự kiện click vào card
+                onRelease();
+              }}
+              className="mt-2 w-full bg-red-600 hover:bg-red-700"
+            >
+              Trả bàn
+            </Button>
+          )}
         </div>
       </Tooltip>
 

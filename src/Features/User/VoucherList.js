@@ -24,9 +24,12 @@ const VoucherList = ({ selectedUser }) => {
     setLoading(true);
     try {
       const response = await voucherAPI.getAllVouchers();
-      setVouchers(response);
+      const data = Array.isArray(response) ? response : [];
+      console.log("Fetched vouchers:", data); // Debug dữ liệu
+      setVouchers(data);
     } catch (error) {
-      message.error("Lỗi khi tải danh sách voucher");
+      message.error("Lỗi khi tải danh sách voucher: " + error.message);
+      setVouchers([]);
     } finally {
       setLoading(false);
     }
@@ -74,7 +77,7 @@ const VoucherList = ({ selectedUser }) => {
       width: "25%",
       ellipsis: true,
       className: "hidden lg:table-cell",
-      render: (users) => (users.length > 0 ? users.join(", ") : "Tất cả"),
+      render: (users) => (users && users.length > 0 ? users.join(", ") : "Tất cả"),
     },
     {
       title: "Thao tác",
@@ -117,10 +120,11 @@ const VoucherList = ({ selectedUser }) => {
   const handleDelete = async (record) => {
     try {
       await voucherAPI.deleteVoucher(record._id);
-      setVouchers(vouchers.filter((v) => v._id !== record._id));
+      const updatedVouchers = vouchers.filter((v) => v._id !== record._id);
+      setVouchers(updatedVouchers);
       message.success("Xóa voucher thành công");
     } catch (error) {
-      message.error("Xóa voucher không thành công");
+      message.error("Xóa voucher không thành công: " + error.message);
     }
   };
 
@@ -130,7 +134,7 @@ const VoucherList = ({ selectedUser }) => {
       fetchVouchers();
       message.success(`Đã thêm ${selectedUser.name} vào voucher ${record.code}`);
     } catch (error) {
-      message.error("Thêm người dùng vào voucher thất bại");
+      message.error("Thêm người dùng vào voucher thất bại: " + error.message);
     }
   };
 
@@ -145,11 +149,10 @@ const VoucherList = ({ selectedUser }) => {
 
       if (editingVoucher) {
         await voucherAPI.updateVoucher(editingVoucher._id, voucherData);
-        setVouchers(
-          vouchers.map((v) =>
-            v._id === editingVoucher._id ? { ...v, ...voucherData } : v
-          )
+        const updatedVouchers = vouchers.map((v) =>
+          v._id === editingVoucher._id ? { ...v, ...voucherData } : v
         );
+        setVouchers(updatedVouchers);
         message.success("Cập nhật voucher thành công");
       } else {
         const newVoucher = await voucherAPI.createVoucher(voucherData);
@@ -159,7 +162,7 @@ const VoucherList = ({ selectedUser }) => {
       setIsModalVisible(false);
       form.resetFields();
     } catch (error) {
-      message.error("Có lỗi xảy ra khi xử lý voucher");
+      message.error("Có lỗi xảy ra khi xử lý voucher: " + error.message);
     }
   };
 
@@ -174,14 +177,14 @@ const VoucherList = ({ selectedUser }) => {
       <div className="overflow-x-auto">
         <Table
           columns={columns}
-          dataSource={vouchers}
+          dataSource={Array.isArray(vouchers) ? vouchers : []} // Đảm bảo dataSource là mảng
           rowKey="_id"
           loading={loading}
           pagination={{
-            pageSizeOptions: [5, 10], // Tùy chọn 5 hoặc 10 voucher mỗi trang
-            defaultPageSize: 5, // Mặc định 5 voucher mỗi trang
-            showSizeChanger: true, // Hiển thị tùy chọn thay đổi số lượng
-            showTotal: (total) => `Tổng cộng ${total} voucher`, // Hiển thị tổng số
+            pageSizeOptions: [5, 10],
+            defaultPageSize: 5,
+            showSizeChanger: true,
+            showTotal: (total) => `Tổng cộng ${total} voucher`,
           }}
           className="min-w-0"
           tableLayout="fixed"
@@ -194,16 +197,16 @@ const VoucherList = ({ selectedUser }) => {
         onCancel={() => setIsModalVisible(false)}
       >
         <Form form={form} layout="vertical" className="mt-4">
-          <Form.Item name="code" label="Mã" rules={[{ required: true }]}>
+          <Form.Item name="code" label="Mã" rules={[{ required: true, message: "Vui lòng nhập mã!" }]}>
             <Input />
           </Form.Item>
-          <Form.Item name="discount" label="Giảm giá" rules={[{ required: true }]}>
+          <Form.Item name="discount" label="Giảm giá" rules={[{ required: true, message: "Vui lòng nhập giá trị giảm giá!" }]}>
             <Input type="number" />
           </Form.Item>
           <Form.Item
             name="discountType"
             label="Loại giảm giá"
-            rules={[{ required: true }]}
+            rules={[{ required: true, message: "Vui lòng chọn loại giảm giá!" }]}
           >
             <Select>
               <Select.Option value="percentage">Phần trăm</Select.Option>
@@ -213,10 +216,10 @@ const VoucherList = ({ selectedUser }) => {
           <Form.Item name="minOrderValue" label="Giá trị tối thiểu">
             <Input type="number" />
           </Form.Item>
-          <Form.Item name="startDate" label="Ngày bắt đầu" rules={[{ required: true }]}>
+          <Form.Item name="startDate" label="Ngày bắt đầu" rules={[{ required: true, message: "Vui lòng chọn ngày bắt đầu!" }]}>
             <DatePicker showTime />
           </Form.Item>
-          <Form.Item name="endDate" label="Ngày kết thúc" rules={[{ required: true }]}>
+          <Form.Item name="endDate" label="Ngày kết thúc" rules={[{ required: true, message: "Vui lòng chọn ngày kết thúc!" }]}>
             <DatePicker showTime />
           </Form.Item>
         </Form>

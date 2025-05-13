@@ -4,8 +4,8 @@ import moment from "moment";
 import OrderBasicInfo from "./OrderBasicInfo";
 import ItemSelector from "./ItemSelector";
 import SelectedItems from "./SelectedItems";
-import { tableAPI } from "../../../services/apis/Table";
-import { orderAPI } from "../../../services/apis/Order";
+import { tableAPI } from "../../services/apis/Table";
+import { orderAPI } from "../../services/apis/Order";
 
 const OrderFormModal = ({
   visible,
@@ -23,11 +23,11 @@ const OrderFormModal = ({
     status: "pending",
     date: moment().format("DD/MM/YYYY"),
     start_time: moment().format("HH:mm"),
-    end_time: moment().add(1, "hours").format("HH:mm"),
-    tables: table ? [table.table_number] : [],
+    end_time: "23:59", // Mặc định là 23:59
+    tables: table ? [table.table_id] : [],
   });
   const [loading, setLoading] = useState(false);
-  const [showItemSelector, setShowItemSelector] = useState(false); // Trạng thái hiển thị ItemSelector
+  const [showItemSelector, setShowItemSelector] = useState(false);
 
   const fetchAvailableTables = useCallback(async (date, startTime, endTime) => {
     if (!date || !startTime || !endTime) return;
@@ -37,7 +37,7 @@ const OrderFormModal = ({
         start_time: startTime,
         end_time: endTime,
       });
-      setAvailableTables(response);
+      setAvailableTables(Array.isArray(response) ? response : []);
     } catch (error) {
       console.error("Error fetching available tables:", error);
       message.error("Không thể tải danh sách bàn trống");
@@ -47,97 +47,109 @@ const OrderFormModal = ({
   }, []);
 
   const fetchOrderDetails = useCallback(async () => {
-    if (!editingOrder) return;
-    setLoading(true);
-    try {
-      const response = await orderAPI.getOrderInfo({ id: editingOrder.id });
-      const data = response;
+  if (!editingOrder) return;
+  setLoading(true);
+  try {
+    const data = await orderAPI.getOrderInfo({ id: editingOrder.id });
 
-      const reservedTables =
-        data.reservedTables?.map((table) => table.table_id) || [];
-      const items =
-        data.itemOrders?.map((item) => ({
-          id: item.item_id,
-          name: item.itemName,
-          price: item.itemPrice,
-          quantity: item.quantity,
-          size: item.size || null,
-          note: item.note || "",
-        })) || [];
+    const reservedTables =
+      data.reservedTables?.map((table) => ({
+        _id: table.table_id,
+        table_number: table.table_number,
+        area: table.area,
+        capacity: table.capacity,
+        status: table.status,
+      })) || [];
 
-      const newFormData = {
-        type: editingOrder.type || "reservation",
-        status: editingOrder.status || "pending",
-        staff_id: data.order?.staff_id || undefined,
-        date: moment
-          .utc(data.time || editingOrder.time)
-          .local()
-          .format("DD/MM/YYYY"),
-        start_time: data.reservedTables?.[0]
-          ? moment
-              .utc(data.reservedTables[0].start_time)
-              .local()
-              .format("HH:mm")
-          : moment
-              .utc(data.time || editingOrder.time)
-              .local()
-              .format("HH:mm"),
-        end_time: data.reservedTables?.[0]
-          ? moment.utc(data.reservedTables[0].end_time).local().format("HH:mm")
-          : moment
-              .utc(data.time || editingOrder.time)
-              .local()
-              .add(1, "hours")
-              .format("HH:mm"),
-        tables: reservedTables,
-      };
+    const items =
+      data.itemOrders?.map((item) => ({
+        id: item.item_id,
+        name: item.itemName,
+        price: item.itemPrice,
+        quantity: item.quantity,
+        size: item.size || null,
+        note: item.note || "",
+      })) || [];
 
-      setFormData(newFormData);
-      setSelectedItems(items);
+    const newFormData = {
+      type: data.order?.type || "reservation",
+      status: data.order?.status || "pending",
+      staff_id: data.order?.staff_id || undefined,
+      date: moment
+        .utc(data.order?.time || editingOrder.time)
+        .local()
+        .format("DD/MM/YYYY"),
+      start_time: data.reservedTables?.[0]
+        ? moment
+            .utc(data.reservedTables[0].start_time)
+            .local()
+            .format("HH:mm")
+        : moment
+            .utc(data.order?.time || editingOrder.time)
+            .local()
+            .format("HH:mm"),
+      end_time: "23:59", // Mặc định là 23:59
+      tables: reservedTables.map((table) => table._id),
+    };
 
-      const startDateTime = moment(
-        `${newFormData.date} ${newFormData.start_time}`,
-        "DD/MM/YYYY HH:mm"
-      ).utc();
-      const endDateTime = moment(
-        `${newFormData.date} ${newFormData.end_time}`,
-        "DD/MM/YYYY HH:mm"
-      ).utc();
-      fetchAvailableTables(
-        newFormData.date,
-        startDateTime.format("YYYY-MM-DDTHH:mm:ss[Z]"),
-        endDateTime.format("YYYY-MM-DDTHH:mm:ss[Z]")
-      );
-    } catch (error) {
-      console.error("Error loading order for edit:", error);
-      message.error("Không thể tải thông tin đơn hàng");
-    } finally {
-      setLoading(false);
-    }
-  }, [editingOrder, fetchAvailableTables]);
+    setFormData(newFormData);
+    setSelectedItems(items);
+
+    // Lấy danh sách bàn trống
+    const startDateTime = moment(
+      `${newFormData.date} ${newFormData.start_time}`,
+      "DD/MM/YYYY HH:mm"
+    ).utc();
+    const endDateTime = moment(
+      `${newFormData.date} 23:59`,
+      "DD/MM/YYYY HH:mm"
+    ).utc();
+    
+    // Gọi API lấy bàn trống
+    const response = await tableAPI.getAvailableTables({
+      start_time: startDateTime.format("YYYY-MM-DDTHH:mm:ss[Z]"),
+      end_time: endDateTime.format("YYYY-MM-DDTHH:mm:ss[Z]"),
+    });
+
+    // Kết hợp danh sách bàn trống với các bàn đã đặt của đơn hàng
+    const availableTablesFromAPI = Array.isArray(response) ? response : [];
+    const existingTableIds = availableTablesFromAPI.map((table) => table._id);
+    const additionalReservedTables = reservedTables.filter(
+      (table) => !existingTableIds.includes(table._id)
+    );
+    const mergedTables = [...availableTablesFromAPI, ...additionalReservedTables];
+
+    setAvailableTables(mergedTables);
+  } catch (error) {
+    console.error("Error loading order for edit:", error);
+    message.error("Không thể tải thông tin đơn hàng");
+  } finally {
+    setLoading(false);
+  }
+}, [editingOrder]);
 
   const resetForm = useCallback(() => {
     const now = moment();
     const newFormData = {
       date: now.format("DD/MM/YYYY"),
       start_time: now.format("HH:mm"),
-      end_time: now.add(1, "hours").format("HH:mm"),
+      end_time: "23:59", // Mặc định là 23:59
       type: "reservation",
       status: "pending",
-      tables: table ? [table.table_number] : [],
+      tables: table ? [table.table_id] : [],
     };
     setFormData(newFormData);
     setSelectedItems([]);
     setAvailableTables([]);
     setMenuItems([]);
-    setShowItemSelector(false); // Đặt lại trạng thái hiển thị
+    setShowItemSelector(false);
 
     const startDateTime = moment(
       `${newFormData.date} ${newFormData.start_time}`,
       "DD/MM/YYYY HH:mm"
     ).utc();
     const endDateTime = moment(
-      `${newFormData.date} ${newFormData.end_time}`,
+      `${newFormData.date} 23:59`,
       "DD/MM/YYYY HH:mm"
     ).utc();
     fetchAvailableTables(
@@ -159,11 +171,7 @@ const OrderFormModal = ({
 
   const handleModalOk = async () => {
     const isValidDate = moment(formData.date, "DD/MM/YYYY", true).isValid();
-    const isValidStartTime = moment(
-      formData.start_time,
-      "HH:mm",
-      true
-    ).isValid();
+    const isValidStartTime = moment(formData.start_time, "HH:mm", true).isValid();
     const isValidEndTime = moment(formData.end_time, "HH:mm", true).isValid();
 
     if (
@@ -208,7 +216,7 @@ const OrderFormModal = ({
         end_time: endDateTime.format("YYYY-MM-DDTHH:mm:ss[Z]"),
         type: formData.type,
         status: formData.status,
-        tables: formData.tables || [], // Sửa lỗi: thay 'tablesintre' thành 'tables'
+        tables: formData.tables || [],
         items: selectedItems.map((item) => ({
           id: item.id,
           quantity: item.quantity,
@@ -224,7 +232,7 @@ const OrderFormModal = ({
       setSelectedItems([]);
       setAvailableTables([]);
       setMenuItems([]);
-      setShowItemSelector(false); // Đặt lại trạng thái hiển thị
+      setShowItemSelector(false);
       onCancel();
     } catch (error) {
       console.error("Error submitting order:", error);
@@ -235,11 +243,11 @@ const OrderFormModal = ({
   };
 
   const handleAddItemClick = () => {
-    setShowItemSelector(true); // Chuyển sang hiển thị ItemSelector
+    setShowItemSelector(true);
   };
 
   const handleDoneSelectingItems = () => {
-    setShowItemSelector(false); // Quay lại hiển thị OrderBasicInfo
+    setShowItemSelector(false);
   };
 
   return (
@@ -270,11 +278,11 @@ const OrderFormModal = ({
       ]}
     >
       <div className="flex h-[80vh] bg-white/80 backdrop-blur-md rounded-xl overflow-hidden">
-        {/* Phần bên trái: OrderBasicInfo hoặc ItemSelector */}
         <div className="w-1/2 p-4 border-r border-gray-200 overflow-y-auto">
           {showItemSelector ? (
             <ItemSelector
               setSelectedItems={setSelectedItems}
+              menuItems={menuItems}
               setMenuItems={setMenuItems}
             />
           ) : (
@@ -286,7 +294,6 @@ const OrderFormModal = ({
             />
           )}
         </div>
-        {/* Phần bên phải: SelectedItems với nút Thêm Món/Xong ở trên bên trái */}
         <div className="w-1/2 p-4 overflow-y-auto">
           <div className="flex justify-between items-center mb-4">
             <div>

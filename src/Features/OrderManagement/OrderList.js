@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { Table, Button, Modal, message, Tabs, Space, Select } from "antd";
 import moment from "moment";
 import { orderAPI } from "../../services/apis/Order";
@@ -7,7 +7,7 @@ import { userAPI } from "../../services/apis/User";
 import OrderDetailsModal from "./Modals/OrderDetailsModal";
 import SplitOrderModal from "./Modals/SplitOrderModal";
 import MergeOrderModal from "./Modals/MergeOrderModal";
-import OrderFormModal from "./OrderFormMoDal/OrderFormModal";
+import OrderFormModal from "../OrderFormModal/OrderFormModal";
 
 const { TabPane } = Tabs;
 
@@ -24,59 +24,76 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
   const [splitModalVisible, setSplitModalVisible] = useState(false);
   const [mergeModalVisible, setMergeModalVisible] = useState(false);
   const [mergeSourceOrder, setMergeSourceOrder] = useState(null);
+  const customerCache = useRef({}); // Sử dụng useRef thay vì useState
 
   // Lấy danh sách đơn hàng
-  const fetchOrders = async (customerId = null) => {
+  const fetchOrders = useCallback(async (customerId = null) => {
     setLoading(true);
     try {
       const response = customerId
         ? await orderAPI.searchOrdersByCustomer(customerId)
         : await orderAPI.getAllOrders();
-      const ordersData = response || []; // Đảm bảo response không undefined
+      const ordersData = response || [];
 
-      const ordersWithCustomerDetails = await Promise.all(
-        ordersData.map(async (order) => {
-          try {
-            const customerResponse = await adminAPI.getCustomerDetails(order.customer_id);
-            return {
-              ...order,
-              id: order._id,
-              customerName: customerResponse.name || "Không xác định",
-              customerPhone: customerResponse.phone || "Không xác định",
-              customerId: order.customer_id,
-            };
-          } catch (error) {
-            console.error(`Error fetching customer for order ${order._id}:`, error);
-            return {
-              ...order,
-              id: order._id,
-              customerName: "Không xác định",
-              customerPhone: "Không xác định",
-              customerId: order.customer_id,
-            };
-          }
-        })
-      );
+      // Thu thập các customer_id duy nhất
+      const uniqueCustomerIds = [
+        ...new Set(ordersData.map((order) => order.customer_id)),
+      ];
+
+      // Lấy thông tin khách hàng cho các customer_id duy nhất
+      const customerDetailsPromises = uniqueCustomerIds.map(async (id) => {
+        if (customerCache.current[id]) {
+          return { id, data: customerCache.current[id] };
+        }
+        try {
+          const customerResponse = await adminAPI.getCustomerDetails(id);
+          customerCache.current[id] = customerResponse; // Cập nhật cache
+          return { id, data: customerResponse };
+        } catch (error) {
+          console.error(`Error fetching customer ${id}:`, error);
+          return {
+            id,
+            data: { name: "Không xác định", phone: "Không xác định" },
+          };
+        }
+      });
+
+      const customerDetailsResults = await Promise.all(customerDetailsPromises);
+      const customerMap = customerDetailsResults.reduce((acc, { id, data }) => {
+        acc[id] = data;
+        return acc;
+      }, {});
+
+      // Gắn thông tin khách hàng vào đơn hàng
+      const ordersWithCustomerDetails = ordersData.map((order) => ({
+        ...order,
+        id: order._id,
+        customerName: customerMap[order.customer_id]?.name || "Không xác định",
+        customerPhone:
+          customerMap[order.customer_id]?.phone || "Không xác định",
+        customerId: order.customer_id,
+      }));
 
       const sortedOrders = ordersWithCustomerDetails.sort((a, b) =>
         moment(b.time).diff(moment(a.time))
       );
       setOrders({
-        reservation: sortedOrders.filter((order) => order.type === "reservation"),
+        reservation: sortedOrders.filter(
+          (order) => order.type === "reservation"
+        ),
         ship: sortedOrders.filter((order) => order.type === "ship"),
       });
     } catch (error) {
-      console.error("Error loading orders:", error);
       message.error("Lỗi khi tải danh sách đơn hàng");
-      setOrders({ ship: [], reservation: [] }); // Đặt lại orders để tránh lỗi
+      setOrders({ ship: [], reservation: [] });
     } finally {
       setLoading(false);
     }
-  };
+  }, []); // Không phụ thuộc vào customerCache
 
   useEffect(() => {
     fetchOrders(selectedCustomer?._id);
-  }, [selectedCustomer]);
+  }, [selectedCustomer, fetchOrders]);
 
   // Xử lý thay đổi trạng thái đơn hàng
   const handleStatusChange = async (orderId, newStatus) => {
@@ -86,13 +103,11 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
     }
 
     try {
-      // Tìm đơn hàng trong danh sách
       const currentOrder =
         orders.reservation.find((o) => o.id === orderId) ||
         orders.ship.find((o) => o.id === orderId);
 
       if (!currentOrder) {
-        // Nếu không tìm thấy trong state, thử lấy trực tiếp từ API
         try {
           const response = await orderAPI.getOrderInfo({ id: orderId });
           if (response && response.order) {
@@ -131,8 +146,14 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
   // Xem chi tiết khách hàng
   const handleViewCustomerDetails = async (customerId) => {
     try {
-      const response = await adminAPI.getCustomerDetails(customerId);
-      setCustomerDetails(response);
+      let customerData;
+      if (customerCache.current[customerId]) {
+        customerData = customerCache.current[customerId];
+      } else {
+        customerData = await adminAPI.getCustomerDetails(customerId);
+        customerCache.current[customerId] = customerData;
+      }
+      setCustomerDetails(customerData);
       setCustomerModalVisible(true);
     } catch (error) {
       console.error("Error fetching customer details:", error);
@@ -149,7 +170,8 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
       let staffName = "Chưa phân công";
       if (data.order?.staff_id) {
         const staffResponse = await userAPI.getUserById(data.order.staff_id);
-        staffName = staffResponse.username || staffResponse.name || "Không xác định";
+        staffName =
+          staffResponse.username || staffResponse.name || "Không xác định";
       }
 
       setOrderDetails({ ...data, order: { ...data.order, staffName } });
@@ -203,7 +225,9 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
           await orderAPI.deleteOrder(record.id);
           setOrders((prev) => ({
             ...prev,
-            [record.type]: prev[record.type].filter((order) => order.id !== record.id),
+            [record.type]: prev[record.type].filter(
+              (order) => order.id !== record.id
+            ),
           }));
           message.success(`Xóa đơn hàng ${record.id} thành công`);
         } catch (error) {
@@ -222,10 +246,11 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
         message.success("Cập nhật đơn hàng thành công");
       } else {
         const response = await orderAPI.createOrder(orderData);
-        if (!response.Order) {
+        // Kiểm tra response trực tiếp vì handleApiResponse đã trả về data
+        if (!response || !response._id) {
           throw new Error("Invalid response: Order object not found");
         }
-        const newOrder = response.Order;
+        const newOrder = response; // response là đối tượng đơn hàng
         setOrders((prev) => ({
           ...prev,
           [newOrder.type]: [
@@ -267,7 +292,8 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
       title: "Ngày",
       dataIndex: "time",
       key: "time",
-      render: (text) => (text ? moment.utc(text).local().format("DD/MM/YY HH:mm") : "N/A"),
+      render: (text) =>
+        text ? moment.utc(text).local().format("DD/MM/YY HH:mm") : "N/A",
     },
     {
       title: "Trạng Thái",
@@ -279,7 +305,7 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
           onChange={(value) => handleStatusChange(record.id, value)}
           className="w-32 border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
           popupMatchSelectWidth={false}
-          disabled={loading} // Vô hiệu hóa khi đang tải
+          disabled={loading}
         >
           <Select.Option value="pending">Pending</Select.Option>
           <Select.Option value="confirmed">Confirmed</Select.Option>
@@ -348,12 +374,15 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
   return (
     <div className="p-4 bg-white h-full overflow-y-auto">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold text-gray-900">Danh sách đơn hàng</h2>
+        <h2 className="text-lg font-semibold text-gray-900">
+          Danh sách đơn hàng
+        </h2>
         <Space>
           {selectedCustomer && (
             <>
               <span>
-                Đang hiển thị đơn hàng của: {selectedCustomer.name} - {selectedCustomer.phone}
+                Đang hiển thị đơn hàng của: {selectedCustomer.name} -{" "}
+                {selectedCustomer.phone}
               </span>
               <Button
                 className="px-4 py-1 text-sm font-medium text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition-all duration-300"
@@ -429,12 +458,22 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
                 alt={customerDetails.name}
                 className="w-20 h-20 rounded-full object-cover"
               />
-              <h3 className="text-lg font-semibold text-gray-900">{customerDetails.name}</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                {customerDetails.name}
+              </h3>
             </div>
-            <p><b>Địa Chỉ:</b> {customerDetails.address || "Chưa cung cấp"}</p>
-            <p><b>Email:</b> {customerDetails.email || "Chưa cung cấp"}</p>
-            <p><b>Số Điện Thoại:</b> {customerDetails.phone || "Chưa cung cấp"}</p>
-            <p><b>Username:</b> {customerDetails.username || "Chưa cung cấp"}</p>
+            <p>
+              <b>Địa Chỉ:</b> {customerDetails.address || "Chưa cung cấp"}
+            </p>
+            <p>
+              <b>Email:</b> {customerDetails.email || "Chưa cung cấp"}
+            </p>
+            <p>
+              <b>Số Điện Thoại:</b> {customerDetails.phone || "Chưa cung cấp"}
+            </p>
+            <p>
+              <b>Username:</b> {customerDetails.username || "Chưa cung cấp"}
+            </p>
           </div>
         ) : (
           <p className="text-sm text-gray-600">Đang tải thông tin...</p>

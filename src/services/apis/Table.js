@@ -5,6 +5,13 @@ export const tableAPI = {
   getAllTable: () =>
     axiosInstance.get("/tables").then(handleApiResponse),
 
+  getAllAreas: async () => {
+    const tables = await axiosInstance.get("/tables").then(handleApiResponse);
+    // Lấy danh sách khu vực duy nhất
+    const areas = [...new Set(tables.map((table) => table.area))];
+    return areas;
+  },
+
   addTable: (data) =>
     axiosInstance.post("/tables/create-table", data).then(handleApiResponse),
 

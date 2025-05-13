@@ -54,7 +54,7 @@ const MergeOrderModal = ({
       title="Gộp Đơn Hàng"
       open={visible}
       onCancel={onCancel}
-      className="rounded-xl"
+      className="rounded-xl top-near-header"
       footer={[
         <Button
           key="cancel"
@@ -72,6 +72,8 @@ const MergeOrderModal = ({
         </Button>,
       ]}
       width={600}
+      style={{ top: 50 }}
+      zIndex={15}
     >
       <div className="flex flex-col gap-4">
         <div>

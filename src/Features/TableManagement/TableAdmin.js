@@ -1,8 +1,14 @@
-import React from "react";
-import { Table, Button } from "antd";
+import React, { useState } from "react";
+import { Table, Button, Tabs } from "antd";
 import { getVietnameseStatus } from "./TableCardView/TableCardUtils";
 
-const TableAdmin = ({ tables, onEdit, onDelete, onAdd }) => {
+const { TabPane } = Tabs;
+
+const TableAdmin = ({ tables, onEdit, onDelete, onAdd, areas }) => {
+  // Đặt khu vực mặc định là khu vực đầu tiên trong areas, nếu không có thì là chuỗi rỗng
+  const initialArea = areas.length > 0 ? areas[0] : "";
+  const [activeArea, setActiveArea] = useState(initialArea);
+
   const columns = [
     {
       title: "Số bàn",
@@ -15,6 +21,12 @@ const TableAdmin = ({ tables, onEdit, onDelete, onAdd }) => {
       dataIndex: "capacity",
       key: "capacity",
       sorter: (a, b) => a.capacity - b.capacity,
+    },
+    {
+      title: "Khu vực",
+      dataIndex: "area",
+      key: "area",
+      sorter: (a, b) => a.area.localeCompare(b.area),
     },
     {
       title: "Trạng thái",
@@ -48,7 +60,7 @@ const TableAdmin = ({ tables, onEdit, onDelete, onAdd }) => {
           </Button>
           <Button
             type="danger"
-            onClick={() => onDelete(record)}
+            onClick={() => onDelete(record.table_id)}
             className="px-3 py-1 text-sm bg-red-600 hover:bg-red-700"
           >
             Xóa
@@ -57,6 +69,15 @@ const TableAdmin = ({ tables, onEdit, onDelete, onAdd }) => {
       ),
     },
   ];
+
+  // Lọc bàn theo khu vực
+  const filteredTables =
+    activeArea === ""
+      ? tables
+      : tables.filter((table) => table.area === activeArea);
+
+  // Danh sách khu vực cho Tabs (chỉ lấy các khu vực duy nhất từ tables)
+  const tabAreas = [...new Set(tables.map((table) => table.area))];
 
   return (
     <div>
@@ -69,9 +90,18 @@ const TableAdmin = ({ tables, onEdit, onDelete, onAdd }) => {
           Thêm bàn mới
         </Button>
       </div>
+      {tabAreas.length > 0 ? (
+        <Tabs activeKey={activeArea} onChange={setActiveArea} className="mb-4">
+          {tabAreas.map((area) => (
+            <TabPane tab={area} key={area} />
+          ))}
+        </Tabs>
+      ) : (
+        <div className="text-center">Không có khu vực nào</div>
+      )}
       <Table
         columns={columns}
-        dataSource={tables}
+        dataSource={filteredTables}
         rowKey="table_number"
         pagination={{ pageSize: 10 }}
         className="mt-4"

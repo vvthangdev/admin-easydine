@@ -159,7 +159,8 @@ const SplitOrderModal = ({ visible, orderDetails, onCancel, onSuccess }) => {
           Tách Đơn
         </Button>,
       ]}
-      width={800}
+      width="80vw"
+      style={{ top: 50 }}
     >
       <div className="flex flex-col gap-4">
         <div>

@@ -1,10 +1,11 @@
 import React from "react";
-import { Table, Button, Input, Select } from "antd";
+import { Table, Button, Input, Select, Typography } from "antd";
 
 const { Option } = Select;
 const { TextArea } = Input;
+const { Text } = Typography;
 
-const SelectedItems = ({ selectedItems, setSelectedItems }) => {
+const SelectedItems = ({ selectedItems, setSelectedItems, menuItems }) => {
   const handleQuantityChange = (id, size, value) => {
     setSelectedItems((prev) =>
       prev.map((item) =>
@@ -19,7 +20,7 @@ const SelectedItems = ({ selectedItems, setSelectedItems }) => {
     setSelectedItems((prev) => {
       const item = prev.find((i) => i.id === id && i.size === oldSize);
       if (!item) return prev;
-      const menuItem = window.menuItems?.find((m) => m._id === id);
+      const menuItem = menuItems.find((m) => m._id === id);
       const sizeInfo = newSize
         ? menuItem?.sizes.find((s) => s.name === newSize)
         : null;
@@ -44,59 +45,56 @@ const SelectedItems = ({ selectedItems, setSelectedItems }) => {
   };
 
   const handleRemove = (id, size) => {
-    setSelectedItems((prev) => prev.filter((item) => !(item.id === id && item.size === size)));
+    setSelectedItems((prev) =>
+      prev.filter((item) => !(item.id === id && item.size === size))
+    );
   };
 
+  // Tính toán hóa đơn tạm tính
+  const subtotal = selectedItems.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
+  const vat = subtotal * 0.1; // VAT 10%
+  const total = subtotal + vat;
+
   const columns = [
-    { title: "Tên món", dataIndex: "name", key: "name" },
     {
-      title: "Kích thước",
-      dataIndex: "size",
-      key: "size",
-      render: (size, record) => {
-        const menuItem = window.menuItems?.find((m) => m._id === record.id);
+      title: "Tên món",
+      dataIndex: "name",
+      key: "name",
+      width: 200, // Đảm bảo đủ không gian cho tên món dài
+    },
+    {
+      title: "Kích thước - Giá",
+      key: "sizePrice",
+      width: 180, // Tăng width để hiển thị đầy đủ nội dung
+      render: (_, record) => {
+        const menuItem = menuItems.find((m) => m._id === record.id);
         return menuItem?.sizes?.length > 0 ? (
           <Select
-            value={size || null}
-            onChange={(value) => handleSizeChange(record.id, size, value)}
-            style={{ width: 120 }}
+            value={record.size || null}
+            onChange={(value) => handleSizeChange(record.id, record.size, value)}
+            style={{ width: "100%" }} // Chiếm toàn bộ chiều rộng cột
             allowClear
+            placeholder="Chọn kích thước"
           >
             {menuItem.sizes.map((s) => (
-              <Option key={s.name} value={s.name}>
-                {s.name}
+              <Option key={s._id} value={s.name}>
+                {`${s.name} - ${s.price.toLocaleString()}`}
               </Option>
             ))}
           </Select>
         ) : (
-          "Mặc định"
+          record.price.toLocaleString()
         );
       },
-    },
-    {
-      title: "Ghi chú",
-      dataIndex: "note",
-      key: "note",
-      render: (note, record) => (
-        <TextArea
-          value={note}
-          onChange={(e) => handleNoteChange(record.id, record.size, e.target.value)}
-          placeholder="Nhập ghi chú (ví dụ: Ít đá)"
-          rows={3}
-          style={{ width: 200 }}
-        />
-      ),
-    },
-    {
-      title: "Giá",
-      dataIndex: "price",
-      key: "price",
-      render: (text) => `${text.toLocaleString()} VND`,
     },
     {
       title: "Số lượng",
       dataIndex: "quantity",
       key: "quantity",
+      width: 100,
       render: (quantity, record) => (
         <Input
           type="number"
@@ -110,11 +108,28 @@ const SelectedItems = ({ selectedItems, setSelectedItems }) => {
     {
       title: "Tổng",
       key: "total",
-      render: (_, record) => `${(record.price * record.quantity).toLocaleString()} VND`,
+      width: 100,
+      render: (_, record) => (record.price * record.quantity).toLocaleString(),
     },
     {
-      title: "Thao tác",
+      title: "Ghi chú",
+      dataIndex: "note",
+      key: "note",
+      width: 200,
+      render: (note, record) => (
+        <TextArea
+          value={note}
+          onChange={(e) => handleNoteChange(record.id, record.size, e.target.value)}
+          placeholder="Nhập ghi chú (ví dụ: Ít đá)"
+          rows={3}
+          style={{ width: "100%" }}
+        />
+      ),
+    },
+    {
+      title: "Xóa",
       key: "action",
+      width: 80,
       render: (_, record) => (
         <Button
           type="link"
@@ -139,6 +154,23 @@ const SelectedItems = ({ selectedItems, setSelectedItems }) => {
         className="text-sm text-gray-600 flex-1 overflow-y-auto"
         rowClassName="hover:bg-gray-100 transition-all duration-200"
       />
+      <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+        <h4 className="text-md font-semibold text-gray-900">Hóa đơn tạm tính</h4>
+        <div className="flex justify-between mt-2">
+          <Text>Tổng tiền món:</Text>
+          <Text strong>{subtotal.toLocaleString()} VND</Text>
+        </div>
+        <div className="flex justify-between mt-2">
+          <Text>VAT (10%):</Text>
+          <Text strong>{vat.toLocaleString()} VND</Text>
+        </div>
+        <div className="flex justify-between mt-2 border-t pt-2">
+          <Text strong>Tổng cộng:</Text>
+          <Text strong className="text-blue-600">
+            {total.toLocaleString()} VND
+          </Text>
+        </div>
+      </div>
     </div>
   );
 };
