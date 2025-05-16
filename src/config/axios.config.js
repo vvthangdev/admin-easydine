@@ -4,7 +4,8 @@ import axios from "axios";
 // http://localhost:8080
 // http://128.199.246.55:8080
 
-const API_URL = process.env.BACKEND_URL;
+const API_URL = process.env.REACT_APP_BACKEND_URL;
+console.log(`vvt: ${process.env.REACT_APP_BACKEND_URL}`);
 
 const axiosInstance = axios.create({
   baseURL: API_URL, // Thay đổi baseURL theo API của bạn

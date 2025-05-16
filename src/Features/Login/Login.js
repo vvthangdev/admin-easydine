@@ -85,7 +85,7 @@ export default function Login() {
   const handleGoogleLogin = () => {
     setGoogleLoading(true);
     message.loading("Đang chuyển hướng đến Google...", 0);
-    window.location.href = `${process.env.BACKEND_URL}/users/auth/google`;
+    window.location.href = `${process.env.REACT_APP_BACKEND_URL}/users/auth/google`;
   };
 
   return (
