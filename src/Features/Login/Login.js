@@ -1,5 +1,10 @@
 import { Form, Input, Button, Card, Checkbox, message } from "antd";
-import { LockOutlined, MailOutlined, HomeOutlined, GoogleOutlined } from "@ant-design/icons";
+import {
+  LockOutlined,
+  MailOutlined,
+  HomeOutlined,
+  GoogleOutlined,
+} from "@ant-design/icons";
 import { authAPI } from "../../services/apis/Auth";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -22,7 +27,7 @@ export default function Login() {
     const userData = query.get("userData");
     const error = query.get("error");
 
-     if (error) {
+    if (error) {
       message.error("Đăng nhập Google thất bại! Vui lòng thử lại.");
       setGoogleLoading(false);
       return;
@@ -80,7 +85,7 @@ export default function Login() {
   const handleGoogleLogin = () => {
     setGoogleLoading(true);
     message.loading("Đang chuyển hướng đến Google...", 0);
-    window.location.href = `${process.env.REACT_APP_API_URL}/users/auth/google`;
+    window.location.href = `${process.env.BACKEND_URL}/users/auth/google`;
   };
 
   return (
@@ -165,7 +170,10 @@ export default function Login() {
                 <Checkbox className="text-amber-700">Ghi nhớ tôi</Checkbox>
               </Form.Item>
 
-              <a href="/forgot-password" className="text-amber-600 hover:text-amber-800">
+              <a
+                href="/forgot-password"
+                className="text-amber-600 hover:text-amber-800"
+              >
                 Quên mật khẩu?
               </a>
             </div>
@@ -199,7 +207,10 @@ export default function Login() {
 
             <div className="text-center text-amber-700">
               Bạn chưa có tài khoản?{" "}
-              <a href="/register" className="font-semibold text-amber-600 hover:text-amber-800">
+              <a
+                href="/register"
+                className="font-semibold text-amber-600 hover:text-amber-800"
+              >
                 Đăng ký ngay
               </a>
             </div>

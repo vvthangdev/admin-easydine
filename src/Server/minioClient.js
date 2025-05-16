@@ -1,5 +1,5 @@
 const MINIO_API_URL =
-  process.env.REACT_APP_MINIO_API_URL || "http://128.199.246.55:3001/upload";
+  process.env.REACT_APP_MINIO_API_URL;
 
 // Lưu trữ fileUrl từ lần upload gần nhất
 let lastUploadedFileUrl = null;
