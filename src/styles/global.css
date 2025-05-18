@@ -1,0 +1,15 @@
+/* .ant-table-thead > tr > th {
+  @apply bg-neutral-100 text-neutral-900 font-semibold;
+}
+.ant-table-row {
+  @apply transition-all duration-200;
+}
+.ant-tabs-tab {
+  @apply text-neutral-600 font-medium;
+}
+.ant-tabs-tab-active {
+  @apply text-primary-600 font-semibold;
+}
+.ant-btn {
+  @apply rounded-lg transition-all duration-200;
+} */

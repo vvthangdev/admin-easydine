@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import '../../../src/global.css';
+import { Box, Typography, Button, Avatar, Menu, MenuItem, IconButton } from '@mui/material';
+import { ExpandMore } from '@mui/icons-material';
 import { jwtDecode } from 'jwt-decode';
 import { message } from 'antd';
 import { userAPI } from '../../services/apis/User';
@@ -12,6 +13,7 @@ export default function Header({ logo, navLinks }) {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(null); // Thêm state để quản lý vị trí dropdown
 
   const fetchProfile = async () => {
     setLoading(true);
@@ -64,106 +66,126 @@ export default function Header({ logo, navLinks }) {
     }
   };
 
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget); // Lưu vị trí của nút avatar
+    setIsDropdownOpen(true);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setIsDropdownOpen(false);
+  };
+
   console.log('check profile', profile);
 
   return (
-    <header className="flex items-center justify-between p-4 bg-white shadow-sm sticky top-0 z-10">
-      <div className="flex items-center gap-2">
-        <div className="h-10">
-          <img src={logo} alt="Restaurant Logo" className="h-10 rounded-2xl" />
-        </div>
-        <nav className="header__nav">
-          <ul className="flex gap-6 list-none">
-            {navLinks.map((link, index) => (
-              <li key={index}>
-                <Link
-                  to={link.path}
-                  className="text-gray-800 no-underline font-medium transition-colors duration-300 hover:text-blue-500"
-                >
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </div>
+    <Box
+      component="header"
+      sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        p: 2,
+        bgcolor: 'background.paper',
+        boxShadow: 1,
+        position: 'sticky',
+        top: 0,
+        zIndex: 10,
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box>
+          <img src={logo} alt="Restaurant Logo" style={{ height: 40, borderRadius: 8 }} />
+        </Box>
+        <Box sx={{ display: 'flex', gap: 3 }}>
+          {navLinks.map((link, index) => (
+            <Button
+              key={index}
+              component={Link}
+              to={link.path}
+              sx={{ color: 'text.primary', textTransform: 'none', '&:hover': { color: 'primary.main' } }}
+            >
+              {link.label}
+            </Button>
+          ))}
+        </Box>
+      </Box>
 
-      <div className="flex items-center gap-4">
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
         {loading ? (
-          <div className="text-gray-600">Đang tải...</div>
+          <Typography variant="body2" color="text.secondary">
+            Đang tải...
+          </Typography>
         ) : (
           <>
             {isAdmin && (
-              <Link to="/admin" className="text-blue-500">
+              <Button
+                component={Link}
+                to="/admin"
+                sx={{ color: 'primary.main', textTransform: 'none' }}
+              >
                 Admin
-              </Link>
+              </Button>
             )}
             {isLoggedIn ? (
-              <div className="relative">
-                <button
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="flex items-center gap-2 focus:outline-none"
+              <Box sx={{ position: 'relative' }}>
+                <IconButton
+                  onClick={handleMenuOpen}
+                  sx={{ p: 0 }}
                 >
-                  <img
-                    src={profile?.avatar || 'path/to/default/avatar.png'}
+                  <Avatar
                     alt="Profile"
-                    className="h-8 w-8 rounded-full object-cover"
+                    src={profile?.avatar || 'path/to/default/avatar.png'}
+                    sx={{ width: 32, height: 32 }}
                   />
-                  <span className="text-gray-700">{user?.username}</span>
-                  <svg
-                    className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
+                  <Typography sx={{ ml: 1, color: 'text.primary' }}>{user?.username}</Typography>
+                  <ExpandMore sx={{ ml: 1, transition: 'transform 0.3s', transform: isDropdownOpen ? 'rotate(180deg)' : 'none' }} />
+                </IconButton>
 
-                {isDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1">
-                    <Link
-                      to="/profile"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      onClick={() => setIsDropdownOpen(false)}
-                    >
-                      Thông tin cá nhân
-                    </Link>
-                    <Link
-                      to="/orders"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      onClick={() => setIsDropdownOpen(false)}
-                    >
-                      Đơn hàng của tôi
-                    </Link>
-                    <button
-                      onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-red-500 hover:bg-gray-100"
-                    >
-                      Đăng xuất
-                    </button>
-                  </div>
-                )}
-              </div>
+                <Menu
+                  anchorEl={anchorEl}
+                  open={isDropdownOpen}
+                  onClose={handleMenuClose}
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }} // Đặt menu ngay dưới avatar
+                  transformOrigin={{ vertical: 'top', horizontal: 'center' }} // Đỉnh của menu căn giữa với avatar
+                  PaperProps={{ sx: { borderRadius: 2, mt: 1 } }}
+                >
+                  <MenuItem component={Link} to="/profile" onClick={handleMenuClose}>
+                    Thông tin cá nhân
+                  </MenuItem>
+                  <MenuItem component={Link} to="/orders" onClick={handleMenuClose}>
+                    Đơn hàng của tôi
+                  </MenuItem>
+                  <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
+                    Đăng xuất
+                  </MenuItem>
+                </Menu>
+              </Box>
             ) : (
               <>
-                <Link
+                <Button
+                  component={Link}
                   to="/login"
-                  className="px-4 py-2 text-blue-500 border border-blue-500 rounded-md hover:bg-blue-50 transition-colors duration-300"
+                  variant="outlined"
+                  color="primary"
+                  sx={{ borderRadius: 1, textTransform: 'none', '&:hover': { bgcolor: 'grey.100' } }}
                 >
                   Đăng nhập
-                </Link>
-                <Link
+                </Button>
+                <Button
+                  component={Link}
                   to="/register"
-                  className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-300"
+                  variant="contained"
+                  color="primary"
+                  sx={{ borderRadius: 1, textTransform: 'none', '&:hover': { bgcolor: 'primary.dark' } }}
                 >
                   Đăng ký
-                </Link>
+                </Button>
               </>
             )}
           </>
         )}
-      </div>
-    </header>
+      </Box>
+    </Box>
   );
 }

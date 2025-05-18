@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { Modal, Button, Tooltip, List, message } from "antd";
+import { Modal, Button, Tooltip, List, Typography } from "@mui/material";
 import moment from "moment";
 import { orderAPI } from "../../../services/apis/Order";
+import { toast } from "react-toastify";
 import {
   getTableImage,
   getSourceTables,
@@ -21,14 +22,29 @@ const TableCard = ({
   const [isOrderModalVisible, setIsOrderModalVisible] = useState(false);
   const [editingOrder, setEditingOrder] = useState(null);
 
+  // Tính thời gian từ start_time đến hiện tại, phân biệt Reserved và Occupied
+  const calculateServingTime = (startTime, status) => {
+    if (!startTime || status === "Available") return "-";
+    const start = moment.utc(startTime).local();
+    const now = moment();
+    const duration = moment.duration(now.diff(start));
+    const hours = Math.floor(duration.asHours());
+    const minutes = Math.floor(duration.asMinutes()) % 60;
+    const prefix = status === "Reserved" ? "Đã đặt" : "Đã phục vụ";
+    if (hours > 0) {
+      return `${prefix}: ${hours} giờ ${minutes} phút`;
+    }
+    return `${prefix}: ${minutes} phút`;
+  };
+
   const handleCardClick = async () => {
     if (table.status === "Available") {
       setIsOrderModalVisible(true);
-      setEditingOrder(null); // Thêm mới đơn hàng
+      setEditingOrder(null);
     } else {
       try {
         const response = await orderAPI.getOrderInfo({
-          table_id: table.table_id, // Sử dụng table_id
+          table_id: table.table_id,
         });
         if (response) {
           setEditingOrder({
@@ -42,11 +58,11 @@ const TableCard = ({
           });
           setIsOrderModalVisible(true);
         } else {
-          message.error("Không tìm thấy thông tin đơn hàng");
+          toast.error("Không tìm thấy thông tin đơn hàng");
         }
       } catch (error) {
         console.error("Error fetching order details:", error);
-        message.error("Không thể tải thông tin đơn hàng");
+        toast.error("Không thể tải thông tin đơn hàng");
       }
     }
   };
@@ -55,17 +71,17 @@ const TableCard = ({
     try {
       if (orderData.id) {
         await orderAPI.updateOrder(orderData);
-        message.success("Cập nhật đơn hàng thành công");
+        toast.success("Cập nhật đơn hàng thành công");
       } else {
         await orderAPI.createOrder(orderData);
-        message.success("Thêm đơn hàng mới thành công");
+        toast.success("Thêm đơn hàng mới thành công");
       }
       setIsOrderModalVisible(false);
       setEditingOrder(null);
       onOrderSuccess();
     } catch (error) {
       console.error("Error submitting order:", error);
-      message.error("Không thể lưu đơn hàng");
+      toast.error("Không thể lưu đơn hàng");
     }
   };
 
@@ -73,99 +89,180 @@ const TableCard = ({
     <>
       <Tooltip
         title={
-          <div className="text-sm text-gray-600 bg-white p-2 rounded">
-            <p>
-              <span className="font-medium text-gray-900">Số bàn:</span>{" "}
-              {table.table_number}
-            </p>
-            <p>
-              <span className="font-medium text-gray-900">Sức chứa:</span>{" "}
-              {table.capacity}
-            </p>
-            <p>
-              <span className="font-medium text-gray-900">Trạng thái:</span>{" "}
-              {getVietnameseStatus(table.status)}
-            </p>
-            {table.same_order_tables && (
-              <p>
-                <span className="font-medium text-gray-900">Bàn gộp:</span> Bàn{" "}
-                {table.same_order_tables.join(", ")} (Đơn #{table.order_number})
-              </p>
+          <div
+            style={{
+              padding: 8,
+              background: "#fff",
+              borderRadius: 4,
+              border: "1px solid #e0e0e0",
+            }}
+          >
+            <Typography variant="body2" color="text.primary">
+              <strong>Số bàn:</strong> {table.table_number}
+            </Typography>
+            <Typography variant="body2" color="text.primary">
+              <strong>Sức chứa:</strong> {table.capacity}
+            </Typography>
+            <Typography variant="body2" color="text.primary">
+              <strong>Trạng thái:</strong> {getVietnameseStatus(table.status)}
+            </Typography>
+            {(table.status === "Reserved" || table.status === "Occupied") && (
+              <Typography variant="body2" color="text.primary">
+                <strong>Thời gian:</strong>{" "}
+                {calculateServingTime(table.start_time, table.status)}
+              </Typography>
             )}
-            <p>
-              <span className="font-medium text-gray-900">Bắt đầu:</span>{" "}
+            {table.same_order_tables && (
+              <Typography variant="body2" color="text.primary">
+                <strong>Bàn gộp:</strong> Bàn{" "}
+                {table.same_order_tables.join(", ")} (Đơn #{table.order_number})
+              </Typography>
+            )}
+            <Typography variant="body2" color="text.primary">
+              <strong>Bắt đầu:</strong>{" "}
               {table.start_time
-                ? moment
-                    .utc(table.start_time)
-                    .local()
-                    .format("HH:mm, DD/MM/YYYY")
+                ? moment.utc(table.start_time).local().format("HH:mm, DD/MM/YYYY")
                 : "-"}
-            </p>
-            <p>
-              <span className="font-medium text-gray-900">Kết thúc:</span>{" "}
+            </Typography>
+            <Typography variant="body2" color="text.primary">
+              <strong>Kết thúc:</strong>{" "}
               {table.end_time
                 ? moment.utc(table.end_time).local().format("HH:mm, DD/MM/YYYY")
                 : "-"}
-            </p>
+            </Typography>
           </div>
         }
       >
         <div
-          className={`table-card ${table.status.toLowerCase()} ${
-            table.same_order_tables ? "grouped" : ""
-          } border border-gray-200 rounded-lg p-4 bg-white shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer`}
           onClick={handleCardClick}
+          style={{
+            border: "1px solid #e0e0e0",
+            borderRadius: 8,
+            padding: 16,
+            background: "#fff",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+            transition: "box-shadow 0.3s",
+            cursor: "pointer",
+            width: 250, // Chiều ngang cố định
+            height: 200, // Chiều cao cố định
+            margin: "auto",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            backgroundColor: "#ffffff",
+              // table.status === "Available"
+              //   ? "#e8f5e9"
+              //   : table.status === "Reserved"
+              //   ? "#fff3e0"
+              //   : "#ffebee",
+          }}
         >
-          <div className="table-icon flex justify-center">
-            <img
-              src={getTableImage(table.status)}
-              alt={`Table ${table.status}`}
-              className="w-16 h-16 object-cover rounded-lg"
-            />
+          <div
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "center" }}>
+              <img
+                src={getTableImage(table.status)}
+                alt={`Table ${table.status}`}
+                style={{
+                  width: 64,
+                  height: 64,
+                  borderRadius: 8,
+                  objectFit: "cover",
+                }}
+              />
+            </div>
+            <div style={{ textAlign: "center", marginTop: 8 }}>
+              <Typography variant="h6" color="text.primary">
+                Bàn {table.table_number}
+              </Typography>
+              {(table.status === "Reserved" || table.status === "Occupied") && (
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  style={{ maxHeight: 20, overflow: "hidden" }}
+                >
+                  {calculateServingTime(table.start_time, table.status)}
+                </Typography>
+              )}
+            </div>
           </div>
-          <div className="table-info text-center mt-2">
-            <h3 className="text-lg font-semibold text-gray-900">
-              Bàn {table.table_number}
-            </h3>
+          <div style={{ marginTop: 8 }}>
+            {(table.status === "Reserved" || table.status === "Occupied") ? (
+              <Button
+                variant="contained"
+                color="error"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRelease();
+                }}
+                fullWidth
+              >
+                Trả bàn
+              </Button>
+            ) : (
+              <div style={{ height: 36 }} /> // Giữ khoảng trống để đồng nhất chiều cao
+            )}
           </div>
-          {(table.status === "Reserved" || table.status === "Occupied") && (
-            <Button
-              type="primary"
-              danger
-              onClick={(e) => {
-                e.stopPropagation(); // Ngăn sự kiện click vào card
-                onRelease();
-              }}
-              className="mt-2 w-full bg-red-600 hover:bg-red-700"
-            >
-              Trả bàn
-            </Button>
-          )}
         </div>
       </Tooltip>
 
       <Modal
-        title="Chọn bàn nguồn để ghép đơn"
         open={isMergeModalVisible}
-        onCancel={() => setIsMergeModalVisible(false)}
-        footer={[
-          <Button
-            key="cancel"
-            onClick={() => setIsMergeModalVisible(false)}
-            className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition-all duration-300"
-          >
-            Đóng
-          </Button>,
-        ]}
-        width={600}
+        onClose={() => setIsMergeModalVisible(false)}
+        aria-labelledby="merge-modal-title"
       >
-        <List
-          dataSource={getSourceTables(tables, table.reservation_id)}
-          renderItem={(sourceTable) => (
-            <List.Item
-              actions={[
+        <div
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "90%",
+            maxWidth: 600,
+            background: "#fff",
+            borderRadius: 8,
+            padding: 24,
+            boxShadow: "0 4px 16px rgba(0,0,0,0.2)",
+          }}
+        >
+          <Typography id="merge-modal-title" variant="h6" gutterBottom>
+            Chọn bàn nguồn để ghép đơn
+          </Typography>
+          <List>
+            {getSourceTables(tables, table.reservation_id).map((sourceTable) => (
+              <div
+                key={sourceTable.table_id}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "8px 0",
+                  borderBottom: "1px solid #e0e0e0",
+                }}
+              >
+                <div>
+                  <Typography variant="body1">
+                    <strong>Bàn {sourceTable.table_number}</strong>
+                  </Typography>
+                  <Typography variant="body2">
+                    Đơn #{sourceTable.order_number}
+                  </Typography>
+                  <Typography variant="body2">
+                    Bàn gộp:{" "}
+                    {sourceTable.same_order_tables
+                      ? sourceTable.same_order_tables.join(", ")
+                      : "Không có"}
+                  </Typography>
+                </div>
                 <Button
-                  type="primary"
+                  variant="contained"
+                  color="primary"
                   onClick={() =>
                     handleMergeOrder(
                       sourceTable,
@@ -175,27 +272,21 @@ const TableCard = ({
                       setIsMergeModalVisible
                     )
                   }
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all duration-300"
                 >
                   Ghép đơn
-                </Button>,
-              ]}
-            >
-              <div>
-                <p>
-                  <strong>Bàn {sourceTable.table_number}</strong>
-                </p>
-                <p>Đơn #{sourceTable.order_number}</p>
-                <p>
-                  Bàn gộp:{" "}
-                  {sourceTable.same_order_tables
-                    ? sourceTable.same_order_tables.join(", ")
-                    : "Không có"}
-                </p>
+                </Button>
               </div>
-            </List.Item>
-          )}
-        />
+            ))}
+          </List>
+          <Button
+            variant="outlined"
+            onClick={() => setIsMergeModalVisible(false)}
+            fullWidth
+            style={{ marginTop: 16 }}
+          >
+            Đóng
+          </Button>
+        </div>
       </Modal>
 
       <OrderFormModal

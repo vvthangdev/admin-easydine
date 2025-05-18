@@ -1,32 +1,34 @@
 import React from "react";
-import { Modal, Button } from "antd";
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography } from "@mui/material";
 
-const ReleaseTableModal = ({ visible, onCancel, onConfirm, tableNumber }) => {
+const ReleaseTableModal = ({ open, onClose, onConfirm, tableNumber }) => {
   return (
-    <Modal
-      title="Xác nhận trả bàn"
-      open={visible}
-      onCancel={onCancel}
-      footer={[
-        <Button
-          key="cancel"
-          onClick={onCancel}
-          className="bg-gray-200 hover:bg-gray-300"
-        >
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="xs"
+      fullWidth
+      sx={{ "& .MuiDialog-paper": { borderRadius: 2 } }}
+    >
+      <DialogTitle>Xác nhận trả bàn</DialogTitle>
+      <DialogContent>
+        <Typography variant="body1">
+          Bạn có chắc muốn trả bàn số {tableNumber} không?
+        </Typography>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose} color="inherit" variant="outlined">
           Hủy
-        </Button>,
+        </Button>
         <Button
-          key="submit"
-          type="primary"
           onClick={onConfirm}
-          className="bg-green-600 hover:bg-green-700"
+          variant="contained"
+          color="success"
         >
           Trả bàn
-        </Button>,
-      ]}
-    >
-      <p>Bạn có chắc muốn trả bàn số {tableNumber} không?</p>
-    </Modal>
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 

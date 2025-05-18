@@ -1,15 +1,13 @@
-import React, { useState } from "react";
-import { Table, Button, Input } from "antd";
-import { userAPI } from "../../services/apis/User";
-
-const { Search: SearchInput } = Input;
+import React, { useState } from 'react';
+import { Box, Typography, TextField, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Button } from '@mui/material';
+import { userAPI } from '../../services/apis/User';
 
 const UserSearch = ({ onSelectCustomer }) => {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
 
   const searchUsers = async (query) => {
-    if (!query || query.trim() === "") {
+    if (!query || query.trim() === '') {
       setSearchResults([]);
       return;
     }
@@ -18,7 +16,7 @@ const UserSearch = ({ onSelectCustomer }) => {
       const response = await userAPI.searchUsers(query);
       setSearchResults(response);
     } catch (error) {
-      console.error("Error searching users:", error);
+      console.error('Error searching users:', error);
       setSearchResults([]);
     }
   };
@@ -29,52 +27,57 @@ const UserSearch = ({ onSelectCustomer }) => {
     searchUsers(value);
   };
 
-  const columns = [
-    { title: "Tên", dataIndex: "name", key: "name" },
-    { title: "Số điện thoại", dataIndex: "phone", key: "phone" },
-    { title: "Địa chỉ", dataIndex: "address", key: "address" },
-    {
-      title: "Hành động",
-      key: "action",
-      render: (_, record) => (
-        <Button
-          className="text-blue-600 hover:text-blue-700"
-          type="link"
-          onClick={() => handleSelectCustomer(record)}
-        >
-          Chọn
-        </Button>
-      ),
-    },
-  ];
-
   const handleSelectCustomer = (customer) => {
-    setSearchTerm("");
+    setSearchTerm('');
     setSearchResults([]);
     onSelectCustomer(customer);
   };
 
   return (
-    <div className="h-full overflow-y-auto">
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">Tìm kiếm khách hàng</h2>
-      <SearchInput
-        placeholder="Tìm kiếm theo tên, số điện thoại, địa chỉ"
+    <Box sx={{ height: '100%', overflowY: 'auto' }}>
+      <Typography variant="h6" sx={{ mb: 2 }}>
+        Tìm kiếm khách hàng
+      </Typography>
+      <TextField
+        fullWidth
+        label="Tìm kiếm theo tên, số điện thoại, địa chỉ"
         value={searchTerm}
         onChange={handleSearch}
-        className="w-full mb-4 border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+        variant="outlined"
+        sx={{ mb: 2 }}
       />
       {searchResults.length > 0 && (
-        <Table
-          columns={columns}
-          dataSource={searchResults}
-          rowKey="_id"
-          pagination={false}
-          size="small"
-          className="text-sm text-gray-600"
-          rowClassName="hover:bg-gray-100 transition-all duration-200"
-        />
+        <TableContainer component={Paper}>
+          <Table size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell>Tên</TableCell>
+                <TableCell>Số điện thoại</TableCell>
+                <TableCell>Địa chỉ</TableCell>
+                <TableCell>Hành động</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {searchResults.map((record) => (
+                <TableRow key={record._id}>
+                  <TableCell>{record.name}</TableCell>
+                  <TableCell>{record.phone}</TableCell>
+                  <TableCell>{record.address}</TableCell>
+                  <TableCell>
+                    <Button
+                      color="primary"
+                      onClick={() => handleSelectCustomer(record)}
+                    >
+                      Chọn
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       )}
-    </div>
+    </Box>
   );
 };
 

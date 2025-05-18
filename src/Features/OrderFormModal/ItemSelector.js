@@ -1,11 +1,27 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Table, Input, Select, Button, Modal, Typography } from "antd";
+import {
+  Table,
+  TableContainer,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  TextField,
+  Select,
+  MenuItem,
+  Button,
+  Modal,
+  Box,
+  Typography,
+  FormControl,
+  InputLabel,
+  CircularProgress,
+} from "@mui/material";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { itemAPI } from "../../services/apis/Item";
 
-const { Option } = Select;
-const { Text } = Typography;
-
-const ItemSelector = ({ setSelectedItems, menuItems, setMenuItems }) => {
+const ItemSelector = ({ setSelectedItems, menuItems, setMenuItems, sx }) => {
   const [categories, setCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -19,6 +35,7 @@ const ItemSelector = ({ setSelectedItems, menuItems, setMenuItems }) => {
       setCategories(Array.isArray(categoriesData) ? categoriesData : []);
     } catch (error) {
       console.error("Error fetching categories:", error);
+      toast.error("Không thể tải danh mục món ăn");
       setCategories([]);
     }
   };
@@ -37,6 +54,7 @@ const ItemSelector = ({ setSelectedItems, menuItems, setMenuItems }) => {
       setMenuItems(Array.isArray(items) ? items : []);
     } catch (error) {
       console.error("Error fetching menu items:", error);
+      toast.error("Không thể tải danh sách món ăn");
       setMenuItems([]);
     } finally {
       setLoading(false);
@@ -94,114 +112,128 @@ const ItemSelector = ({ setSelectedItems, menuItems, setMenuItems }) => {
     setSelectedDescription("");
   };
 
-  const columns = [
-    {
-      title: "Ảnh",
-      dataIndex: "image",
-      key: "image",
-      width: 100,
-      render: (image) =>
-        image ? (
-          <img
-            src={image}
-            alt="Món ăn"
-            style={{ width: 60, height: 60, objectFit: "cover", borderRadius: 4 }}
-          />
-        ) : (
-          <Text type="secondary">Không có ảnh</Text>
-        ),
-    },
-    { title: "Tên món", dataIndex: "name", key: "name" },
-    {
-      title: "Giá",
-      dataIndex: "price",
-      key: "price",
-      render: (text) => `${text.toLocaleString()} VND`,
-    },
-    {
-      title: "Kích thước",
-      dataIndex: "sizes",
-      key: "sizes",
-      render: (sizes) =>
-        sizes?.length > 0
-          ? sizes
-              .map((s) => `${s.name} (${s.price.toLocaleString()} VND)`)
-              .join(", ")
-          : "Mặc định",
-    },
-    {
-      title: "Thao tác",
-      key: "action",
-      render: (_, record) =>
-        record.description ? (
-          <Button
-            type="link"
-            className="text-blue-600 hover:text-blue-700"
-            onClick={() => showDescriptionModal(record.description)}
-          >
-            Chi tiết
-          </Button>
-        ) : null,
-    },
-  ];
-
   return (
-    <div className="flex flex-col h-full">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Chọn món ăn</h3>
-      <div className="flex gap-4 mb-4">
-        <Input
-          placeholder="Tìm kiếm món ăn"
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        p: 2,
+        maxWidth: "100%", // Giữ chiều rộng tối đa 100% để chiếm 50% modal
+        ...sx,
+      }}
+    >
+      <Typography variant="h6" sx={{ mb: 2 }}>
+        Chọn món ăn
+      </Typography>
+      <Box sx={{ display: "flex", gap: 2, mb: 2, flexDirection: { xs: "column", sm: "row" } }}>
+        <TextField
+          label="Tìm kiếm món ăn"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="flex-1 border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+          fullWidth
+          sx={{ flex: 1 }}
         />
-        <Select
-          placeholder="Lọc theo danh mục"
-          value={selectedCategory}
-          onChange={(value) => setSelectedCategory(value)}
-          allowClear
-          className="w-48 border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-          onClear={() => setSelectedCategory(null)}
-        >
-          <Option value={null}>Tất cả</Option>
-          {categories.map((cat) => (
-            <Option key={cat._id} value={cat._id}>
-              {cat.name}
-            </Option>
-          ))}
-        </Select>
-      </div>
-      <Table
-        columns={columns}
-        dataSource={menuItems}
-        rowKey="_id"
-        loading={loading}
-        pagination={{ pageSize: 10 }}
-        size="small"
-        className="text-sm text-gray-600 flex-1 overflow-y-auto"
-        rowClassName="hover:bg-gray-100 transition-all duration-200 cursor-pointer"
-        onRow={(record) => ({
-          onClick: (event) => {
-            // Ngăn chặn sự kiện click trên nút "Chi tiết" kích hoạt thêm món
-            if (event.target.tagName !== "BUTTON" && !event.target.closest("button")) {
-              handleAddItem(record);
-            }
-          },
-        })}
-      />
-      <Modal
-        title="Thông tin món ăn"
-        open={isModalVisible}
-        onCancel={handleModalClose}
-        footer={[
-          <Button key="close" onClick={handleModalClose}>
-            Đóng
-          </Button>,
-        ]}
+        <FormControl sx={{ width: { xs: "100%", sm: 200 } }}>
+          <InputLabel>Lọc theo danh mục</InputLabel>
+          <Select
+            value={selectedCategory || ""}
+            label="Lọc theo danh mục"
+            onChange={(e) => setSelectedCategory(e.target.value || null)}
+          >
+            <MenuItem value="">Tất cả</MenuItem>
+            {categories.map((cat) => (
+              <MenuItem key={cat._id} value={cat._id}>
+                {cat.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
+      <TableContainer
+        sx={{
+          flex: 1, // Chiếm toàn bộ không gian còn lại
+          overflowY: "auto", // Cho phép cuộn dọc
+          maxHeight: "calc(100% - 140px)", // Trừ chiều cao của header và search bar
+          maxWidth: "100%", // Giữ chiều rộng tối đa 100%
+        }}
       >
-        <Text>{selectedDescription || "Không có mô tả."}</Text>
+        <Table size="small" stickyHeader>
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ fontWeight: "bold" }}>Ảnh</TableCell>
+              <TableCell sx={{ fontWeight: "bold" }}>Tên món</TableCell>
+              <TableCell sx={{ fontWeight: "bold" }}>Giá</TableCell>
+              <TableCell sx={{ fontWeight: "bold" }}>Kích thước</TableCell>
+              <TableCell sx={{ fontWeight: "bold" }}>Công thức</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {menuItems.map((record) => (
+              <TableRow
+                key={record._id}
+                sx={{ "&:hover": { bgcolor: "grey.100", cursor: "pointer" } }}
+                onClick={(e) => {
+                  if (e.target.tagName !== "BUTTON" && !e.target.closest("button")) {
+                    handleAddItem(record);
+                  }
+                }}
+              >
+                <TableCell>
+                  {record.image ? (
+                    <img
+                      src={record.image}
+                      alt="Món ăn"
+                      style={{ width: 60, height: 60, objectFit: "cover", borderRadius: 4 }}
+                    />
+                  ) : (
+                    <Typography color="text.secondary">Không có ảnh</Typography>
+                  )}
+                </TableCell>
+                <TableCell>{record.name}</TableCell>
+                <TableCell>{record.price.toLocaleString()} VND</TableCell>
+                <TableCell>
+                  {record.sizes?.length > 0
+                    ? record.sizes
+                        .map((s) => `${s.name} (${s.price.toLocaleString()} VND)`)
+                        .join(", ")
+                    : "Mặc định"}
+                </TableCell>
+                <TableCell>
+                  {record.description && (
+                    <Button
+                      variant="text"
+                      color="primary"
+                      onClick={() => showDescriptionModal(record.description)}
+                    >
+                      Chi tiết
+                    </Button>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      {loading && <CircularProgress sx={{ alignSelf: "center", mt: 2 }} />}
+      <Modal
+        open={isModalVisible}
+        onClose={handleModalClose}
+        sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+      >
+        <Box sx={{ bgcolor: "background.paper", p: 3, borderRadius: 2, maxWidth: 400 }}>
+          <Typography variant="h6" sx={{ mb: 2 }}>
+            Thông tin món ăn
+          </Typography>
+          <Typography>{selectedDescription || "Không có mô tả."}</Typography>
+          <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
+            <Button variant="contained" color="error" onClick={handleModalClose}>
+              Đóng
+            </Button>
+          </Box>
+        </Box>
       </Modal>
-    </div>
+    </Box>
   );
 };
 

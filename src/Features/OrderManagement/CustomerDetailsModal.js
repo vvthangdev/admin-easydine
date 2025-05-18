@@ -1,107 +1,136 @@
-import React from "react";
-import { Modal, Button } from "antd";
-import moment from "moment";
+import React from 'react';
+import { Box, Typography, Button, Modal } from '@mui/material';
+import moment from 'moment';
 
 const OrderDetailsModal = ({ visible, orderDetails, onCancel }) => {
   return (
     <Modal
-      title="Chi Tiết Đơn Hàng"
       open={visible}
-      onCancel={onCancel}
-      className="rounded-xl"
-      footer={[
-        <Button
-          key="close"
-          className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition-all duration-300"
-          onClick={onCancel}
-        >
-          Đóng
-        </Button>,
-      ]}
-      width={800}
+      onClose={onCancel}
+      sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
     >
-      <div className="bg-white/80 backdrop-blur-md p-6 rounded-xl">
+      <Box sx={{ bgcolor: 'background.paper', p: 3, borderRadius: 3, width: 800, maxHeight: '80vh', overflowY: 'auto' }}>
+        <Typography variant="h6" sx={{ mb: 2 }}>
+          Chi Tiết Đơn Hàng
+        </Typography>
         {orderDetails ? (
-          <div className="flex flex-col gap-6">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">Thông Tin Đơn Hàng</h3>
-              <div className="grid grid-cols-2 gap-2 text-sm text-gray-600 mt-2">
-                <p><span className="font-medium text-gray-900">Mã Đơn Hàng:</span> {orderDetails.order?.id || orderDetails._id || "N/A"}</p>
-                <p><span className="font-medium text-gray-900">Mã Khách Hàng:</span> {orderDetails.order?.customer_id || orderDetails.customer_id || "N/A"}</p>
-                <p>
-                  <span className="font-medium text-gray-900">Ngày:</span>{" "}
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            <Box>
+              <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                Thông Tin Đơn Hàng
+              </Typography>
+              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, mt: 1 }}>
+                <Typography variant="body2">
+                  <b>Mã Đơn Hàng:</b> {orderDetails.order?.id || orderDetails._id || 'N/A'}
+                </Typography>
+                <Typography variant="body2">
+                  <b>Mã Khách Hàng:</b> {orderDetails.order?.customer_id || orderDetails.customer_id || 'N/A'}
+                </Typography>
+                <Typography variant="body2">
+                  <b>Ngày:</b>{' '}
                   {orderDetails.order?.time || orderDetails.time
-                    ? moment.utc(orderDetails.order?.time || orderDetails.time).local().format("DD/MM/YYYY")
-                    : "N/A"}
-                </p>
-                <p>
-                  <span className="font-medium text-gray-900">Thời gian bắt đầu:</span>{" "}
+                    ? moment.utc(orderDetails.order?.time || orderDetails.time).local().format('DD/MM/YYYY')
+                    : 'N/A'}
+                </Typography>
+                <Typography variant="body2">
+                  <b>Thời gian bắt đầu:</b>{' '}
                   {orderDetails.reservedTables?.[0]?.start_time
-                    ? moment.utc(orderDetails.reservedTables[0].start_time).local().format("HH:mm")
-                    : "N/A"}
-                </p>
-                <p>
-                  <span className="font-medium text-gray-900">Thời gian kết thúc:</span>{" "}
+                    ? moment.utc(orderDetails.reservedTables[0].start_time).local().format('HH:mm')
+                    : 'N/A'}
+                </Typography>
+                <Typography variant="body2">
+                  <b>Thời gian kết thúc:</b>{' '}
                   {orderDetails.reservedTables?.[0]?.end_time
-                    ? moment.utc(orderDetails.reservedTables[0].end_time).local().format("HH:mm")
-                    : "N/A"}
-                </p>
-                <p><span className="font-medium text-gray-900">Loại:</span> {orderDetails.order?.type || orderDetails.type || "N/A"}</p>
-                <p><span className="font-medium text-gray-900">Trạng Thái:</span> {orderDetails.order?.status || orderDetails.status || "N/A"}</p>
-              </div>
-            </div>
+                    ? moment.utc(orderDetails.reservedTables[0].end_time).local().format('HH:mm')
+                    : 'N/A'}
+                </Typography>
+                <Typography variant="body2">
+                  <b>Loại:</b> {orderDetails.order?.type || orderDetails.type || 'N/A'}
+                </Typography>
+                <Typography variant="body2">
+                  <b>Trạng Thái:</b> {orderDetails.order?.status || orderDetails.status || 'N/A'}
+                </Typography>
+              </Box>
+            </Box>
 
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">Danh Sách Bàn Đặt</h3>
+            <Box>
+              <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                Danh Sách Bàn Đặt
+              </Typography>
               {orderDetails.reservedTables?.length > 0 ? (
-                <ul className="list-disc pl-5 text-sm text-gray-600 mt-2">
+                <ul style={{ paddingLeft: 20, marginTop: 8 }}>
                   {orderDetails.reservedTables.map((table) => (
                     <li key={table._id}>
-                      <span className="font-medium text-gray-900">Bàn:</span> {table.table_id || "N/A"}, <span className="font-medium text-gray-900">Thời gian:</span>{" "}
-                      {table.start_time && table.end_time
-                        ? `${moment.utc(table.start_time).local().format("HH:mm, DD/MM/YYYY")} - ${moment.utc(table.end_time).local().format("HH:mm, DD/MM/YYYY")}`
-                        : "N/A"}
+                      <Typography variant="body2">
+                        <b>Bàn:</b> {table.table_id || 'N/A'}, <b>Thời gian:</b>{' '}
+                        {table.start_time && table.end_time
+                          ? `${moment.utc(table.start_time).local().format('HH:mm, DD/MM/YYYY')} - ${moment
+                              .utc(table.end_time)
+                              .local()
+                              .format('HH:mm, DD/MM/YYYY')}`
+                          : 'N/A'}
+                      </Typography>
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className="text-sm text-gray-600">Không có bàn đặt nào.</p>
+                <Typography variant="body2">Không có bàn đặt nào.</Typography>
               )}
-            </div>
+            </Box>
 
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">Danh Sách Mặt Hàng</h3>
+            <Box>
+              <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                Danh Sách Mặt Hàng
+              </Typography>
               {orderDetails.itemOrders?.length > 0 ? (
-                <div className="flex flex-col gap-4 mt-2">
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
                   {orderDetails.itemOrders.map((item) => (
-                    <div
+                    <Box
                       key={item._id}
-                      className="flex items-center border-b border-gray-200 pb-4"
+                      sx={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid', borderColor: 'divider', pb: 2 }}
                     >
                       <img
-                        src={item.itemImage || "https://via.placeholder.com/80"}
-                        alt={item.itemName || "Item"}
-                        className="w-16 h-16 rounded-lg object-cover mr-4"
+                        src={item.itemImage || 'https://via.placeholder.com/80'}
+                        alt={item.itemName || 'Item'}
+                        style={{ width: 64, height: 64, borderRadius: 8, objectFit: 'cover', marginRight: 16 }}
                       />
-                      <div className="text-sm text-gray-600">
-                        <p><span className="font-medium text-gray-900">Tên:</span> {item.itemName || "N/A"}</p>
-                        <p><span className="font-medium text-gray-900">Kích thước:</span> {item.size || "Mặc định"}</p>
-                        <p><span className="font-medium text-gray-900">Ghi chú:</span> {item.note || "Không có"}</p>
-                        <p><span className="font-medium text-gray-900">Giá:</span> {item.itemPrice ? item.itemPrice.toLocaleString() : "N/A"} VND</p>
-                        <p><span className="font-medium text-gray-900">Số Lượng:</span> {item.quantity || "N/A"}</p>
-                        <p><span className="font-medium text-gray-900">Tổng Tiền:</span> {item.itemPrice && item.quantity ? (item.itemPrice * item.quantity).toLocaleString() : "N/A"} VND</p>
-                      </div>
-                    </div>
+                      <Box>
+                        <Typography variant="body2">
+                          <b>Tên:</b> {item.itemName || 'N/A'}
+                        </Typography>
+                        <Typography variant="body2">
+                          <b>Kích thước:</b> {item.size || 'Mặc định'}
+                        </Typography>
+                        <Typography variant="body2">
+                          <b>Ghi chú:</b> {item.note || 'Không có'}
+                        </Typography>
+                        <Typography variant="body2">
+                          <b>Giá:</b> {item.itemPrice ? item.itemPrice.toLocaleString() : 'N/A'} VND
+                        </Typography>
+                        <Typography variant="body2">
+                          <b>Số Lượng:</b> {item.quantity || 'N/A'}
+                        </Typography>
+                        <Typography variant="body2">
+                          <b>Tổng Tiền:</b>{' '}
+                          {item.itemPrice && item.quantity
+                            ? (item.itemPrice * item.quantity).toLocaleString()
+                            : 'N/A'}{' '}
+                          VND
+                        </Typography>
+                      </Box>
+                    </Box>
                   ))}
-                </div>
+                </Box>
               ) : (
-                <p className="text-sm text-gray-600">Không có mặt hàng nào được đặt.</p>
+                <Typography variant="body2">Không có mặt hàng nào được đặt.</Typography>
               )}
-            </div>
+            </Box>
 
-            <div className="border-t border-gray-200 pt-4">
-              <h3 className="text-lg font-semibold text-gray-900">Tính Tổng Hóa Đơn</h3>
-              <div className="text-sm text-gray-600 mt-2">
+            <Box sx={{ borderTop: '1px solid', borderColor: 'divider', pt: 2 }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
+                Tính Tổng Hóa Đơn
+              </Typography>
+              <Box sx={{ mt: 1 }}>
                 {(() => {
                   const totalAmount =
                     orderDetails.itemOrders?.reduce(
@@ -112,19 +141,33 @@ const OrderDetailsModal = ({ visible, orderDetails, onCancel }) => {
                   const grandTotal = totalAmount + vat;
                   return (
                     <>
-                      <p><span className="font-medium text-gray-900">Tổng Tiền:</span> {totalAmount.toLocaleString()} VND</p>
-                      <p><span className="font-medium text-gray-900">VAT (10%):</span> {vat.toLocaleString()} VND</p>
-                      <p className="font-semibold text-blue-600"><span className="font-medium text-gray-900">Tổng Cộng:</span> {grandTotal.toLocaleString()} VND</p>
+                      <Typography variant="body2">
+                        <b>Tổng Tiền:</b> {totalAmount.toLocaleString()} VND
+                      </Typography>
+                      <Typography variant="body2">
+                        <b>VAT (10%):</b> {vat.toLocaleString()} VND
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+                        <b>Tổng Cộng:</b> {grandTotal.toLocaleString()} VND
+                      </Typography>
                     </>
                   );
                 })()}
-              </div>
-            </div>
-          </div>
+              </Box>
+            </Box>
+          </Box>
         ) : (
-          <p className="text-sm text-gray-600">Đang tải thông tin chi tiết...</p>
+          <Typography variant="body2">Đang tải thông tin chi tiết...</Typography>
         )}
-      </div>
+        <Button
+          variant="outlined"
+          color="secondary"
+          onClick={onCancel}
+          sx={{ mt: 2 }}
+        >
+          Đóng
+        </Button>
+      </Box>
     </Modal>
   );
 };

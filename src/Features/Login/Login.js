@@ -1,15 +1,16 @@
-import { Form, Input, Button, Card, Checkbox, message } from "antd";
+import { Form, Input, Button, Card, Checkbox, message } from 'antd';
 import {
   LockOutlined,
   MailOutlined,
   HomeOutlined,
   GoogleOutlined,
-} from "@ant-design/icons";
-import { authAPI } from "../../services/apis/Auth";
-import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../../contexts/AuthContext";
-import { jwtDecode } from "jwt-decode";
+} from '@ant-design/icons';
+import { authAPI } from '../../services/apis/Auth';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import { jwtDecode } from 'jwt-decode';
+import { Box, Typography, Button as MuiButton } from '@mui/material';
 
 export default function Login() {
   const [form] = Form.useForm();
@@ -19,16 +20,15 @@ export default function Login() {
   const location = useLocation();
   const { login } = useAuth();
 
-  // Xử lý callback từ Google OAuth
   useEffect(() => {
     const query = new URLSearchParams(location.search);
-    const accessToken = query.get("accessToken");
-    const refreshToken = query.get("refreshToken");
-    const userData = query.get("userData");
-    const error = query.get("error");
+    const accessToken = query.get('accessToken');
+    const refreshToken = query.get('refreshToken');
+    const userData = query.get('userData');
+    const error = query.get('error');
 
     if (error) {
-      message.error("Đăng nhập Google thất bại! Vui lòng thử lại.");
+      message.error('Đăng nhập Google thất bại! Vui lòng thử lại.');
       setGoogleLoading(false);
       return;
     }
@@ -39,18 +39,18 @@ export default function Login() {
         login({
           accessToken: `Bearer ${accessToken}`,
           refreshToken: `Bearer ${refreshToken}`,
-          userData: parsedUserData, // Truyền userData để login xử lý
+          userData: parsedUserData,
         });
-        message.success("Đăng nhập Google thành công!");
+        message.success('Đăng nhập Google thành công!');
         const decoded = jwtDecode(`Bearer ${accessToken}`);
-        if (decoded.payload.role === "ADMIN") {
-          navigate("/admin");
+        if (decoded.payload.role === 'ADMIN') {
+          navigate('/admin');
         } else {
-          navigate("/");
+          navigate('/');
         }
-        window.history.replaceState({}, document.title, "/login");
+        window.history.replaceState({}, document.title, '/login');
       } catch (err) {
-        message.error("Lỗi xử lý dữ liệu Google login!");
+        message.error('Lỗi xử lý dữ liệu Google login!');
         console.error(err);
         setGoogleLoading(false);
       }
@@ -64,17 +64,17 @@ export default function Login() {
     try {
       setLoading(true);
       const response = await authAPI.login(requestData);
-      login(response); // Truyền response trực tiếp vì handleApiResponse đã trả về data
-      message.success("Đăng nhập thành công!");
+      login(response);
+      message.success('Đăng nhập thành công!');
 
       const decoded = jwtDecode(response.accessToken);
-      if (decoded.payload.role === "ADMIN") {
-        navigate("/admin");
+      if (decoded.payload.role === 'ADMIN') {
+        navigate('/admin');
       } else {
-        navigate("/");
+        navigate('/');
       }
     } catch (error) {
-      const errorMessage = error.message || "Đăng nhập thất bại!";
+      const errorMessage = error.message || 'Đăng nhập thất bại!';
       console.log(errorMessage);
       message.error(errorMessage);
     } finally {
@@ -84,99 +84,191 @@ export default function Login() {
 
   const handleGoogleLogin = () => {
     setGoogleLoading(true);
-    message.loading("Đang chuyển hướng đến Google...", 0);
+    message.loading('Đang chuyển hướng đến Google...', 0);
     window.location.href = `${process.env.REACT_APP_BACKEND_URL}/users/auth/google`;
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-amber-50">
-      <div className="absolute top-4 left-4 z-10">
-        <Button
-          type="link"
-          icon={<HomeOutlined className="text-2xl" />}
-          onClick={() => navigate("/")}
-          className="flex items-center justify-center w-12 h-12 bg-white/80 border border-amber-200 hover:border-amber-400 text-amber-700 hover:text-amber-800 shadow-md hover:shadow-lg transition-all duration-300 rounded-full"
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'relative',
+        background: 'linear-gradient(to bottom right, #fff7e6, #fefcbf)',
+        overflow: 'hidden',
+      }}
+    >
+      <Box sx={{ position: 'absolute', top: 16, left: 16, zIndex: 10 }}>
+        <MuiButton
+          variant="outlined"
+          startIcon={<HomeOutlined />}
+          onClick={() => navigate('/')}
+          sx={{
+            width: 48,
+            height: 48,
+            borderRadius: '50%',
+            bgcolor: 'rgba(255, 255, 255, 0.8)',
+            borderColor: '#f59e0b',
+            color: '#f59e0b',
+            '&:hover': { bgcolor: '#fff3bf', borderColor: '#d97706' },
+            transition: 'all 0.3s',
+          }}
         />
-      </div>
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full bg-orange-200 opacity-20 blur-3xl"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full bg-amber-200 opacity-20 blur-3xl"></div>
-      </div>
+      </Box>
 
-      <div className="max-w-md w-full mx-4 relative">
-        <div className="absolute -inset-0.5 bg-gradient-to-r from-orange-300 via-amber-300 to-orange-300 rounded-2xl opacity-50 blur"></div>
+      <Box
+        sx={{
+          position: 'absolute',
+          top: -100,
+          right: -100,
+          width: 320,
+          height: 320,
+          borderRadius: '50%',
+          bgcolor: '#f59e0b',
+          opacity: 0.2,
+          filter: 'blur(40px)',
+        }}
+      />
+      <Box
+        sx={{
+          position: 'absolute',
+          bottom: -100,
+          left: -100,
+          width: 320,
+          height: 320,
+          borderRadius: '50%',
+          bgcolor: '#facc15',
+          opacity: 0.2,
+          filter: 'blur(40px)',
+        }}
+      />
 
-        <Card className="relative bg-white/90 backdrop-blur-sm rounded-xl border-0 shadow-lg">
-          <div className="absolute -top-16 left-1/2 transform -translate-x-1/2">
-            <div className="w-32 h-32 rounded-full bg-white p-1 shadow-lg">
-              <div className="w-full h-full rounded-full bg-gradient-to-r from-orange-400 to-amber-400 flex items-center justify-center">
-                <span className="text-5xl">🍽️</span>
-              </div>
-            </div>
-          </div>
+      <Box sx={{ maxWidth: 400, width: '100%', mx: 2, position: 'relative' }}>
+        <Box
+          sx={{
+            position: 'absolute',
+            inset: -4,
+            background: 'linear-gradient(to right, #f59e0b, #facc15)',
+            borderRadius: 2,
+            opacity: 0.5,
+            filter: 'blur(10px)',
+            zがあれば: -1,
+          }}
+        />
 
-          <div className="text-center mt-16 mb-8">
-            <h1 className="text-3xl font-serif font-bold text-amber-800 mb-2">
+        <Card
+          style={{
+            padding: 32,
+            background: 'rgba(255, 255, 255, 0.9)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: 8,
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+            position: 'relative',
+          }}
+        >
+          <Box
+            sx={{
+              position: 'absolute',
+              top: -64,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: 128,
+              height: 128,
+              borderRadius: '50%',
+              bgcolor: 'white',
+              p: 0.5,
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+            }}
+          >
+            <Box
+              sx={{
+                width: '100%',
+                height: '100%',
+                borderRadius: '50%',
+                background: 'linear-gradient(to right, #f59e0b, #facc15)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Typography variant="h2" color="white">
+                🍽️
+              </Typography>
+            </Box>
+          </Box>
+
+          <Box sx={{ textAlign: 'center', mt: 8, mb: 4 }}>
+            <Typography variant="h5" fontWeight="bold" color="text.primary" gutterBottom>
               Chào mừng!
-            </h1>
-            <div className="flex items-center justify-center gap-4">
-              <div className="h-px w-12 bg-amber-300"></div>
-              <p className="text-amber-700 font-serif italic">
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
+              <Box sx={{ width: 48, height: 1, bgcolor: '#f59e0b' }} />
+              <Typography variant="body2" color="text.secondary" fontStyle="italic">
                 Trải nghiệm ẩm thực tuyệt vời
-              </p>
-              <div className="h-px w-12 bg-amber-300"></div>
-            </div>
-          </div>
+              </Typography>
+              <Box sx={{ width: 48, height: 1, bgcolor: '#f59e0b' }} />
+            </Box>
+          </Box>
 
           <Form
             form={form}
             name="login"
             onFinish={handleSubmit}
             layout="vertical"
-            className="space-y-6"
+            style={{ marginTop: 24 }}
           >
             <Form.Item
               name="email"
               rules={[
-                { type: "email", message: "Vui lòng nhập email hợp lệ!" },
-                { required: true, message: "Vui lòng nhập email của bạn!" },
+                { type: 'email', message: 'Vui lòng nhập email hợp lệ!' },
+                { required: true, message: 'Vui lòng nhập email của bạn!' },
               ]}
             >
               <Input
-                prefix={<MailOutlined className="text-amber-500" />}
+                prefix={<MailOutlined style={{ color: '#f59e0b' }} />}
                 placeholder="Email"
                 size="large"
-                className="h-12 bg-white/80 border-amber-200 hover:border-amber-400 focus:border-amber-500 text-amber-900 placeholder:text-amber-400"
+                style={{
+                  height: 48,
+                  background: 'rgba(255, 255, 255, 0.8)',
+                  borderColor: '#d4a017',
+                }}
               />
             </Form.Item>
 
             <Form.Item
               name="password"
               rules={[
-                { required: true, message: "Vui lòng nhập mật khẩu!" },
-                { min: 8, message: "Mật khẩu phải có ít nhất 8 ký tự!" },
+                { required: true, message: 'Vui lòng nhập mật khẩu!' },
+                { min: 8, message: 'Mật khẩu phải có ít nhất 8 ký tự!' },
               ]}
             >
               <Input.Password
-                prefix={<LockOutlined className="text-amber-500" />}
+                prefix={<LockOutlined style={{ color: '#f59e0b' }} />}
                 placeholder="Mật khẩu"
                 size="large"
-                className="h-12 bg-white/80 border-amber-200 hover:border-amber-400 focus:border-amber-500 text-amber-900 placeholder:text-amber-400"
+                style={{
+                  height: 48,
+                  background: 'rgba(255, 255, 255, 0.8)',
+                  borderColor: '#d4a017',
+                }}
               />
             </Form.Item>
 
-            <div className="flex items-center justify-between">
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Form.Item name="remember" valuePropName="checked" noStyle>
-                <Checkbox className="text-amber-700">Ghi nhớ tôi</Checkbox>
+                <Checkbox style={{ color: '#f59e0b' }}>Ghi nhớ tôi</Checkbox>
               </Form.Item>
-
-              <a
-                href="/forgot-password"
-                className="text-amber-600 hover:text-amber-800"
+              <MuiButton
+                component={Link}
+                to="/forgot-password"
+                sx={{ color: '#f59e0b', '&:hover': { color: '#b45309' } }}
               >
                 Quên mật khẩu?
-              </a>
-            </div>
+              </MuiButton>
+            </Box>
 
             <Form.Item>
               <Button
@@ -185,7 +277,14 @@ export default function Login() {
                 size="large"
                 block
                 loading={loading}
-                className="h-12 bg-gradient-to-r from-amber-500 to-orange-500 border-0 text-lg font-serif hover:from-amber-600 hover:to-orange-600 shadow-md hover:shadow-lg transition-all duration-300"
+                style={{
+                  height: 48,
+                  background: 'linear-gradient(to right, #f59e0b, #facc15)',
+                  border: 0,
+                  fontSize: '1.125rem',
+                  fontFamily: 'serif',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                }}
               >
                 Đăng nhập
               </Button>
@@ -198,31 +297,55 @@ export default function Login() {
                 block
                 onClick={handleGoogleLogin}
                 loading={googleLoading}
-                className="h-12 bg-white border-amber-200 hover:border-amber-400 text-amber-700 hover:text-amber-800 flex items-center justify-center gap-2"
+                style={{
+                  height: 48,
+                  background: 'white',
+                  borderColor: '#d4a017',
+                  color: '#f59e0b',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                }}
               >
-                <GoogleOutlined className="text-red-500" />
+                <GoogleOutlined style={{ color: '#db4437' }} />
                 Đăng nhập bằng Google
               </Button>
             </Form.Item>
 
-            <div className="text-center text-amber-700">
-              Bạn chưa có tài khoản?{" "}
-              <a
-                href="/register"
-                className="font-semibold text-amber-600 hover:text-amber-800"
+            <Box sx={{ textAlign: 'center', color: '#f59e0b' }}>
+              Bạn chưa có tài khoản?{' '}
+              <MuiButton
+                component={Link}
+                to="/register"
+                sx={{ color: '#f59e0b', fontWeight: 'bold', '&:hover': { color: '#b45309' } }}
               >
                 Đăng ký ngay
-              </a>
-            </div>
+              </MuiButton>
+            </Box>
 
-            <div className="pt-6 flex items-center justify-center gap-3">
-              <div className="h-px w-full bg-gradient-to-r from-transparent via-amber-300 to-transparent"></div>
-              <span className="text-amber-400">✦</span>
-              <div className="h-px w-full bg-gradient-to-r from-transparent via-amber-300 to-transparent"></div>
-            </div>
+            <Box sx={{ pt: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
+              <Box
+                sx={{
+                  width: '100%',
+                  height: 1,
+                  background: 'linear-gradient(to right, transparent, #f59e0b, transparent)',
+                }}
+              />
+              <Typography variant="body2" color="text.secondary">
+                ✦
+              </Typography>
+              <Box
+                sx={{
+                  width: '100%',
+                  height: 1,
+                  background: 'linear-gradient(to right, transparent, #f59e0b, transparent)',
+                }}
+              />
+            </Box>
           </Form>
         </Card>
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 }

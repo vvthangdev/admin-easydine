@@ -1,19 +1,30 @@
 import React, { useEffect, useState } from "react";
-import { Select, Input, Tabs } from "antd";
+import {
+  Box,
+  Typography,
+  TextField,
+  Select,
+  MenuItem,
+  Tabs,
+  Tab,
+  FormControl,
+  InputLabel,
+} from "@mui/material";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import moment from "moment";
 import { userAPI } from "../../services/apis/User";
-
-const { Option } = Select;
-const { TabPane } = Tabs;
 
 const OrderBasicInfo = ({
   formData,
   setFormData,
   availableTables,
   fetchAvailableTables,
+  isTableAvailable,
 }) => {
   const [staffList, setStaffList] = useState([]);
   const [loadingStaff, setLoadingStaff] = useState(false);
+  const [activeTab, setActiveTab] = useState("Tầng 1");
 
   useEffect(() => {
     const fetchStaffList = async () => {
@@ -23,6 +34,7 @@ const OrderBasicInfo = ({
         setStaffList(Array.isArray(users) ? users : []);
       } catch (error) {
         console.error("Error fetching staff list:", error);
+        toast.error("Không thể tải danh sách nhân viên");
         setStaffList([]);
       } finally {
         setLoadingStaff(false);
@@ -31,7 +43,6 @@ const OrderBasicInfo = ({
     fetchStaffList();
   }, []);
 
-  // Nhóm bàn theo tầng (area)
   const groupedTables = availableTables.reduce((acc, table) => {
     const area = table.area || "Không xác định";
     if (!acc[area]) {
@@ -44,8 +55,6 @@ const OrderBasicInfo = ({
   const handleChange = (field, value) => {
     setFormData((prev) => {
       const newData = { ...prev, [field]: value };
-
-      // Đặt end_time mặc định là 23:59
       newData.end_time = "23:59";
 
       if (newData.date && newData.start_time) {
@@ -82,7 +91,6 @@ const OrderBasicInfo = ({
   };
 
   const handleTableChange = (area, value) => {
-    // Tạo key duy nhất cho bàn dựa trên area và table_number
     const selectedTableIds = value.map((tableKey) => {
       const [tableNumber, tableArea] = tableKey.split("|");
       const table = availableTables.find(
@@ -91,7 +99,6 @@ const OrderBasicInfo = ({
       return table ? table._id : null;
     }).filter((id) => id !== null);
 
-    // Cập nhật danh sách bàn được chọn, giữ lại các bàn từ các area khác
     setFormData((prev) => {
       const otherAreaTableIds = prev.tables.filter((tableId) => {
         const table = availableTables.find((t) => t._id === tableId);
@@ -105,131 +112,126 @@ const OrderBasicInfo = ({
   };
 
   return (
-    <div className="flex flex-col gap-6 w-full p-4">
-      <h3 className="text-lg font-semibold text-gray-900">Thông tin cơ bản</h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
-        <div className="min-w-0">
-          <label className="text-sm font-medium text-gray-900">
-            Loại Đơn Hàng <span className="text-red-500">*</span>
-          </label>
+    <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 2 }}>
+      <Typography variant="h6">Thông tin cơ bản</Typography>
+      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
+        <FormControl fullWidth>
+          <InputLabel>Loại Đơn Hàng *</InputLabel>
           <Select
             value={formData.type || "reservation"}
-            onChange={(value) => handleChange("type", value)}
-            className="w-full mt-2"
-            popupClassName="border-gray-300 rounded-lg"
+            label="Loại Đơn Hàng *"
+            onChange={(e) => handleChange("type", e.target.value)}
           >
-            <Option value="reservation">Đặt Chỗ</Option>
-            <Option value="ship">Giao Hàng</Option>
+            <MenuItem value="reservation">Đặt Chỗ</MenuItem>
+            <MenuItem value="ship">Giao Hàng</MenuItem>
           </Select>
-        </div>
-        <div className="min-w-0">
-          <label className="text-sm font-medium text-gray-900">
-            Trạng Thái <span className="text-red-500">*</span>
-          </label>
+        </FormControl>
+        <FormControl fullWidth>
+          <InputLabel>Trạng Thái *</InputLabel>
           <Select
             value={formData.status || "pending"}
-            onChange={(value) => handleChange("status", value)}
-            className="w-full mt-2 border-2 border-blue-500 rounded-lg shadow-md"
-            popupClassName="border-gray-300 rounded-lg"
-            style={{ fontWeight: "bold", color: "#1E40AF" }}
+            label="Trạng Thái *"
+            onChange={(e) => handleChange("status", e.target.value)}
+            disabled={isTableAvailable}
+            sx={{
+              "& .MuiSelect-select": {
+                fontWeight: "bold",
+                color: {
+                  pending: "#D97706",
+                  confirmed: "#059669",
+                  completed: "#1E40AF",
+                  canceled: "#DC2626",
+                }[formData.status || "pending"],
+              },
+            }}
           >
-            <Option value="pending" style={{ color: "#D97706" }}>
-              Pending
-            </Option>
-            <Option value="confirmed" style={{ color: "#059669" }}>
-              Confirmed
-            </Option>
-            <Option value="completed" style={{ color: "#1E40AF" }}>
-              Completed
-            </Option>
-            <Option value="canceled" style={{ color: "#DC2626" }}>
-              Canceled
-            </Option>
+            <MenuItem value="pending" sx={{ color: "#D97706" }}>Pending</MenuItem>
+            {!isTableAvailable && (
+              <>
+                <MenuItem value="confirmed" sx={{ color: "#059669" }}>Confirmed</MenuItem>
+                <MenuItem value="completed" sx={{ color: "#1E40AF" }}>Completed</MenuItem>
+                <MenuItem value="canceled" sx={{ color: "#DC2626" }}>Canceled</MenuItem>
+              </>
+            )}
           </Select>
-        </div>
-        <div className="min-w-0">
-          <label className="text-sm font-medium text-gray-900">
-            Nhân Viên Phụ Trách
-          </label>
+        </FormControl>
+        <FormControl fullWidth>
+          <InputLabel>Nhân Viên Phụ Trách</InputLabel>
           <Select
-            value={formData.staff_id || undefined}
-            onChange={(value) => handleChange("staff_id", value)}
-            placeholder="Chọn nhân viên"
-            className="w-full mt-2"
-            popupClassName="border-gray-300 rounded-lg"
-            loading={loadingStaff}
-            allowClear
+            value={formData.staff_id || ""}
+            label="Nhân Viên Phụ Trách"
+            onChange={(e) => handleChange("staff_id", e.target.value)}
+            disabled={loadingStaff}
           >
+            <MenuItem value="">Chọn nhân viên</MenuItem>
             {staffList.map((staff) => (
-              <Option key={staff._id} value={staff._id}>
+              <MenuItem key={staff._id} value={staff._id}>
                 {staff.username || staff.name || "Không xác định"}
-              </Option>
+              </MenuItem>
             ))}
           </Select>
-        </div>
-        <div className="min-w-0">
-          <label className="text-sm font-medium text-gray-900">
-            Ngày <span className="text-red-500">*</span>
-          </label>
-          <Input
-            value={formData.date || ""}
-            placeholder="DD/MM/YYYY"
-            onChange={(e) => handleChange("date", e.target.value)}
-            className="w-full mt-2 border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
-        <div className="min-w-0">
-          <label className="text-sm font-medium text-gray-900">
-            Thời Gian Bắt Đầu <span className="text-red-500">*</span>
-          </label>
-          <Input
-            value={formData.start_time || ""}
-            placeholder="HH:mm"
-            onChange={(e) => handleChange("start_time", e.target.value)}
-            className="w-full mt-2 border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
+        </FormControl>
+        <TextField
+          label="Ngày *"
+          value={formData.date || ""}
+          onChange={(e) => handleChange("date", e.target.value)}
+          placeholder="DD/MM/YYYY"
+          fullWidth
+        />
+        <TextField
+          label="Thời Gian Bắt Đầu *"
+          value={formData.start_time || ""}
+          onChange={(e) => handleChange("start_time", e.target.value)}
+          placeholder="HH:mm"
+          fullWidth
+        />
         {formData.type === "reservation" && (
-          <div className="sm:col-span-2 min-w-0">
-            <label className="text-sm font-medium text-gray-900">
-              Chọn Bàn
-            </label>
-            <Tabs defaultActiveKey="Tầng 1" className="mt-2">
+          <Box sx={{ gridColumn: { sm: "span 2" } }}>
+            <Typography variant="subtitle1">Chọn Bàn</Typography>
+            <Tabs
+              value={activeTab}
+              onChange={(e, newValue) => setActiveTab(newValue)}
+              sx={{ mb: 1 }}
+            >
               {Object.keys(groupedTables).map((area) => (
-                <TabPane tab={area} key={area}>
+                <Tab key={area} label={area} value={area} />
+              ))}
+            </Tabs>
+            {Object.keys(groupedTables).map((area) => (
+              <Box key={area} sx={{ display: activeTab === area ? "block" : "none" }}>
+                <FormControl fullWidth>
+                  <InputLabel>Chọn bàn ở {area}</InputLabel>
                   <Select
-                    mode="multiple"
+                    multiple
                     value={
                       formData.tables
                         ? availableTables
-                            .filter((table) =>
-                              formData.tables.includes(table._id) &&
-                              table.area === area
+                            .filter(
+                              (table) =>
+                                formData.tables.includes(table._id) && table.area === area
                             )
                             .map((table) => `${table.table_number}|${table.area}`)
                         : []
                     }
-                    onChange={(value) => handleTableChange(area, value)}
-                    placeholder={`Chọn bàn ở ${area}`}
-                    className="w-full"
-                    popupClassName="border-gray-300 rounded-lg"
+                    label={`Chọn bàn ở ${area}`}
+                    onChange={(e) => handleTableChange(area, e.target.value)}
                   >
                     {groupedTables[area].map((table) => (
-                      <Option
+                      <MenuItem
                         key={table._id}
                         value={`${table.table_number}|${table.area}`}
                       >
                         Bàn {table.table_number} (Sức chứa: {table.capacity})
-                      </Option>
+                      </MenuItem>
                     ))}
                   </Select>
-                </TabPane>
-              ))}
-            </Tabs>
-          </div>
+                </FormControl>
+              </Box>
+            ))}
+          </Box>
         )}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 };
 

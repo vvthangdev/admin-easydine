@@ -1,5 +1,14 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { Modal, message, Button } from "antd";
+import {
+  Modal,
+  Box,
+  Button,
+  Grid,
+  CircularProgress,
+  Typography,
+} from "@mui/material";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import moment from "moment";
 import OrderBasicInfo from "./OrderBasicInfo";
 import ItemSelector from "./ItemSelector";
@@ -22,7 +31,7 @@ const OrderFormModal = ({
   const [menuItems, setMenuItems] = useState([]);
   const [formData, setFormData] = useState({
     type: "reservation",
-    status: "pending",
+    status: table?.status === "Available" ? "pending" : "pending",
     date: moment().format("DD/MM/YYYY"),
     start_time: moment().format("HH:mm"),
     end_time: "23:59",
@@ -46,7 +55,7 @@ const OrderFormModal = ({
       setAvailableTables(Array.isArray(response) ? response : []);
     } catch (error) {
       console.error("Error fetching available tables:", error);
-      message.error("Không thể tải danh sách bàn trống");
+      toast.error("Không thể tải danh sách bàn trống");
     } finally {
       setLoading(false);
     }
@@ -141,7 +150,7 @@ const OrderFormModal = ({
       setAvailableTables(mergedTables);
     } catch (error) {
       console.error("Error loading order for edit:", error);
-      message.error("Không thể tải thông tin đơn hàng");
+      toast.error("Không thể tải thông tin đơn hàng");
     } finally {
       setLoading(false);
     }
@@ -154,7 +163,7 @@ const OrderFormModal = ({
       start_time: now.format("HH:mm"),
       end_time: "23:59",
       type: "reservation",
-      status: "pending",
+      status: table?.status === "Available" ? "pending" : "pending",
       tables: table ? [table.table_id] : [],
     };
     setFormData(newFormData);
@@ -201,22 +210,22 @@ const OrderFormModal = ({
       !formData.start_time ||
       !formData.end_time
     ) {
-      message.error("Vui lòng điền đầy đủ thông tin bắt buộc");
+      toast.error("Vui lòng điền đầy đủ thông tin bắt buộc");
       return;
     }
     if (!isValidDate || !isValidStartTime || !isValidEndTime) {
-      message.error("Định dạng ngày hoặc giờ không hợp lệ");
+      toast.error("Định dạng ngày hoặc giờ không hợp lệ");
       return;
     }
     if (
       formData.type === "reservation" &&
       (!formData.tables || formData.tables.length === 0)
     ) {
-      message.error("Vui lòng chọn ít nhất một bàn");
+      toast.error("Vui lòng chọn ít nhất một bàn");
       return;
     }
     if (!selectedItems || selectedItems.length === 0) {
-      message.error("Vui lòng chọn ít nhất một món ăn");
+      toast.error("Vui lòng chọn ít nhất một món ăn");
       return;
     }
 
@@ -288,7 +297,7 @@ const OrderFormModal = ({
       }
     } catch (error) {
       console.error("Error submitting order:", error);
-      message.error("Có lỗi xảy ra. Vui lòng thử lại.");
+      toast.error("Có lỗi xảy ra. Vui lòng thử lại.");
     } finally {
       setLoading(false);
     }
@@ -318,7 +327,7 @@ const OrderFormModal = ({
 
   const handleOpenSplitModal = async () => {
     if (!currentOrderId && !editingOrder) {
-      message.info("Vui lòng lưu đơn hàng trước khi tách!");
+      toast.info("Vui lòng lưu đơn hàng trước khi tách!");
       await handleModalOk();
       if (currentOrderId) {
         setSplitModalVisible(true);
@@ -330,7 +339,7 @@ const OrderFormModal = ({
 
   const handleOpenMergeModal = async () => {
     if (!currentOrderId && !editingOrder) {
-      message.info("Vui lòng lưu đơn hàng trước khi gộp!");
+      toast.info("Vui lòng lưu đơn hàng trước khi gộp!");
       await handleModalOk();
       if (currentOrderId) {
         setMergeModalVisible(true);
@@ -341,99 +350,171 @@ const OrderFormModal = ({
   };
 
   return (
-    <Modal
-      title={editingOrder ? "Sửa Đơn Hàng" : "Thêm Đơn Hàng Mới"}
-      open={visible}
-      onCancel={onCancel}
-      width="90vw"
-      className="rounded-xl"
-      styles={{ padding: 0, background: "transparent" }}
-      zIndex={1000}
-      footer={[
-        <Button
-          key="cancel"
-          className="px-6 py-2 text-base font-semibold text-white bg-red-500 rounded-lg hover:bg-red-600 transition-all duration-300 shadow-md"
-          onClick={onCancel}
-          disabled={loading}
+    <>
+      <Modal
+        open={visible}
+        onClose={onCancel}
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 1000,
+        }}
+      >
+        <Box
+          sx={{
+            width: { xs: "95vw", md: "90vw" },
+            height: "80vh",
+            bgcolor: "background.paper",
+            borderRadius: 2,
+            boxShadow: 24,
+            overflow: "hidden",
+            display: "flex",
+            flexDirection: "column",
+          }}
         >
-          Hủy
-        </Button>,
-        <Button
-          key="submit"
-          className="px-6 py-2 text-base font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all duration-300 shadow-md"
-          onClick={handleModalOk}
-          loading={loading}
-        >
-          {editingOrder ? "Cập nhật" : "Thêm"}
-        </Button>,
-      ]}
-    >
-      <div className="flex h-[80vh] bg-white/80 backdrop-blur-md rounded-xl overflow-hidden">
-        <div className="w-1/2 p-4 border-r border-gray-200 overflow-y-auto">
-          {showItemSelector ? (
-            <ItemSelector
-              setSelectedItems={setSelectedItems}
-              menuItems={menuItems}
-              setMenuItems={setMenuItems}
-            />
-          ) : (
-            <OrderBasicInfo
-              formData={formData}
-              setFormData={setFormData}
-              availableTables={availableTables}
-              fetchAvailableTables={fetchAvailableTables}
-            />
-          )}
-        </div>
-        <div className="w-1/2 p-4 overflow-y-auto">
-          <div className="flex gap-2 items-center mb-4">
-            {showItemSelector ? (
-              <Button
-                className="px-6 py-2 text-base font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition-all duration-300 shadow-md"
-                onClick={handleDoneSelectingItems}
-                disabled={loading}
-              >
-                Xong
-              </Button>
-            ) : (
-              <>
-                <Button
-                  className="px-6 py-2 text-base font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all duration-300 shadow-md"
-                  onClick={handleAddItemClick}
-                  disabled={loading}
-                >
-                  Thêm Món
-                </Button>
-                {formData.type === "reservation" && (
+          <Box
+            sx={{
+              p: 2,
+              bgcolor: "primary.main",
+              color: "primary.contrastText",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Typography variant="h6">
+              {editingOrder ? "Sửa Đơn Hàng" : "Thêm Đơn Hàng Mới"}
+            </Typography>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={onCancel}
+              disabled={loading}
+              sx={{ minWidth: 100 }}
+            >
+              Hủy
+            </Button>
+          </Box>
+          <Grid container sx={{ flex: 1, overflow: "hidden" }}>
+            <Grid
+              item
+              xs={12}
+              md={6}
+              sx={{
+                p: 2,
+                borderRight: { md: "1px solid", borderColor: "divider" },
+                overflowY: "auto",
+                maxWidth: { md: "50%" },
+                width: { md: "50%" },
+              }}
+            >
+              {showItemSelector ? (
+                <ItemSelector
+                  setSelectedItems={setSelectedItems}
+                  menuItems={menuItems}
+                  setMenuItems={setMenuItems}
+                  sx={{ maxWidth: "100%", width: "100%" }}
+                />
+              ) : (
+                <OrderBasicInfo
+                  formData={formData}
+                  setFormData={setFormData}
+                  availableTables={availableTables}
+                  fetchAvailableTables={fetchAvailableTables}
+                  isTableAvailable={table?.status === "Available"}
+                />
+              )}
+            </Grid>
+            <Grid
+              item
+              xs={12}
+              md={6}
+              sx={{
+                p: 2,
+                overflowY: "auto",
+                maxWidth: { md: "50%" },
+                width: { md: "50%" },
+              }}
+            >
+              <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
+                {showItemSelector ? (
+                  <Button
+                    variant="contained"
+                    color="success"
+                    onClick={handleDoneSelectingItems}
+                    disabled={loading}
+                    sx={{ minWidth: 100 }}
+                  >
+                    Xong
+                  </Button>
+                ) : (
                   <>
                     <Button
-                      className="px-6 py-2 text-base font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition-all duration-300 shadow-md"
-                      onClick={handleOpenSplitModal}
+                      variant="contained"
+                      color="primary"
+                      onClick={handleAddItemClick}
                       disabled={loading}
+                      sx={{ minWidth: 100 }}
                     >
-                      Tách Đơn
+                      Thêm Món
                     </Button>
-                    <Button
-                      className="px-6 py-2 text-base font-semibold text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition-all duration-300 shadow-md"
-                      onClick={handleOpenMergeModal}
-                      disabled={loading}
-                    >
-                      Gộp Đơn
-                    </Button>
+                    {formData.type === "reservation" && (
+                      <>
+                        <Button
+                          variant="contained"
+                          color="success"
+                          onClick={handleOpenSplitModal}
+                          disabled={loading}
+                          sx={{ minWidth: 100 }}
+                        >
+                          Tách Đơn
+                        </Button>
+                        <Button
+                          variant="contained"
+                          color="secondary"
+                          onClick={handleOpenMergeModal}
+                          disabled={loading}
+                          sx={{ minWidth: 100 }}
+                        >
+                          Gộp Đơn
+                        </Button>
+                      </>
+                    )}
                   </>
                 )}
-              </>
-            )}
-          </div>
-          <SelectedItems
-            selectedItems={selectedItems}
-            setSelectedItems={setSelectedItems}
-            menuItems={menuItems}
-          />
-        </div>
-      </div>
-
-      {/* Modal tách đơn */}
+              </Box>
+              <SelectedItems
+                selectedItems={selectedItems}
+                setSelectedItems={setSelectedItems}
+                menuItems={menuItems}
+              />
+            </Grid>
+          </Grid>
+          <Box
+            sx={{
+              p: 2,
+              bgcolor: "background.default",
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: 1,
+              borderTop: "1px solid",
+              borderColor: "divider",
+            }}
+          >
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleModalOk}
+              disabled={loading}
+              sx={{ minWidth: 100 }}
+              startIcon={loading && <CircularProgress size={20} color="inherit" />}
+            >
+              {editingOrder ? "Cập nhật" : "Thêm"}
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
       <SplitOrderModal
         visible={splitModalVisible}
         orderDetails={orderDetails}
@@ -441,8 +522,6 @@ const OrderFormModal = ({
         onSuccess={handleSplitSuccess}
         zIndex={1001}
       />
-
-      {/* Modal gộp đơn */}
       <MergeOrderModal
         visible={mergeModalVisible}
         targetOrder={{ id: currentOrderId || editingOrder?.id }}
@@ -450,7 +529,7 @@ const OrderFormModal = ({
         onSuccess={handleMergeSuccess}
         zIndex={1001}
       />
-    </Modal>
+    </>
   );
 };
 

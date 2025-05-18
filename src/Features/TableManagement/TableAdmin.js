@@ -1,112 +1,137 @@
 import React, { useState } from "react";
-import { Table, Button, Tabs } from "antd";
+import {
+  Box,
+  Button,
+  Tabs,
+  Tab,
+  Typography,
+} from "@mui/material";
+import { DataGrid } from "@mui/x-data-grid";
 import { getVietnameseStatus } from "./TableCardView/TableCardUtils";
 
-const { TabPane } = Tabs;
-
 const TableAdmin = ({ tables, onEdit, onDelete, onAdd, areas }) => {
-  // Đặt khu vực mặc định là khu vực đầu tiên trong areas, nếu không có thì là chuỗi rỗng
   const initialArea = areas.length > 0 ? areas[0] : "";
   const [activeArea, setActiveArea] = useState(initialArea);
 
   const columns = [
     {
-      title: "Số bàn",
-      dataIndex: "table_number",
-      key: "table_number",
-      sorter: (a, b) => a.table_number - b.table_number,
+      field: "table_number",
+      headerName: "Số bàn",
+      width: 150,
+      sortable: true,
     },
     {
-      title: "Sức chứa",
-      dataIndex: "capacity",
-      key: "capacity",
-      sorter: (a, b) => a.capacity - b.capacity,
+      field: "capacity",
+      headerName: "Sức chứa",
+      width: 150,
+      sortable: true,
     },
     {
-      title: "Khu vực",
-      dataIndex: "area",
-      key: "area",
-      sorter: (a, b) => a.area.localeCompare(b.area),
+      field: "area",
+      headerName: "Khu vực",
+      width: 150,
+      sortable: true,
     },
     {
-      title: "Trạng thái",
-      dataIndex: "status",
-      key: "status",
-      render: (status) => (
-        <span
-          className={
-            status === "Available"
-              ? "text-green-600"
-              : status === "Reserved"
-              ? "text-yellow-600"
-              : "text-blue-600"
-          }
+      field: "status",
+      headerName: "Trạng thái",
+      width: 150,
+      renderCell: (params) => (
+        <Typography
+          sx={{
+            color:
+              params.value === "Available"
+                ? "green"
+                : params.value === "Reserved"
+                ? "orange"
+                : "blue",
+          }}
         >
-          {getVietnameseStatus(status)}
-        </span>
+          {getVietnameseStatus(params.value)}
+        </Typography>
       ),
     },
     {
-      title: "Hành động",
-      key: "action",
-      render: (_, record) => (
-        <div className="flex gap-2">
+      fieldXRD: "action",
+      headerName: "Hành động",
+      width: 200,
+      renderCell: (params) => (
+        <Box sx={{ display: "flex", gap: 1 }}>
           <Button
-            type="primary"
-            onClick={() => onEdit(record)}
-            className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700"
+            variant="contained"
+            color="primary"
+            size="small"
+            onClick={() => onEdit(params.row)}
           >
             Sửa
           </Button>
           <Button
-            type="danger"
-            onClick={() => onDelete(record.table_id)}
-            className="px-3 py-1 text-sm bg-red-600 hover:bg-red-700"
+            variant="contained"
+            color="error"
+            size="small"
+            onClick={() => onDelete(params.row.table_id)}
           >
             Xóa
           </Button>
-        </div>
+        </Box>
       ),
     },
   ];
 
-  // Lọc bàn theo khu vực
   const filteredTables =
     activeArea === ""
       ? tables
       : tables.filter((table) => table.area === activeArea);
 
-  // Danh sách khu vực cho Tabs (chỉ lấy các khu vực duy nhất từ tables)
   const tabAreas = [...new Set(tables.map((table) => table.area))];
 
   return (
-    <div>
-      <div className="flex justify-end mb-4">
+    <Box sx={{ p: 2 }}>
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
         <Button
-          type="primary"
+          variant="contained"
+          color="primary"
           onClick={onAdd}
-          className="px-4 py-1 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
         >
           Thêm bàn mới
         </Button>
-      </div>
+      </Box>
       {tabAreas.length > 0 ? (
-        <Tabs activeKey={activeArea} onChange={setActiveArea} className="mb-4">
+        <Tabs
+          value={activeArea}
+          onChange={(e, newValue) => setActiveArea(newValue)}
+          sx={{ mb: 2 }}
+        >
           {tabAreas.map((area) => (
-            <TabPane tab={area} key={area} />
+            <Tab label={area} value={area} key={area} />
           ))}
         </Tabs>
       ) : (
-        <div className="text-center">Không có khu vực nào</div>
+        <Typography textAlign="center" sx={{ mb: 2 }}>
+          Không có khu vực nào
+        </Typography>
       )}
-      <Table
-        columns={columns}
-        dataSource={filteredTables}
-        rowKey="table_number"
-        pagination={{ pageSize: 10 }}
-        className="mt-4"
-      />
-    </div>
+      <Box sx={{ height: 400, width: "100%" }}>
+        <DataGrid
+          rows={filteredTables}
+          columns={columns}
+          getRowId={(row) => row.table_number}
+          pageSizeOptions={[10]}
+          pagination
+          disableRowSelectionOnClick
+          sx={{
+            "& .MuiDataGrid-columnHeaders": {
+              backgroundColor: "#f5f5f5",
+            },
+            "& .MuiDataGrid-row": {
+              "&:hover": {
+                backgroundColor: "#f0f0f0",
+              },
+            },
+          }}
+        />
+      </Box>
+    </Box>
   );
 };
 

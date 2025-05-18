@@ -1,37 +1,71 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import { Box, Button, Typography } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 export default function HeroSection() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex items-center justify-between px-4 md:px-20 py-12 bg-gradient-to-r from-orange-50 to-orange-100">
-      <div className="flex flex-col gap-6 max-w-xl items-center">
-        <h1 className="text-4xl md:text-6xl font-bold text-gray-800 text-center">
+    <Box
+      minHeight="100vh"
+      display="flex"
+      alignItems="center"
+      justifyContent="space-between"
+      px={{ xs: 2, md: 5 }}
+      py={6}
+      sx={{
+        background: 'linear-gradient(to right, #fff7ed, #fff1d6)',
+      }}
+    >
+      <Box display="flex" flexDirection="column" gap={3} maxWidth="500px" alignItems="center" textAlign="center">
+        <Typography variant="h3" fontWeight="bold" color="text.primary">
           Quản lý
-          <span className="text-orange-500 block mt-2">Nhà hàng của bạn</span>
+          <Typography component="span" variant="h3" color="orange" display="block" mt={1}>
+            Nhà hàng của bạn
+          </Typography>
           Một cách thật dễ dàng
-        </h1>
-
-        <p className="text-lg md:text-xl text-gray-600 text-center">
+        </Typography>
+        <Typography variant="h6" color="text.secondary">
           Hãy cùng trải nghiệm!
-        </p>
-
-        <button
-          onClick={() => navigate("/login")}
-          className="bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 px-8 rounded-full w-fit transition-all duration-300 shadow-lg hover:shadow-xl"
+        </Typography>
+        <Button
+          variant="contained"
+          size="large"
+          sx={{
+            backgroundColor: 'orange',
+            color: '#fff',
+            px: 4,
+            py: 1.5,
+            borderRadius: 9999,
+            boxShadow: 4,
+            '&:hover': {
+              backgroundColor: '#fb923c',
+              boxShadow: 6,
+            },
+          }}
+          onClick={() => navigate('/login')}
         >
           Khám phá ngay
-        </button>
-      </div>
+        </Button>
+      </Box>
 
-      <div className="hidden md:block">
-        <img
-          src="../../Assets/HomePage/breadsup.jpg"
+      <Box display={{ xs: 'none', md: 'block' }}>
+        <Box
+          component="img"
+          src="/Assets/HomePage/breadsup.jpg"
           alt="Bánh mì ngon"
-          className="w-[500px] h-[500px] object-cover rounded-2xl shadow-2xl hover:scale-105 transition-transform duration-300"
+          sx={{
+            width: 500,
+            height: 500,
+            objectFit: 'cover',
+            borderRadius: 4,
+            boxShadow: 6,
+            transition: 'transform 0.3s',
+            '&:hover': {
+              transform: 'scale(1.05)',
+            },
+          }}
         />
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 }

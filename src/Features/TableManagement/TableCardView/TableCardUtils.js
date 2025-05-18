@@ -2,9 +2,8 @@ import TableAvailable from "../../../assets/images/table_available.png";
 import TableReserved from "../../../assets/images/table_reserved.png";
 import TableOccupied from "../../../assets/images/table_occupied.png";
 import { orderAPI } from "../../../services/apis/Order";
-import { message } from "antd";
+import { toast } from "react-toastify";
 
-// Hàm chọn hình ảnh dựa trên trạng thái
 export const getTableImage = (status) => {
   switch (status) {
     case "Available":
@@ -18,7 +17,6 @@ export const getTableImage = (status) => {
   }
 };
 
-// Hàm chuyển đổi trạng thái sang tiếng Việt
 export const getVietnameseStatus = (status) => {
   switch (status) {
     case "Available":
@@ -32,7 +30,6 @@ export const getVietnameseStatus = (status) => {
   }
 };
 
-// Lấy danh sách bàn nguồn (chỉ lấy bàn đại diện cho mỗi đơn hàng)
 export const getSourceTables = (tables, currentReservationId) => {
   if (!currentReservationId) return [];
   const seenReservations = new Set();
@@ -45,7 +42,7 @@ export const getSourceTables = (tables, currentReservationId) => {
       ) {
         if (!seenReservations.has(t.reservation_id)) {
           seenReservations.add(t.reservation_id);
-          return true; // Chỉ lấy bàn có table_number nhỏ nhất trong nhóm
+          return true;
         }
         return false;
       }
@@ -54,14 +51,12 @@ export const getSourceTables = (tables, currentReservationId) => {
     .sort((a, b) => a.table_number - b.table_number);
 };
 
-// Xử lý ghép đơn
 export const handleMergeOrder = async (
   sourceTable,
   tables,
   table,
   onMergeSuccess,
-  setIsMergeModalVisible,
-  setIsModalVisible
+  setIsMergeModalVisible
 ) => {
   try {
     const sourceTableNumber = Math.min(
@@ -82,14 +77,13 @@ export const handleMergeOrder = async (
 
     await orderAPI.mergeOrder(data);
 
-    message.success(
+    toast.success(
       `Ghép đơn từ bàn ${sourceTableNumber} vào bàn ${targetTableNumber} thành công`
     );
     setIsMergeModalVisible(false);
-    setIsModalVisible(false);
     onMergeSuccess();
   } catch (error) {
     console.error("Error merging order:", error);
-    message.error("Ghép đơn không thành công");
+    toast.error("Ghép đơn không thành công");
   }
 };

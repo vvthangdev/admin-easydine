@@ -1,16 +1,22 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { Button, message, Modal, Tabs } from "antd";
+import {
+  Box,
+  Typography,
+  Button,
+  Tabs,
+  Tab,
+  CircularProgress,
+  Dialog,
+} from "@mui/material";
 import { tableAPI } from "../../services/apis/Table";
 import TableCard from "../TableManagement/TableCardView/TableCard";
 import TableFormModal from "./TableFormModal";
 import OrderFormModal from "../OrderFormModal/OrderFormModal";
 import ReleaseTableModal from "./ReleaseTableModal";
 import TableAdmin from "./TableAdmin";
-import "./TableManagement.css";
 import { orderAPI } from "../../services/apis/Order";
-import { ReloadOutlined } from "@ant-design/icons";
-
-const { TabPane } = Tabs;
+import { toast } from "react-toastify";
+import RefreshIcon from "@mui/icons-material/Refresh";
 
 export default function TableManagement() {
   const [tables, setTables] = useState([]);
@@ -66,7 +72,7 @@ export default function TableManagement() {
       setTables(formattedTables);
     } catch (error) {
       console.error("Error fetching tables:", error);
-      message.error("Lỗi khi tải danh sách bàn");
+      toast.error("Lỗi khi tải danh sách bàn");
     } finally {
       setLoading(false);
     }
@@ -81,18 +87,16 @@ export default function TableManagement() {
       }
     } catch (error) {
       console.error("Error fetching areas:", error);
-      message.error("Lỗi khi tải danh sách khu vực");
+      toast.error("Lỗi khi tải danh sách khu vực");
     }
   }, [activeArea]);
 
-  // Hàm xử lý nút làm mới
   const handleRefresh = () => {
     fetchTables();
     fetchAreas();
   };
 
   useEffect(() => {
-    // Chỉ gọi API nếu dữ liệu chưa tồn tại
     if (tables.length === 0) {
       fetchTables();
     }
@@ -122,18 +126,16 @@ export default function TableManagement() {
     try {
       await tableAPI.deleteTable({ table_id: tableId });
       setTables(tables.filter((t) => t.table_id !== tableId));
-      message.success(`Xóa bàn thành công`);
-      // Chỉ gọi fetchAreas nếu cần (ví dụ: khu vực có thể bị ảnh hưởng)
-      // fetchAreas();
+      toast.success(`Xóa bàn thành công`);
     } catch (error) {
       console.error("Error deleting table:", error);
-      message.error("Xóa bàn không thành công");
+      toast.error("Xóa bàn không thành công");
     }
   };
 
   const handleReleaseTable = async () => {
     if (!releasingTable?.reservation_id || !releasingTable?.table_id) {
-      message.error("Thông tin đặt chỗ hoặc bàn không hợp lệ");
+      toast.error("Thông tin đặt chỗ hoặc bàn không hợp lệ");
       return;
     }
 
@@ -157,12 +159,12 @@ export default function TableManagement() {
             : table
         )
       );
-      message.success(`Trả bàn số ${releasingTable.table_number} thành công`);
+      toast.success(`Trả bàn số ${releasingTable.table_number} thành công`);
       setIsReleaseModalVisible(false);
       setReleasingTable(null);
     } catch (error) {
       console.error("Error releasing table:", error);
-      message.error("Trả bàn không thành công");
+      toast.error("Trả bàn không thành công");
     }
   };
 
@@ -183,7 +185,7 @@ export default function TableManagement() {
               : table
           )
         );
-        message.success(`Cập nhật bàn số ${requestData.table_number} thành công`);
+        toast.success(`Cập nhật bàn số ${requestData.table_number} thành công`);
       } else {
         const newTable = await tableAPI.addTable(requestData);
         setTables([
@@ -196,16 +198,15 @@ export default function TableManagement() {
             order_number: null,
           },
         ]);
-        message.success(`Thêm bàn số ${requestData.table_number} thành công`);
+        toast.success(`Thêm bàn số ${requestData.table_number} thành công`);
       }
       setIsFormModalVisible(false);
-      // Chỉ gọi fetchAreas nếu khu vực mới được thêm
       if (!areas.includes(requestData.area)) {
         fetchAreas();
       }
     } catch (error) {
       console.error("Error saving table:", error);
-      message.error(
+      toast.error(
         editingTable ? "Cập nhật bàn không thành công" : "Thêm bàn không thành công"
       );
     }
@@ -226,12 +227,12 @@ export default function TableManagement() {
   const handleOrderSubmit = async (orderData) => {
     try {
       await orderAPI.createOrder(orderData);
-      message.success("Thêm đơn hàng mới thành công");
+      toast.success("Thêm đơn hàng mới thành công");
       fetchTables();
       setIsOrderModalVisible(false);
     } catch (error) {
       console.error("Error creating order:", error);
-      message.error("Thêm đơn hàng không thành công");
+      toast.error("Thêm đơn hàng không thành công");
     }
   };
 
@@ -251,81 +252,123 @@ export default function TableManagement() {
     });
 
     return Object.values(orders).map((order) => (
-      <div key={order.order_number} className="order-summary-item">
-        Đơn #
-        <span
-          className="text-blue-600 cursor-pointer hover:underline"
-          onClick={() => {
-            navigator.clipboard.writeText(order.full_id).then(() => {
-              message.success(`Đã sao chép mã đơn hàng: ${order.full_id}`);
-            }).catch(() => {
-              message.error("Không thể sao chép mã đơn hàng");
-            });
-          }}
-        >
-          {order.order_number}
-        </span>
-        : Bàn {order.tables.sort((a, b) => a - b).join(", ")}
-      </div>
+      <Box key={order.order_number} sx={{ mb: 1 }}>
+        <Typography variant="body2">
+          Đơn #
+          <span
+            style={{ color: "#1976d2", cursor: "pointer", textDecoration: "underline" }}
+            onClick={() => {
+              navigator.clipboard.writeText(order.full_id).then(() => {
+                toast.success(`Đã sao chép mã đơn hàng: ${order.full_id}`);
+              }).catch(() => {
+                toast.error("Không thể sao chép mã đơn hàng");
+              });
+            }}
+          >
+            {order.order_number}
+          </span>
+          : Bàn {order.tables.sort((a, b) => a - b).join(", ")}
+        </Typography>
+      </Box>
     ));
   };
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+    <Box sx={{ p: 3, bgcolor: "#f5f5f5", minHeight: "100vh" }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 3,
+        }}
+      >
+        <Typography
+          variant="h5"
+          sx={{
+            bgcolor: "#1976d2",
+            color: "#fff",
+            p: 1,
+            borderRadius: 2,
+            "&:hover": { bgcolor: "#1565c0" },
+          }}
+        >
           Quản lý bàn
-        </h1>
-        <div className="flex gap-4">
+        </Typography>
+        <Box sx={{ display: "flex", gap: 2 }}>
           <Button
-            type="primary"
+            variant="contained"
+            color="secondary"
+            startIcon={<RefreshIcon />}
             onClick={handleRefresh}
-            icon={<ReloadOutlined />}
-            className="px-4 py-1 text-sm font-medium text-white bg-gray-600 rounded-lg hover:bg-gray-700"
           >
             Làm mới
           </Button>
           <Button
-            type="primary"
+            variant="contained"
+            color="primary"
             onClick={() => setIsTableListModalVisible(true)}
-            className="px-4 py-1 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
           >
             Quản lý danh sách bàn
           </Button>
           <Button
-            type="primary"
+            variant="contained"
+            color="success"
             onClick={handleNewOrder}
-            className="px-4 py-1 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700"
           >
             Đặt đơn hàng mới
           </Button>
-        </div>
-      </div>
+        </Box>
+      </Box>
 
       {tables.some((table) => table.reservation_id) && (
-        <div className="order-summary mb-4">
-          <h3 className="text-lg font-medium">Tóm tắt đơn hàng</h3>
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="h6" gutterBottom>
+            Tóm tắt đơn hàng
+          </Typography>
           {orderSummary()}
-        </div>
+        </Box>
       )}
 
       {tabAreas.length > 0 ? (
-        <Tabs activeKey={activeArea} onChange={setActiveArea} className="mb-4">
+        <Tabs
+          value={activeArea}
+          onChange={(e, newValue) => setActiveArea(newValue)}
+          sx={{ mb: 3 }}
+        >
           {tabAreas.map((area) => (
-            <TabPane tab={area} key={area} />
+            <Tab label={area} value={area} key={area} />
           ))}
         </Tabs>
       ) : (
-        <div className="text-center">Không có khu vực nào</div>
+        <Typography textAlign="center">Không có khu vực nào</Typography>
       )}
 
-      <div className="bg-white rounded-lg shadow p-4 table-container">
+      <Box
+        sx={{
+          bgcolor: "#fff",
+          borderRadius: 2,
+          boxShadow: 1,
+          p: 2,
+        }}
+      >
         {loading ? (
-          <div className="text-center">Đang tải...</div>
+          <Box sx={{ textAlign: "center" }}>
+            <CircularProgress />
+          </Box>
         ) : filteredTables.length === 0 ? (
-          <div className="text-center">Không có bàn nào</div>
+          <Typography textAlign="center">Không có bàn nào</Typography>
         ) : (
-          <div className="table-grid">
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "repeat(auto-fill, minmax(200px, 1fr))",
+                sm: "repeat(auto-fill, minmax(250px, 1fr))",
+              },
+              gap: 2,
+            }}
+          >
             {filteredTables.map((table) => (
               <TableCard
                 key={table.table_id}
@@ -339,19 +382,16 @@ export default function TableManagement() {
                 onOrderSuccess={handleOrderSuccess}
               />
             ))}
-          </div>
+          </Box>
         )}
-      </div>
+      </Box>
 
-      <Modal
-        title="Quản lý danh sách bàn"
+      <Dialog
         open={isTableListModalVisible}
-        onCancel={() => setIsTableListModalVisible(false)}
-        footer={null}
-        width={800}
-        className="rounded-xl"
-        style={{ top: 10 }}
-        zIndex={25}
+        onClose={() => setIsTableListModalVisible(false)}
+        maxWidth="md"
+        fullWidth
+        sx={{ "& .MuiDialog-paper": { borderRadius: 2, top: 10 } }}
       >
         <TableAdmin
           tables={tables}
@@ -360,11 +400,11 @@ export default function TableManagement() {
           onAdd={handleAdd}
           areas={areas}
         />
-      </Modal>
+      </Dialog>
 
       <TableFormModal
-        visible={isFormModalVisible}
-        onCancel={() => setIsFormModalVisible(false)}
+        open={isFormModalVisible}
+        onClose={() => setIsFormModalVisible(false)}
         onSubmit={handleFormSubmit}
         editingTable={editingTable}
         areas={areas}
@@ -388,6 +428,6 @@ export default function TableManagement() {
         onSubmit={handleOrderSubmit}
         table={null}
       />
-    </div>
+    </Box>
   );
 }
