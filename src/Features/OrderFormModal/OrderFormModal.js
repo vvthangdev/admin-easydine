@@ -17,6 +17,7 @@ import { tableAPI } from "../../services/apis/Table";
 import { orderAPI } from "../../services/apis/Order";
 import MergeOrderModal from "../OrderUpdate/MergeOrderModal";
 import SplitOrderModal from "../OrderUpdate/SplitOrderModal";
+import PaymentModal from "./PaymentModal";
 
 const OrderFormModal = ({
   visible,
@@ -41,6 +42,7 @@ const OrderFormModal = ({
   const [showItemSelector, setShowItemSelector] = useState(false);
   const [splitModalVisible, setSplitModalVisible] = useState(false);
   const [mergeModalVisible, setMergeModalVisible] = useState(false);
+  const [paymentModalVisible, setPaymentModalVisible] = useState(false);
   const [orderDetails, setOrderDetails] = useState(null);
   const [currentOrderId, setCurrentOrderId] = useState(null);
 
@@ -145,7 +147,10 @@ const OrderFormModal = ({
       const additionalReservedTables = reservedTables.filter(
         (table) => !existingTableIds.includes(table._id)
       );
-      const mergedTables = [...availableTablesFromAPI, ...additionalReservedTables];
+      const mergedTables = [
+        ...availableTablesFromAPI,
+        ...additionalReservedTables,
+      ];
 
       setAvailableTables(mergedTables);
     } catch (error) {
@@ -193,6 +198,8 @@ const OrderFormModal = ({
     if (visible) {
       if (editingOrder) {
         fetchOrderDetails();
+        console.log("isTableAvailable:", table?.status === "Available");
+        console.log("Table status:", table?.status);
       } else {
         resetForm();
       }
@@ -201,7 +208,11 @@ const OrderFormModal = ({
 
   const handleModalOk = async () => {
     const isValidDate = moment(formData.date, "DD/MM/YYYY", true).isValid();
-    const isValidStartTime = moment(formData.start_time, "HH:mm", true).isValid();
+    const isValidStartTime = moment(
+      formData.start_time,
+      "HH:mm",
+      true
+    ).isValid();
     const isValidEndTime = moment(formData.end_time, "HH:mm", true).isValid();
 
     if (
@@ -285,7 +296,7 @@ const OrderFormModal = ({
         });
       }
 
-      if (!splitModalVisible && !mergeModalVisible) {
+      if (!splitModalVisible && !mergeModalVisible && !paymentModalVisible) {
         setFormData({});
         setSelectedItems([]);
         setAvailableTables([]);
@@ -325,6 +336,21 @@ const OrderFormModal = ({
     }
   };
 
+  const handlePaymentSuccess = async ({ paymentMethod, orderId }) => {
+    try {
+      await orderAPI.updateOrderStatus({
+        id: orderId,
+        status: "completed",
+        payment_status: paymentMethod === "vnpay" ? "success" : "success",
+        payment_method: paymentMethod,
+      });
+      onCancel();
+    } catch (error) {
+      console.error("Error updating order status after payment:", error);
+      toast.error("Lỗi khi cập nhật trạng thái đơn hàng.");
+    }
+  };
+
   const handleOpenSplitModal = async () => {
     if (!currentOrderId && !editingOrder) {
       toast.info("Vui lòng lưu đơn hàng trước khi tách!");
@@ -346,6 +372,29 @@ const OrderFormModal = ({
       }
     } else {
       setMergeModalVisible(true);
+    }
+  };
+
+  const handleOpenPaymentModal = async () => {
+    if (!currentOrderId && !editingOrder) {
+      toast.info("Vui lòng lưu đơn hàng trước khi thanh toán!");
+      await handleModalOk();
+      if (currentOrderId) {
+        setPaymentModalVisible(true);
+      }
+    } else {
+      const orderId = currentOrderId || editingOrder?.id;
+      try {
+        const orderInfo = await orderAPI.getOrderInfo({ id: orderId });
+        if (orderInfo.order.status !== "confirmed") {
+          toast.error("Đơn hàng cần được xác nhận trước khi thanh toán!");
+          return;
+        }
+        setPaymentModalVisible(true);
+      } catch (error) {
+        console.error("Error fetching order info:", error);
+        toast.error("Lỗi khi kiểm tra trạng thái đơn hàng!");
+      }
     }
   };
 
@@ -479,6 +528,15 @@ const OrderFormModal = ({
                         >
                           Gộp Đơn
                         </Button>
+                        <Button
+                          variant="contained"
+                          color="info"
+                          onClick={handleOpenPaymentModal}
+                          disabled={loading}
+                          sx={{ minWidth: 100 }}
+                        >
+                          Thanh Toán
+                        </Button>
                       </>
                     )}
                   </>
@@ -508,7 +566,9 @@ const OrderFormModal = ({
               onClick={handleModalOk}
               disabled={loading}
               sx={{ minWidth: 100 }}
-              startIcon={loading && <CircularProgress size={20} color="inherit" />}
+              startIcon={
+                loading && <CircularProgress size={20} color="inherit" />
+              }
             >
               {editingOrder ? "Cập nhật" : "Thêm"}
             </Button>
@@ -527,6 +587,13 @@ const OrderFormModal = ({
         targetOrder={{ id: currentOrderId || editingOrder?.id }}
         onCancel={() => setMergeModalVisible(false)}
         onSuccess={handleMergeSuccess}
+        zIndex={1001}
+      />
+      <PaymentModal
+        visible={paymentModalVisible}
+        orderDetails={orderDetails}
+        onCancel={() => setPaymentModalVisible(false)}
+        onConfirm={handlePaymentSuccess}
         zIndex={1001}
       />
     </>

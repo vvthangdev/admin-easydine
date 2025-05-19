@@ -36,13 +36,16 @@ export default function Login() {
     if (accessToken && refreshToken && userData) {
       try {
         const parsedUserData = JSON.parse(decodeURIComponent(userData));
+        // Làm sạch token từ query params
+        const cleanAccessToken = accessToken.replace(/^Bearer\s+/, '');
+        const cleanRefreshToken = refreshToken.replace(/^Bearer\s+/, '');
         login({
-          accessToken: `Bearer ${accessToken}`,
-          refreshToken: `Bearer ${refreshToken}`,
+          accessToken: cleanAccessToken,
+          refreshToken: cleanRefreshToken,
           userData: parsedUserData,
         });
         message.success('Đăng nhập Google thành công!');
-        const decoded = jwtDecode(`Bearer ${accessToken}`);
+        const decoded = jwtDecode(cleanAccessToken);
         if (decoded.payload.role === 'ADMIN') {
           navigate('/admin');
         } else {
@@ -64,10 +67,16 @@ export default function Login() {
     try {
       setLoading(true);
       const response = await authAPI.login(requestData);
-      login(response);
+      // Làm sạch token từ phản hồi
+      const cleanResponse = {
+        ...response,
+        accessToken: response.accessToken.replace(/^Bearer\s+/, ''),
+        refreshToken: response.refreshToken ? response.refreshToken.replace(/^Bearer\s+/, '') : response.refreshToken,
+      };
+      login(cleanResponse);
       message.success('Đăng nhập thành công!');
 
-      const decoded = jwtDecode(response.accessToken);
+      const decoded = jwtDecode(cleanResponse.accessToken);
       if (decoded.payload.role === 'ADMIN') {
         navigate('/admin');
       } else {
@@ -154,7 +163,7 @@ export default function Login() {
             borderRadius: 2,
             opacity: 0.5,
             filter: 'blur(10px)',
-            zがあれば: -1,
+            zIndex: -1,
           }}
         />
 

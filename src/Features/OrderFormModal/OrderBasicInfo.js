@@ -21,6 +21,7 @@ const OrderBasicInfo = ({
   availableTables,
   fetchAvailableTables,
   isTableAvailable,
+  editingOrder,
 }) => {
   const [staffList, setStaffList] = useState([]);
   const [loadingStaff, setLoadingStaff] = useState(false);
@@ -31,7 +32,12 @@ const OrderBasicInfo = ({
       setLoadingStaff(true);
       try {
         const users = await userAPI.getAllUser();
-        setStaffList(Array.isArray(users) ? users : []);
+        const staffArray = Array.isArray(users) ? users : [];
+        setStaffList(staffArray);
+        // Kiểm tra xem formData.staff_id có trong staffList không
+        if (formData.staff_id && !staffArray.find((staff) => staff._id === formData.staff_id)) {
+          setFormData((prev) => ({ ...prev, staff_id: "" }));
+        }
       } catch (error) {
         console.error("Error fetching staff list:", error);
         toast.error("Không thể tải danh sách nhân viên");
@@ -41,7 +47,7 @@ const OrderBasicInfo = ({
       }
     };
     fetchStaffList();
-  }, []);
+  }, []); // Xóa formData.staff_id khỏi dependencies để tránh vòng lặp
 
   const groupedTables = availableTables.reduce((acc, table) => {
     const area = table.area || "Không xác định";
@@ -53,6 +59,7 @@ const OrderBasicInfo = ({
   }, {});
 
   const handleChange = (field, value) => {
+    console.log("handleChange called:", { field, value });
     setFormData((prev) => {
       const newData = { ...prev, [field]: value };
       newData.end_time = "23:59";
@@ -86,6 +93,7 @@ const OrderBasicInfo = ({
         );
       }
 
+      console.log("New formData:", newData);
       return newData;
     });
   };
@@ -118,7 +126,7 @@ const OrderBasicInfo = ({
         <FormControl fullWidth>
           <InputLabel>Loại Đơn Hàng *</InputLabel>
           <Select
-            value={formData.type || "reservation"}
+            value={formData.type ?? "reservation"}
             label="Loại Đơn Hàng *"
             onChange={(e) => handleChange("type", e.target.value)}
           >
@@ -129,38 +137,29 @@ const OrderBasicInfo = ({
         <FormControl fullWidth>
           <InputLabel>Trạng Thái *</InputLabel>
           <Select
-            value={formData.status || "pending"}
+            value={formData.status ?? "pending"}
             label="Trạng Thái *"
-            onChange={(e) => handleChange("status", e.target.value)}
-            disabled={isTableAvailable}
-            sx={{
-              "& .MuiSelect-select": {
-                fontWeight: "bold",
-                color: {
-                  pending: "#D97706",
-                  confirmed: "#059669",
-                  completed: "#1E40AF",
-                  canceled: "#DC2626",
-                }[formData.status || "pending"],
-              },
+            onChange={(e) => {
+              console.log("Select status changed:", e.target.value);
+              handleChange("status", e.target.value);
             }}
+            disabled={isTableAvailable && !editingOrder}
           >
-            <MenuItem value="pending" sx={{ color: "#D97706" }}>Pending</MenuItem>
-            {!isTableAvailable && (
-              <>
-                <MenuItem value="confirmed" sx={{ color: "#059669" }}>Confirmed</MenuItem>
-                <MenuItem value="completed" sx={{ color: "#1E40AF" }}>Completed</MenuItem>
-                <MenuItem value="canceled" sx={{ color: "#DC2626" }}>Canceled</MenuItem>
-              </>
-            )}
+            <MenuItem value="pending">Pending</MenuItem>
+            <MenuItem value="confirmed">Confirmed</MenuItem>
+            <MenuItem value="completed">Completed</MenuItem>
+            <MenuItem value="canceled">Canceled</MenuItem>
           </Select>
         </FormControl>
         <FormControl fullWidth>
           <InputLabel>Nhân Viên Phụ Trách</InputLabel>
           <Select
-            value={formData.staff_id || ""}
+            value={staffList.find((staff) => staff._id === formData.staff_id) ? formData.staff_id : ""}
             label="Nhân Viên Phụ Trách"
-            onChange={(e) => handleChange("staff_id", e.target.value)}
+            onChange={(e) => {
+              console.log("Select staff changed:", e.target.value);
+              handleChange("staff_id", e.target.value);
+            }}
             disabled={loadingStaff}
           >
             <MenuItem value="">Chọn nhân viên</MenuItem>
@@ -173,14 +172,14 @@ const OrderBasicInfo = ({
         </FormControl>
         <TextField
           label="Ngày *"
-          value={formData.date || ""}
+          value={formData.date ?? ""}
           onChange={(e) => handleChange("date", e.target.value)}
           placeholder="DD/MM/YYYY"
           fullWidth
         />
         <TextField
           label="Thời Gian Bắt Đầu *"
-          value={formData.start_time || ""}
+          value={formData.start_time ?? ""}
           onChange={(e) => handleChange("start_time", e.target.value)}
           placeholder="HH:mm"
           fullWidth

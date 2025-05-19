@@ -1,15 +1,17 @@
-/* .ant-table-thead > tr > th {
-  @apply bg-neutral-100 text-neutral-900 font-semibold;
+/* src/styles/global.css */
+@import './variables.css';
+
+body {
+  margin: 0;
+  font-family: 'SF Pro Display', Roboto, sans-serif;
+  background: var(--pure-white);
+  color: var(--pure-black);
 }
-.ant-table-row {
-  @apply transition-all duration-200;
+
+a {
+  color: var(--logo-blue);
+  text-decoration: none;
 }
-.ant-tabs-tab {
-  @apply text-neutral-600 font-medium;
+a:hover {
+  color: var(--pure-black);
 }
-.ant-tabs-tab-active {
-  @apply text-primary-600 font-semibold;
-}
-.ant-btn {
-  @apply rounded-lg transition-all duration-200;
-} */

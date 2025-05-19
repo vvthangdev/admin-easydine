@@ -15,18 +15,20 @@ import UserManagement from "./Features/User/UserManagement";
 import Header from "../src/components/HomePage/header";
 import OrderManagements from "./Features/OrderManagement/OrderManagement";
 import ContactManagement from "./Features/Admin/pages/ContactManagement";
+import TestRefreshToken from "./Features/TestRefreshToken/TestRefreshToken";
 
 const AppRoutes = () => {
   const navLinks = [{ path: "/", label: "Trang chủ" }];
   return (
     <AuthProvider>
       <Router>
-        <Header logo="/Assets/Header/logo2.png" navLinks={navLinks} />
+        <Header logo="/Assets/Header/logo1.png" navLinks={navLinks} />
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/unauthorized" element={<BanKhongPhaiLaAdmin />} />
+          <Route path="/test-refresh" element={<TestRefreshToken />} />
           <Route
             path="/profile"
             element={

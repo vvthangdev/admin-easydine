@@ -32,4 +32,8 @@ export const orderAPI = {
   mergeOrder: (data) => axiosInstance.post("/orders/merge-order", data).then(handleApiResponse),
 
   getOrderInfo: (data) => axiosInstance.get("/orders/order-info", { params: data }).then(handleApiResponse),
+
+  // Thêm các hàm mới cho thanh toán
+  createPayment: (data) => axiosInstance.post("/orders/create-payment", data).then(handleApiResponse),
+  updateOrderStatus: (data) => axiosInstance.patch("/orders/update-order", data).then(handleApiResponse),
 };

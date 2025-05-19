@@ -1,15 +1,10 @@
 import axios from "axios";
 
-// https://backend-easydine.onrender.com
-// http://localhost:8080
-// http://128.199.246.55:8080
-
 const API_URL = process.env.REACT_APP_BACKEND_URL;
-console.log(`vvt: ${process.env.REACT_APP_BACKEND_URL}`);
 
 const axiosInstance = axios.create({
-  baseURL: API_URL, // Thay đổi baseURL theo API của bạn
-  timeout: 10000,
+  baseURL: API_URL,
+  timeout: 15000,
   headers: {
     "Content-Type": "application/json",
   },
@@ -20,48 +15,55 @@ axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("accessToken");
     if (token) {
-      config.headers["Authorization"] = token;
+      const cleanToken = token.replace(/^Bearer\s+/, '');
+      config.headers["Authorization"] = `Bearer ${cleanToken}`;
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 // Response interceptor
 axiosInstance.interceptors.response.use(
-  (response) => {
-    return response.data;
-  },
+  (response) => response.data,
   async (error) => {
     const originalRequest = error.config;
 
-    // Nếu token hết hạn (status 403) và chưa thử refresh
-    if (error.response?.status === 403 && !originalRequest._retry) {
+    if (
+      (error.response?.status === 401 || error.response?.status === 403) &&
+      !originalRequest._retry &&
+      !originalRequest.url.includes('/users/refresh-token')
+    ) {
       originalRequest._retry = true;
 
       try {
         const refreshToken = localStorage.getItem("refreshToken");
-        const response = await axiosInstance.post(
-          "/auth/refresh-token",
+        if (!refreshToken) {
+          throw new Error("Không tìm thấy refreshToken");
+        }
+
+        const response = await axios.post(
+          `${API_URL}/users/refresh-token`,
           {},
           {
             headers: {
-              Authorization: refreshToken,
+              Authorization: `Bearer ${refreshToken}`,
             },
           }
         );
 
-        const { accessToken } = response.data;
-        localStorage.setItem("accessToken", accessToken);
+        const { accessToken } = response.data.data;
+        const cleanAccessToken = accessToken.replace(/^Bearer\s+/, '');
+        localStorage.setItem("accessToken", cleanAccessToken);
 
-        originalRequest.headers["Authorization"] = accessToken;
+        originalRequest.headers["Authorization"] = `Bearer ${cleanAccessToken}`;
         return axiosInstance(originalRequest);
-      } catch (error) {
-        // localStorage.clear();
-        // window.location.href = '/login';
-        return Promise.reject(error);
+      } catch (refreshError) {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
+        window.location.href = "/login";
+        return Promise.reject(refreshError);
       }
     }
 
