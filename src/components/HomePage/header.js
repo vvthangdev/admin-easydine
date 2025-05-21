@@ -1,22 +1,22 @@
+import { memo } from 'react';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Box, Typography, Button, Avatar, Menu, MenuItem, IconButton } from '@mui/material';
 import { ExpandMore } from '@mui/icons-material';
-import { jwtDecode } from 'jwt-decode';
 import { message } from 'antd';
 import { userAPI } from '../../services/apis/User';
-import colors from '../../theme/colors'; // Import brand colors
+import { useAuth } from '../../contexts/AuthContext';
+import colors from '../../theme/colors';
 
-export default function Header({ logo, navLinks }) {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+function Header({ logo, navLinks }) {
+  const { user, loading: authLoading } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
 
   const fetchProfile = async () => {
+    if (profile) return;
     setLoading(true);
     try {
       const response = await userAPI.getUserInfo();
@@ -28,50 +28,19 @@ export default function Header({ logo, navLinks }) {
     }
   };
 
-  const checkLoginStatus = () => {
-    const token = localStorage.getItem('accessToken');
-    const refreshToken = localStorage.getItem('refreshToken');
-    if (!token) {
-      setIsLoggedIn(false);
-      setUser(null);
-      setProfile(null);
-      return;
-    }
-    try {
-      const cleanToken = token.replace(/^Bearer\s+/, '');
-      const decoded = jwtDecode(cleanToken);
-      setUser(decoded);
-      setIsLoggedIn(true);
-      if (decoded?.payload?.role === 'ADMIN') {
-        setIsAdmin(true);
-      }
-      fetchProfile();
-    } catch (error) {
-      if (refreshToken) {
-        setIsLoggedIn(true);
-      } else {
-        setIsLoggedIn(false);
-        setUser(null);
-        setProfile(null);
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
-      }
-    }
-  };
-
   useEffect(() => {
-    checkLoginStatus();
-  }, []);
+    if (user && !profile) {
+      fetchProfile();
+    } else if (!user) {
+      setProfile(null);
+    }
+  }, [user]);
 
   const handleLogout = async () => {
     try {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
-      setIsLoggedIn(false);
-      setUser(null);
-      setIsAdmin(false);
       setIsDropdownOpen(false);
       window.location.reload();
     } catch (error) {
@@ -97,8 +66,8 @@ export default function Header({ logo, navLinks }) {
         justifyContent: 'space-between',
         alignItems: 'center',
         p: 2,
-        bgcolor: colors.creamGold, // Cream Gold (#F5E6CC)
-        boxShadow: `0 4px 16px rgba(0,0,0,0.1)`, // Softer shadow for elegance
+        bgcolor: colors.creamGold,
+        boxShadow: `0 4px 16px rgba(0,0,0,0.1)`,
         position: 'sticky',
         top: 0,
         zIndex: 10,
@@ -112,7 +81,7 @@ export default function Header({ logo, navLinks }) {
             style={{
               height: 40,
               borderRadius: 8,
-              border: `1px solid ${colors.goldLuxe}`, // Gold Luxe (#D4A017)
+              border: `1px solid ${colors.goldLuxe}`,
             }}
           />
         </Box>
@@ -123,10 +92,10 @@ export default function Header({ logo, navLinks }) {
               component={Link}
               to={link.path}
               sx={{
-                color: colors.navySapphire, // Navy Sapphire (#1C2526)
+                color: colors.navySapphire,
                 textTransform: 'none',
                 fontWeight: 500,
-                '&:hover': { color: colors.goldLuxe }, // Gold Luxe (#D4A017)
+                '&:hover': { color: colors.goldLuxe },
               }}
             >
               {link.label}
@@ -136,27 +105,27 @@ export default function Header({ logo, navLinks }) {
       </Box>
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-        {loading ? (
+        {authLoading || loading ? (
           <Typography variant="body2" color={colors.silverMist}>
             Đang tải...
           </Typography>
         ) : (
           <>
-            {isAdmin && (
+            {user?.role === 'ADMIN' && (
               <Button
                 component={Link}
                 to="/admin"
                 sx={{
-                  color: colors.goldLuxe, // Gold Luxe (#D4A017)
+                  color: colors.goldLuxe,
                   textTransform: 'none',
                   fontWeight: 500,
-                  '&:hover': { color: colors.rubyWine }, // Ruby Wine (#8B1E3F)
+                  '&:hover': { color: colors.rubyWine },
                 }}
               >
                 Admin
               </Button>
             )}
-            {isLoggedIn ? (
+            {user ? (
               <Box sx={{ position: 'relative' }}>
                 <IconButton
                   onClick={handleMenuOpen}
@@ -168,22 +137,22 @@ export default function Header({ logo, navLinks }) {
                     sx={{
                       width: 32,
                       height: 32,
-                      border: `2px solid ${colors.goldLuxe}`, // Gold Luxe (#D4A017)
+                      border: `2px solid ${colors.goldLuxe}`,
                     }}
                   />
                   <Typography
                     sx={{
                       ml: 1,
-                      color: colors.navySapphire, // Navy Sapphire (#1C2526)
+                      color: colors.navySapphire,
                       fontWeight: 500,
                     }}
                   >
-                    {user?.username}
+                    {user.username}
                   </Typography>
                   <ExpandMore
                     sx={{
                       ml: 1,
-                      color: colors.silverMist, // Silver Mist (#B0B3B8)
+                      color: colors.silverMist,
                       transition: 'transform 0.3s',
                       transform: isDropdownOpen ? 'rotate(180deg)' : 'none',
                     }}
@@ -198,8 +167,8 @@ export default function Header({ logo, navLinks }) {
                   transformOrigin={{ vertical: 'top', horizontal: 'center' }}
                   PaperProps={{
                     sx: {
-                      bgcolor: colors.moonlightWhite, // Moonlight White (#F5F7FA)
-                      border: `1px solid ${colors.goldLuxe}`, // Gold Luxe (#D4A017)
+                      bgcolor: colors.moonlightWhite,
+                      border: `1px solid ${colors.goldLuxe}`,
                       borderRadius: 2,
                       mt: 1,
                       boxShadow: `0 4px 12px rgba(0,0,0,0.1)`,
@@ -212,7 +181,7 @@ export default function Header({ logo, navLinks }) {
                     onClick={handleMenuClose}
                     sx={{
                       color: colors.navySapphire,
-                      '&:hover': { bgcolor: colors.creamGold }, // Cream Gold (#F5E6CC)
+                      '&:hover': { bgcolor: colors.creamGold },
                     }}
                   >
                     Thông tin cá nhân
@@ -231,7 +200,7 @@ export default function Header({ logo, navLinks }) {
                   <MenuItem
                     onClick={handleLogout}
                     sx={{
-                      color: colors.rubyWine, // Ruby Wine (#8B1E3F)
+                      color: colors.rubyWine,
                       '&:hover': { bgcolor: colors.creamGold },
                     }}
                   >
@@ -246,13 +215,13 @@ export default function Header({ logo, navLinks }) {
                   to="/login"
                   variant="outlined"
                   sx={{
-                    borderColor: colors.goldLuxe, // Gold Luxe (#D4A017)
+                    borderColor: colors.goldLuxe,
                     color: colors.goldLuxe,
                     borderRadius: 50,
                     textTransform: 'none',
                     fontWeight: 500,
                     '&:hover': {
-                      bgcolor: colors.moonlightWhite, // Moonlight White (#F5F7FA)
+                      bgcolor: colors.moonlightWhite,
                       color: colors.navySapphire,
                     },
                   }}
@@ -264,13 +233,13 @@ export default function Header({ logo, navLinks }) {
                   to="/register"
                   variant="contained"
                   sx={{
-                    bgcolor: colors.goldLuxe, // Gold Luxe (#D4A017)
-                    color: colors.obsidianBlack, // Obsidian Black (#121212)
+                    bgcolor: colors.goldLuxe,
+                    color: colors.obsidianBlack,
                     borderRadius: 50,
                     textTransform: 'none',
                     fontWeight: 500,
                     '&:hover': {
-                      bgcolor: colors.moonlightWhite, // Moonlight White (#F5F7FA)
+                      bgcolor: colors.moonlightWhite,
                       color: colors.goldLuxe,
                     },
                   }}
@@ -285,3 +254,5 @@ export default function Header({ logo, navLinks }) {
     </Box>
   );
 }
+
+export default memo(Header);

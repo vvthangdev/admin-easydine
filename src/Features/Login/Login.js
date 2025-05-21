@@ -9,7 +9,6 @@ import { authAPI } from '../../services/apis/Auth';
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { jwtDecode } from 'jwt-decode';
 import { Box, Typography, Button as MuiButton } from '@mui/material';
 
 export default function Login() {
@@ -36,7 +35,6 @@ export default function Login() {
     if (accessToken && refreshToken && userData) {
       try {
         const parsedUserData = JSON.parse(decodeURIComponent(userData));
-        // Làm sạch token từ query params
         const cleanAccessToken = accessToken.replace(/^Bearer\s+/, '');
         const cleanRefreshToken = refreshToken.replace(/^Bearer\s+/, '');
         login({
@@ -45,8 +43,8 @@ export default function Login() {
           userData: parsedUserData,
         });
         message.success('Đăng nhập Google thành công!');
-        const decoded = jwtDecode(cleanAccessToken);
-        if (decoded.payload.role === 'ADMIN') {
+        // Use role from parsed userData for navigation
+        if (parsedUserData.role === 'ADMIN') {
           navigate('/admin');
         } else {
           navigate('/');
@@ -67,7 +65,6 @@ export default function Login() {
     try {
       setLoading(true);
       const response = await authAPI.login(requestData);
-      // Làm sạch token từ phản hồi
       const cleanResponse = {
         ...response,
         accessToken: response.accessToken.replace(/^Bearer\s+/, ''),
@@ -75,9 +72,8 @@ export default function Login() {
       };
       login(cleanResponse);
       message.success('Đăng nhập thành công!');
-
-      const decoded = jwtDecode(cleanResponse.accessToken);
-      if (decoded.payload.role === 'ADMIN') {
+      // Use role from response for navigation
+      if (cleanResponse.role === 'ADMIN') {
         navigate('/admin');
       } else {
         navigate('/');

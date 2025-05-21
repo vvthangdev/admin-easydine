@@ -28,7 +28,6 @@ const AppRoutes = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/unauthorized" element={<BanKhongPhaiLaAdmin />} />
-          <Route path="/test-refresh" element={<TestRefreshToken />} />
           <Route
             path="/profile"
             element={
