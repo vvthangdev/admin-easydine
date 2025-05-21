@@ -27,8 +27,4 @@ export const userAPI = {
   deleteUser: (data) => {
     return axiosInstance.delete("/users/delete", { data }).then(handleApiResponse);
   },
-
-  adminUpdateUser: (id, data) => {
-    return axiosInstance.patch(`/users/admin/update/${id}`, data).then(handleApiResponse);
-  },
 };

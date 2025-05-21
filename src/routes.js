@@ -11,7 +11,7 @@ import AdminLayout from "./Features/Admin/layouts/AdminLayout";
 import BanKhongPhaiLaAdmin from "./Features/BanKhongPhaiLaAdmin/BanKhongPhaiLaAdmin";
 import TableManagement from "./Features/TableManagement/TableManagements";
 import ItemManagements from "./Features/ItemManagement/ItemManagements";
-import UserManagement from "./Features/User/UserManagement";
+import UserVoucherManagement from "./Features/User/UserVoucherManagement";
 import Header from "../src/components/HomePage/Header";
 import OrderManagements from "./Features/OrderManagement/OrderManagement";
 import ContactManagement from "./Features/Admin/pages/ContactManagement";
@@ -48,7 +48,7 @@ const AppRoutes = () => {
             <Route path="tables" element={<TableManagement />} />
             <Route path="menu" element={<ItemManagements />} />
             <Route path="orders" element={<OrderManagements />} />
-            <Route path="users" element={<UserManagement />} />
+            <Route path="users" element={<UserVoucherManagement />} />
             <Route path="contacts" element={<ContactManagement />} />
           </Route>
         </Routes>

@@ -1,7 +1,7 @@
 import Sidebar from "../../../components/Admin/sidebar";
 import { Outlet } from 'react-router-dom';
 import Header from "../../../components/HomePage/Header";
-import { Box, Typography, Grid2 as Grid } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { useState } from 'react';
 
 function AdminLayout() {
