@@ -1,4 +1,4 @@
-import HeroSection from "../../components/HomePage/WhyChoseUs.js"
+import HeroSection from "../../components/HomePage/HeroSection.js"
 import WhyChoseUs from "../../components/HomePage/WhyChoseUs.js"
 export default function HomePage() {
 
