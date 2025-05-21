@@ -68,7 +68,11 @@ const ItemModal = ({
               <>
                 <Form.Item label="Kích cỡ (tùy chọn)">
                   {fields.map(({ key, name, ...restField }) => (
-                    <Space key={key} style={{ display: "flex", marginBottom: 8 }} align="baseline">
+                    <Space
+                      key={key}
+                      style={{ display: "flex", flexDirection: "column", marginBottom: 8 }}
+                      align="baseline"
+                    >
                       <Form.Item
                         {...restField}
                         name={[name, "name"]}
@@ -152,6 +156,7 @@ const ItemModal = ({
       okText={type.includes("delete") ? "Xóa" : "OK"}
       cancelText="Hủy"
       className="rounded-lg"
+      wrapClassName="flex flex-col"
     >
       {renderContent()}
     </Modal>

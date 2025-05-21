@@ -56,7 +56,8 @@ export default function ItemManagements() {
         fetchMenuItems(filterCategory);
       } else {
         const response = await itemAPI.searchItem({ name });
-        setMenuItems(response.item || []);
+        // Fix: Set menuItems directly to response (array of items)
+        setMenuItems(Array.isArray(response) ? response : []);
       }
     } catch (error) {
       message.error("Lỗi khi tìm kiếm món ăn");
@@ -197,7 +198,7 @@ export default function ItemManagements() {
   }, []);
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
+    <div className="p-6 bg-gray-100 min-h-screen flex flex-col">
       <SearchFilterBar
         categories={categories}
         onSearch={handleSearchByName}

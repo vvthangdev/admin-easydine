@@ -1,23 +1,22 @@
 import React from "react";
 import { Input, Select, Button, Space } from "antd";
-import { SearchOutlined } from "@ant-design/icons"; // Thêm icon tìm kiếm
+import { SearchOutlined } from "@ant-design/icons";
 
 const SearchFilterBar = ({ categories, onSearch, onFilter, onAddItem, onAddCategory }) => {
-  // Hàm xử lý thay đổi ô tìm kiếm
   const handleSearchChange = (e) => {
     const value = e.target.value;
-    onSearch(value); // Gọi hàm tìm kiếm với giá trị mới
+    onSearch(value);
   };
 
   return (
-    <div className="flex justify-between items-center mb-6">
-      <h1 className="text-2xl font-semibold text-gray-800">Quản lý menu món ăn</h1>
-      <Space>
+    <div className="flex flex-col mb-6">
+      <h1 className="text-2xl font-semibold text-gray-800 mb-4">Quản lý menu món ăn</h1>
+      <Space direction="vertical" size="middle">
         <Input
           placeholder="Tìm kiếm món ăn theo tên"
           allowClear
-          onChange={handleSearchChange} // Sử dụng onChange thay vì onSearch
-          prefix={<SearchOutlined />} // Thêm icon tìm kiếm
+          onChange={handleSearchChange}
+          prefix={<SearchOutlined />}
           style={{ width: 200 }}
         />
         <Select

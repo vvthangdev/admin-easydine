@@ -21,7 +21,7 @@ const itemColumns = [
     key: "sizes",
     render: (sizes) => {
       if (!Array.isArray(sizes) || sizes.length === 0) {
-        return null; // Để trống nếu không có kích cỡ
+        return null;
       }
       const menu = (
         <Menu>
@@ -111,7 +111,7 @@ const ItemTable = ({ menuItems, categories, loading, onEdit, onDelete, onDeleteC
   );
 
   return (
-    <>
+    <div className="flex flex-col">
       <div className="bg-white rounded-lg shadow overflow-hidden mb-6">
         <h2 className="text-lg font-semibold p-4">Danh sách món ăn</h2>
         <Table
@@ -133,7 +133,7 @@ const ItemTable = ({ menuItems, categories, loading, onEdit, onDelete, onDeleteC
           className="w-full"
         />
       </div>
-    </>
+    </div>
   );
 };
 
