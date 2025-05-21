@@ -1,31 +1,24 @@
 import React, { useEffect, useState, useCallback } from "react";
-import {
-  Table,
-  Button,
-  Modal,
-  Form,
-  Input,
-  Space,
-  message,
-  Select,
-  Upload,
-} from "antd";
+import { Snackbar, Alert } from "@mui/material";
 import { userAPI } from "../../services/apis/User";
 import { adminAPI } from "../../services/apis/Admin";
-import { UploadOutlined } from "@ant-design/icons";
 import minioClient from "../../Server/minioClient.js";
-
-import placeholderImage from "../../assets/images/user_place_holder.jpg";
+import UserTable from "./UserTable";
+import UserFormModal from "./UserFormModal";
+import UserSearch from "./UserSearch";
+import debounce from "lodash.debounce";
 
 const UserList = ({ onSelectUser }) => {
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [form] = Form.useForm();
+  const [form, setForm] = useState({});
+  const [formTouched, setFormTouched] = useState({});
   const [editingUser, setEditingUser] = useState(null);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [avatar, setAvatar] = useState([]); // State để lưu file ảnh upload
+  const [avatar, setAvatar] = useState([]);
+  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -36,7 +29,11 @@ const UserList = ({ onSelectUser }) => {
       setUsers(data);
       setFilteredUsers(data);
     } catch (error) {
-      message.error("Lỗi khi tải danh sách người dùng: " + error.message);
+      setSnackbar({
+        open: true,
+        message: "Lỗi khi tải danh sách người dùng: " + error.message,
+        severity: "error",
+      });
       setUsers([]);
       setFilteredUsers([]);
     } finally {
@@ -44,11 +41,14 @@ const UserList = ({ onSelectUser }) => {
     }
   };
 
-  const searchUsers = useCallback(async (query) => {
+  const searchUsers = async (query) => {
     setLoading(true);
     try {
-      if (!query) {
-        setFilteredUsers(users);
+      if (!query.trim()) {
+        const response = await userAPI.getAllUser();
+        const data = Array.isArray(response) ? response : [];
+        console.log("Fetched all users (empty query):", data);
+        setFilteredUsers(data);
       } else {
         const response = await userAPI.searchUsers(query);
         const data = Array.isArray(response) ? response : [];
@@ -56,113 +56,48 @@ const UserList = ({ onSelectUser }) => {
         setFilteredUsers(data);
       }
     } catch (error) {
-      message.error("Lỗi khi tìm kiếm người dùng: " + error.message);
+      setSnackbar({
+        open: true,
+        message: "Lỗi khi tìm kiếm người dùng: " + error.message,
+        severity: "error",
+      });
       setFilteredUsers([]);
     } finally {
       setLoading(false);
     }
-  }, [users]); // Thêm dependency `users`
+  };
+
+  const debouncedSearch = useCallback(
+    debounce((query) => {
+      searchUsers(query);
+    }, 500),
+    []
+  );
+
+  const handleSearch = (value) => {
+    setSearchTerm(value);
+    debouncedSearch(value);
+  };
+
+  const handleEnter = (value) => {
+    if (!value.trim()) {
+      fetchUsers(); // Gọi getAllUser khi ô tìm kiếm trống và bấm Enter
+    }
+  };
 
   useEffect(() => {
     fetchUsers();
   }, []);
 
-  useEffect(() => {
-    searchUsers(searchTerm);
-  }, [searchTerm, searchUsers]); // Tự động gọi searchUsers khi searchTerm thay đổi
-
-  const handleSearch = (e) => {
-    const value = e.target.value;
-    setSearchTerm(value);
-  };
-
-  const columns = [
-    {
-      title: "Ảnh",
-      dataIndex: "avatar",
-      key: "avatar",
-      width: "10%",
-      render: (avatar) => (
-        <img
-          src={avatar || ''}
-          alt="Avatar"
-          className="w-10 h-10 rounded-full object-cover"
-          onError={(e) => {
-            e.target.src = `${placeholderImage}`;
-          }}
-        />
-      ),
-    },
-    {
-      title: "Tên",
-      dataIndex: "name",
-      key: "name",
-      width: "15%",
-      ellipsis: true,
-    },
-    {
-      title: "Username",
-      dataIndex: "username",
-      key: "username",
-      width: "15%",
-      ellipsis: true,
-      className: "hidden sm:table-cell",
-    },
-    {
-      title: "Email",
-      dataIndex: "email",
-      key: "email",
-      width: "20%",
-      ellipsis: true,
-      className: "hidden sm:table-cell",
-    },
-    {
-      title: "Số điện thoại",
-      dataIndex: "phone",
-      key: "phone",
-      width: "15%",
-      ellipsis: true,
-      className: "hidden sm:table-cell",
-    },
-    {
-      title: "Địa chỉ",
-      dataIndex: "address",
-      key: "address",
-      width: "20%",
-      ellipsis: true,
-      className: "hidden lg:table-cell",
-    },
-    {
-      title: "Vai trò",
-      dataIndex: "role",
-      key: "role",
-      width: "10%",
-      ellipsis: true,
-    },
-    {
-      title: "Thao tác",
-      key: "action",
-      width: "25%",
-      render: (_, record) => (
-        <Space size="small">
-          <Button type="link" onClick={() => handleEdit(record)}>
-            Sửa
-          </Button>
-          <Button type="link" danger onClick={() => handleDelete(record)}>
-            Xóa
-          </Button>
-          <Button type="link" onClick={() => onSelectUser(record)}>
-            Chọn
-          </Button>
-        </Space>
-      ),
-    },
-  ];
-
   const handleEdit = (record) => {
     setEditingUser(record);
-    form.setFieldsValue({
-      ...record,
+    setForm({
+      name: record.name,
+      email: record.email,
+      username: record.username,
+      phone: record.phone,
+      address: record.address,
+      role: record.role,
       password: "",
     });
     setAvatar(record.avatar ? [{ url: record.avatar, uid: "1" }] : []);
@@ -175,9 +110,13 @@ const UserList = ({ onSelectUser }) => {
       const updatedUsers = users.filter((user) => user._id !== record._id);
       setUsers(updatedUsers);
       setFilteredUsers(updatedUsers);
-      message.success("Xóa người dùng thành công");
+      setSnackbar({ open: true, message: "Xóa người dùng thành công", severity: "success" });
     } catch (error) {
-      message.error("Xóa người dùng không thành công: " + error.message);
+      setSnackbar({
+        open: true,
+        message: "Xóa người dùng không thành công: " + error.message,
+        severity: "error",
+      });
     }
   };
 
@@ -186,15 +125,33 @@ const UserList = ({ onSelectUser }) => {
   };
 
   const handleModalOk = async () => {
+    const errors = {};
+    if (!form.name) errors.name = true;
+    if (!form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errors.email = true;
+    if (!form.username) errors.username = true;
+    if (form.phone && !/^[0-9]{10}$/.test(form.phone)) errors.phone = true;
+    if (!form.role) errors.role = true;
+    if (form.password && form.password.length < 8) errors.password = true;
+
+    setFormTouched(errors);
+
+    if (Object.keys(errors).length > 0) {
+      setSnackbar({
+        open: true,
+        message: "Vui lòng kiểm tra lại các trường thông tin!",
+        severity: "error",
+      });
+      return;
+    }
+
     try {
-      const values = await form.validateFields();
       let imageUrl = editingUser?.avatar || "";
 
       if (avatar?.length > 0 && avatar?.[0]?.originFileObj) {
         const timestamp = Date.now();
         const file = avatar[0].originFileObj;
         const fileName = `images/${timestamp}_${file.name}`;
-        
+
         const minioStorage = minioClient.storage.from("test01");
         const { error } = await minioStorage.upload(fileName, file);
 
@@ -211,14 +168,14 @@ const UserList = ({ onSelectUser }) => {
       }
 
       const userData = {
-        email: values.email,
-        username: values.username,
-        name: values.name,
-        phone: values.phone,
-        role: values.role,
-        address: values.address,
+        email: form.email,
+        username: form.username,
+        name: form.name,
+        phone: form.phone,
+        role: form.role,
+        address: form.address,
         avatar: imageUrl,
-        ...(values.password && { password: values.password }),
+        ...(form.password && { password: form.password }),
       };
 
       if (editingUser) {
@@ -229,134 +186,59 @@ const UserList = ({ onSelectUser }) => {
         );
         setUsers(updatedUsers);
         setFilteredUsers(updatedUsers);
-        message.success("Cập nhật người dùng thành công");
+        setSnackbar({ open: true, message: "Cập nhật người dùng thành công", severity: "success" });
       }
       setIsModalVisible(false);
-      form.resetFields();
+      setForm({});
+      setFormTouched({});
       setAvatar([]);
     } catch (error) {
       const errorMessage =
         error.response?.data?.message || error.message || "Có lỗi xảy ra khi cập nhật người dùng";
-      message.error(errorMessage);
+      setSnackbar({ open: true, message: errorMessage, severity: "error" });
     }
   };
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 space-y-2 sm:space-y-0">
-        <h2 className="text-xl font-semibold">Danh sách người dùng</h2>
-        <Input
-          placeholder="Tìm kiếm theo tên, số điện thoại hoặc ID"
-          value={searchTerm}
-          onChange={handleSearch}
-          className="w-full sm:w-64 lg:w-80"
-        />
+      <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "16px" }}>
+        <h2 style={{ fontSize: "1.25rem", fontWeight: 600 }}>Danh sách người dùng</h2>
+        <UserSearch searchTerm={searchTerm} onSearch={handleSearch} onEnter={handleEnter} />
       </div>
-      <div className="overflow-x-auto">
-        <Table
-          columns={columns}
-          dataSource={Array.isArray(filteredUsers) ? filteredUsers : []}
-          rowKey="_id"
-          loading={loading}
-          pagination={{
-            pageSizeOptions: [10, 20],
-            defaultPageSize: 10,
-            showSizeChanger: true,
-            showTotal: (total) => `Tổng cộng ${total} người dùng`,
-          }}
-          className="min-w-0"
-          tableLayout="fixed"
-        />
-      </div>
-      <Modal
-        title="Sửa thông tin người dùng"
-        open={isModalVisible}
+      <UserTable
+        users={filteredUsers}
+        loading={loading}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onSelectUser={onSelectUser}
+      />
+      <UserFormModal
+        visible={isModalVisible}
         onOk={handleModalOk}
         onCancel={() => {
           setIsModalVisible(false);
-          form.resetFields();
+          setForm({});
+          setFormTouched({});
           setAvatar(editingUser?.avatar ? [{ url: editingUser.avatar, uid: "1" }] : []);
         }}
+        form={{
+          ...form,
+          setFieldsValue: (values) => setForm({ ...form, ...values }),
+          touched: formTouched,
+        }}
+        editingUser={editingUser}
+        avatar={avatar}
+        onUploadChange={handleUploadChange}
+      />
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
       >
-        <Form form={form} layout="vertical" className="mt-4">
-          <Form.Item
-            name="name"
-            label="Tên"
-            rules={[{ required: true, message: "Vui lòng nhập tên!" }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name="email"
-            label="Email"
-            rules={[
-              { required: true, message: "Vui lòng nhập email!" },
-              { type: "email", message: "Email không hợp lệ!" },
-            ]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name="username"
-            label="Username"
-            rules={[{ required: true, message: "Vui lòng nhập username!" }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name="phone"
-            label="Số điện thoại"
-            rules={[
-              {
-                pattern: /^[0-9]{10}$/,
-                message: "Số điện thoại phải có 10 chữ số!",
-              },
-            ]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item name="address" label="Địa chỉ">
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name="role"
-            label="Vai trò"
-            rules={[{ required: true, message: "Vui lòng chọn vai trò!" }]}
-          >
-            <Select>
-              <Select.Option value="CUSTOMER">Khách hàng</Select.Option>
-              <Select.Option value="STAFF">Nhân viên</Select.Option>
-              <Select.Option value="ADMIN">Quản trị viên</Select.Option>
-            </Select>
-          </Form.Item>
-          <Form.Item label="Ảnh đại diện">
-            <Upload
-              listType="picture"
-              fileList={avatar}
-              onChange={handleUploadChange}
-              beforeUpload={() => false}
-            >
-              <Button icon={<UploadOutlined />}>Tải lên ảnh đại diện</Button>
-            </Upload>
-          </Form.Item>
-          <Form.Item
-            name="password"
-            label="Mật khẩu mới (để trống nếu không đổi)"
-            rules={[
-              {
-                min: 8,
-                message: "Mật khẩu phải có ít nhất 8 ký tự!",
-                validator: (_, value) =>
-                  value && value.length < 8
-                    ? Promise.reject(new Error("Mật khẩu phải có ít nhất 8 ký tự!"))
-                    : Promise.resolve(),
-              },
-            ]}
-          >
-            <Input.Password />
-          </Form.Item>
-        </Form>
-      </Modal>
+        <Alert severity={snackbar.severity} onClose={() => setSnackbar({ ...snackbar, open: false })}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };

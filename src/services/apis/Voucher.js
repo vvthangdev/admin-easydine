@@ -1,33 +1,48 @@
 import axiosInstance from "../../config/axios.config";
+import { handleApiResponse } from "./handleApiResponse";
 
 export const voucherAPI = {
-  getAllVouchers: () => 
-    axiosInstance.get("/vouchers/all").then((res) => res), // Không dùng res.data
+  getAllVouchers: () => {
+    return axiosInstance.get("/vouchers").then(handleApiResponse);
+  },
 
-  getVoucherByCode: (code) =>
-    axiosInstance
-      .get("/vouchers", { params: { code } })
-      .then((res) => res), // Không dùng res.data
+  getVoucherByCode: (code) => {
+    return axiosInstance
+      .get(`/vouchers/code/${code}`)
+      .then(handleApiResponse);
+  },
 
-  getVoucherById: (id) =>
-    axiosInstance.get(`/vouchers/${id}`).then((res) => res), // Không dùng res.data
+  getVoucherById: (id) => {
+    return axiosInstance.get(`/vouchers/${id}`).then(handleApiResponse);
+  },
 
-  createVoucher: (data) =>
-    axiosInstance.post("/vouchers", data).then((res) => res), // Không dùng res.data
+  createVoucher: (data) => {
+    return axiosInstance.post("/vouchers", data).then(handleApiResponse);
+  },
 
-  updateVoucher: (id, data) =>
-    axiosInstance.patch(`/vouchers/${id}`, data).then((res) => res), // Không dùng res.data
+  updateVoucher: (id, data) => {
+    return axiosInstance.patch(`/vouchers/${id}`, data).then(handleApiResponse);
+  },
 
-  deleteVoucher: (id) =>
-    axiosInstance.delete(`/vouchers/${id}`).then((res) => res), // Không dùng res.data
+  deleteVoucher: (id) => {
+    return axiosInstance.delete(`/vouchers/${id}`).then(handleApiResponse);
+  },
 
-  addUsersToVoucher: (id, userIds) =>
-    axiosInstance
-      .post(`/vouchers/${id}/users`, { userIds })
-      .then((res) => res), // Không dùng res.data
+  addUsersToVoucher: (voucherId, userIds) => {
+    return axiosInstance
+      .post(`/vouchers/add/users`, { voucherId, userIds })
+      .then(handleApiResponse);
+  },
 
-  removeUsersFromVoucher: (id, userIds) =>
-    axiosInstance
-      .delete(`/vouchers/${id}/users`, { userIds })
-      .then((res) => res), // Không dùng res.data
+  removeUsersFromVoucher: (voucherId, userIds) => {
+    return axiosInstance
+      .delete(`/vouchers/delete/users`, { data: { voucherId, userIds } })
+      .then(handleApiResponse);
+  },
+
+  applyVoucher: (voucherCode, orderId) => {
+    return axiosInstance
+      .post(`/vouchers/apply`, { voucherCode, orderId })
+      .then(handleApiResponse);
+  },
 };

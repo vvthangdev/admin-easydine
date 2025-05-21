@@ -1,19 +1,12 @@
 import React, { useEffect, useState } from "react";
-import {
-  Table,
-  Button,
-  Modal,
-  Form,
-  Input,
-  Space,
-  message,
-  Select,
-  DatePicker,
-} from "antd";
+import { Button, message, Form } from "antd";
 import { voucherAPI } from "../../services/apis/Voucher";
+import VoucherTable from "./VoucherTable";
+import VoucherFormModal from "./VoucherFormModal";
+import ApplyVoucherForm from "./ApplyVoucherForm";
 import moment from "moment";
 
-const VoucherList = ({ selectedUser }) => {
+const VoucherList = ({ selectedUser, orderId }) => {
   const [vouchers, setVouchers] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [form] = Form.useForm();
@@ -25,7 +18,7 @@ const VoucherList = ({ selectedUser }) => {
     try {
       const response = await voucherAPI.getAllVouchers();
       const data = Array.isArray(response) ? response : [];
-      console.log("Fetched vouchers:", data); // Debug dữ liệu
+      console.log("Fetched vouchers:", data);
       setVouchers(data);
     } catch (error) {
       message.error("Lỗi khi tải danh sách voucher: " + error.message);
@@ -38,68 +31,6 @@ const VoucherList = ({ selectedUser }) => {
   useEffect(() => {
     fetchVouchers();
   }, []);
-
-  const columns = [
-    { 
-      title: "Mã", 
-      dataIndex: "code", 
-      key: "code", 
-      width: "20%", 
-      ellipsis: true 
-    },
-    { 
-      title: "Giảm giá", 
-      dataIndex: "discount", 
-      key: "discount", 
-      width: "15%", 
-      ellipsis: true 
-    },
-    { 
-      title: "Loại", 
-      dataIndex: "discountType", 
-      key: "discountType", 
-      width: "15%", 
-      ellipsis: true, 
-      className: "hidden sm:table-cell" 
-    },
-    {
-      title: "Giá trị tối thiểu",
-      dataIndex: "minOrderValue",
-      key: "minOrderValue",
-      width: "20%",
-      ellipsis: true,
-      className: "hidden lg:table-cell",
-    },
-    {
-      title: "Người dùng áp dụng",
-      dataIndex: "applicableUsers",
-      key: "applicableUsers",
-      width: "25%",
-      ellipsis: true,
-      className: "hidden lg:table-cell",
-      render: (users) => (users && users.length > 0 ? users.join(", ") : "Tất cả"),
-    },
-    {
-      title: "Thao tác",
-      key: "action",
-      width: "25%",
-      render: (_, record) => (
-        <Space size="small">
-          <Button type="link" onClick={() => handleEdit(record)}>
-            Sửa
-          </Button>
-          <Button type="link" danger onClick={() => handleDelete(record)}>
-            Xóa
-          </Button>
-          {selectedUser && (
-            <Button type="link" onClick={() => handleAddUserToVoucher(record)}>
-              Thêm người dùng
-            </Button>
-          )}
-        </Space>
-      ),
-    },
-  ];
 
   const handleAdd = () => {
     setEditingVoucher(null);
@@ -115,17 +46,6 @@ const VoucherList = ({ selectedUser }) => {
       endDate: moment(record.endDate),
     });
     setIsModalVisible(true);
-  };
-
-  const handleDelete = async (record) => {
-    try {
-      await voucherAPI.deleteVoucher(record._id);
-      const updatedVouchers = vouchers.filter((v) => v._id !== record._id);
-      setVouchers(updatedVouchers);
-      message.success("Xóa voucher thành công");
-    } catch (error) {
-      message.error("Xóa voucher không thành công: " + error.message);
-    }
   };
 
   const handleAddUserToVoucher = async (record) => {
@@ -174,56 +94,22 @@ const VoucherList = ({ selectedUser }) => {
           Thêm Voucher
         </Button>
       </div>
-      <div className="overflow-x-auto">
-        <Table
-          columns={columns}
-          dataSource={Array.isArray(vouchers) ? vouchers : []} // Đảm bảo dataSource là mảng
-          rowKey="_id"
-          loading={loading}
-          pagination={{
-            pageSizeOptions: [5, 10],
-            defaultPageSize: 5,
-            showSizeChanger: true,
-            showTotal: (total) => `Tổng cộng ${total} voucher`,
-          }}
-          className="min-w-0"
-          tableLayout="fixed"
-        />
-      </div>
-      <Modal
-        title={editingVoucher ? "Sửa Voucher" : "Thêm Voucher"}
-        open={isModalVisible}
+      <VoucherTable
+        vouchers={vouchers}
+        loading={loading}
+        selectedUser={selectedUser}
+        onEdit={handleEdit}
+        onAddUser={handleAddUserToVoucher}
+        fetchVouchers={fetchVouchers}
+      />
+      {orderId && <ApplyVoucherForm orderId={orderId} />}
+      <VoucherFormModal
+        visible={isModalVisible}
         onOk={handleModalOk}
         onCancel={() => setIsModalVisible(false)}
-      >
-        <Form form={form} layout="vertical" className="mt-4">
-          <Form.Item name="code" label="Mã" rules={[{ required: true, message: "Vui lòng nhập mã!" }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="discount" label="Giảm giá" rules={[{ required: true, message: "Vui lòng nhập giá trị giảm giá!" }]}>
-            <Input type="number" />
-          </Form.Item>
-          <Form.Item
-            name="discountType"
-            label="Loại giảm giá"
-            rules={[{ required: true, message: "Vui lòng chọn loại giảm giá!" }]}
-          >
-            <Select>
-              <Select.Option value="percentage">Phần trăm</Select.Option>
-              <Select.Option value="fixed">Cố định</Select.Option>
-            </Select>
-          </Form.Item>
-          <Form.Item name="minOrderValue" label="Giá trị tối thiểu">
-            <Input type="number" />
-          </Form.Item>
-          <Form.Item name="startDate" label="Ngày bắt đầu" rules={[{ required: true, message: "Vui lòng chọn ngày bắt đầu!" }]}>
-            <DatePicker showTime />
-          </Form.Item>
-          <Form.Item name="endDate" label="Ngày kết thúc" rules={[{ required: true, message: "Vui lòng chọn ngày kết thúc!" }]}>
-            <DatePicker showTime />
-          </Form.Item>
-        </Form>
-      </Modal>
+        form={form}
+        editingVoucher={editingVoucher}
+      />
     </div>
   );
 };
