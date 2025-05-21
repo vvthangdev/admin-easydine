@@ -12,10 +12,9 @@ import BanKhongPhaiLaAdmin from "./Features/BanKhongPhaiLaAdmin/BanKhongPhaiLaAd
 import TableManagement from "./Features/TableManagement/TableManagements";
 import ItemManagements from "./Features/ItemManagement/ItemManagements";
 import UserManagement from "./Features/User/UserManagement";
-import Header from "../src/components/HomePage/header";
+import Header from "../src/components/HomePage/Header";
 import OrderManagements from "./Features/OrderManagement/OrderManagement";
 import ContactManagement from "./Features/Admin/pages/ContactManagement";
-import TestRefreshToken from "./Features/TestRefreshToken/TestRefreshToken";
 
 const AppRoutes = () => {
   const navLinks = [{ path: "/", label: "Trang chủ" }];
