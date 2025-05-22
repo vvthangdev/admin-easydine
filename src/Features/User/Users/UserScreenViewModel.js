@@ -1,21 +1,10 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Typography,
-} from "@mui/material";
-import { userAPI } from "../../../services/apis/User.js"; // Giữ để lấy danh sách và tìm kiếm
-import { adminAPI } from "../../../services/apis/Admin.js"; // API mới
+import { useEffect, useState, useCallback, useMemo } from "react";
+import { userAPI } from "../../../services/apis/User.js";
+import { adminAPI } from "../../../services/apis/Admin.js";
 import minioClient from "../../../Server/minioClient.js";
-import UserTable from "./UserTable.js";
-import UserFormModal from "./UserFormModal.js";
-import UserSearch from "./UserSearch";
 import debounce from "lodash.debounce";
 
-const UserScreen = ({ setSnackbar }) => {
+const UserScreenViewModel = ({ setSnackbar }) => {
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -27,9 +16,9 @@ const UserScreen = ({ setSnackbar }) => {
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [avatar, setAvatar] = useState([]);
-  const searchCache = useMemo(() => ({}), []); // Cache kết quả tìm kiếm
+  const searchCache = useMemo(() => ({}), []);
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
       const response = await userAPI.getAllUser();
@@ -37,7 +26,7 @@ const UserScreen = ({ setSnackbar }) => {
       console.log("Fetched users:", data);
       setUsers(data);
       setFilteredUsers(data);
-      searchCache[""] = data; // Lưu vào cache cho query rỗng
+      searchCache[""] = data;
     } catch (error) {
       setSnackbar({
         open: true,
@@ -49,12 +38,11 @@ const UserScreen = ({ setSnackbar }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [setSnackbar, searchCache]);
 
-  const searchUsers = async (query) => {
+  const searchUsers = useCallback(async (query) => {
     setLoading(true);
     try {
-      // Kiểm tra cache trước
       if (searchCache[query]) {
         console.log("Using cached result for query:", query);
         setFilteredUsers(searchCache[query]);
@@ -73,7 +61,7 @@ const UserScreen = ({ setSnackbar }) => {
         console.log("Searched users:", data);
       }
       setFilteredUsers(data);
-      searchCache[query] = data; // Lưu vào cache
+      searchCache[query] = data;
     } catch (error) {
       setSnackbar({
         open: true,
@@ -84,54 +72,53 @@ const UserScreen = ({ setSnackbar }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [setSnackbar, searchCache]);
 
   const debouncedSearch = useCallback(
     debounce((query) => {
       setSearchTerm(query);
       searchUsers(query);
     }, 800),
-    []
+    [searchUsers, setSearchTerm]
   );
 
-  const handleSearch = (value) => {
-    setSearchTerm(value);
-    debouncedSearch(value);
-  };
+  const handleSearch = useCallback(
+    (value) => {
+      setSearchTerm(value);
+      debouncedSearch(value);
+    },
+    [debouncedSearch]
+  );
 
-  const handleEnter = (value) => {
-    if (!value.trim()) {
-      fetchUsers();
-    }
-  };
+  const handleEnter = useCallback(
+    (value) => {
+      if (!value.trim()) {
+        fetchUsers();
+      }
+    },
+    [fetchUsers]
+  );
 
-  const handleEdit = (record) => {
+  const handleEdit = useCallback((record) => {
     setEditingUser(record);
-    setForm({
-      name: record.name,
-      email: record.email,
-      username: record.username,
-      phone: record.phone,
-      address: record.address,
-      role: record.role,
-      password: "",
-    });
-    setAvatar(record.avatar ? [{ url: record.avatar, uid: "1" }] : []);
     setIsModalVisible(true);
-  };
+  }, []);
 
-  const handleDelete = (record) => {
+  const handleAdd = useCallback(() => {
+    setEditingUser(null); // Đặt editingUser là null để biểu thị thêm người dùng mới
+    setIsModalVisible(true);
+  }, []);
+
+  const handleDelete = useCallback((record) => {
     setUserToDelete(record);
     setIsDeleteDialogOpen(true);
-  };
+  }, []);
 
-  const confirmDelete = async () => {
+  const confirmDelete = useCallback(async () => {
     if (!userToDelete) return;
     try {
       await adminAPI.deleteUser({ id: userToDelete._id });
-      const updatedUsers = users.filter(
-        (user) => user._id !== userToDelete._id
-      );
+      const updatedUsers = users.filter((user) => user._id !== userToDelete._id);
       setUsers(updatedUsers);
       setFilteredUsers(updatedUsers);
       setSnackbar({
@@ -149,9 +136,9 @@ const UserScreen = ({ setSnackbar }) => {
       setIsDeleteDialogOpen(false);
       setUserToDelete(null);
     }
-  };
+  }, [userToDelete, users, setSnackbar]);
 
-  const handleToggleActive = async (record) => {
+  const handleToggleActive = useCallback(async (record) => {
     try {
       const apiCall = record.isActive
         ? adminAPI.deactivateUser
@@ -178,13 +165,13 @@ const UserScreen = ({ setSnackbar }) => {
         severity: "error",
       });
     }
-  };
+  }, [users, setSnackbar]);
 
-  const handleUploadChange = ({ fileList }) => {
+  const handleUploadChange = useCallback(({ fileList }) => {
     setAvatar(fileList);
-  };
+  }, []);
 
-  const handleModalOk = async () => {
+  const handleModalOk = useCallback(async () => {
     const errors = {};
     if (!form.name) errors.name = true;
     if (!form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
@@ -229,7 +216,7 @@ const UserScreen = ({ setSnackbar }) => {
       }
 
       const userData = {
-        id: editingUser._id,
+        id: editingUser?._id,
         email: form.email,
         username: form.username,
         name: form.name,
@@ -257,6 +244,15 @@ const UserScreen = ({ setSnackbar }) => {
           message: "Cập nhật người dùng thành công",
           severity: "success",
         });
+      } else {
+        const response = await adminAPI.createUser(userData);
+        setUsers([...users, response.data]);
+        setFilteredUsers([...filteredUsers, response.data]);
+        setSnackbar({
+          open: true,
+          message: "Thêm người dùng thành công",
+          severity: "success",
+        });
       }
       setIsModalVisible(false);
       setForm({});
@@ -266,90 +262,51 @@ const UserScreen = ({ setSnackbar }) => {
       const errorMessage =
         error.response?.data?.message ||
         error.message ||
-        "Có lỗi xảy ra khi cập nhật người dùng";
+        "Có lỗi xảy ra khi lưu người dùng";
       setSnackbar({ open: true, message: errorMessage, severity: "error" });
     }
-  };
+  }, [editingUser, avatar, form, users, filteredUsers, setSnackbar]);
+
+  const handleModalCancel = useCallback(() => {
+    setIsModalVisible(false);
+    setForm({});
+    setFormTouched({});
+    setAvatar([]);
+  }, []);
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [fetchUsers]);
 
-  return (
-    <div>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "8px",
-          marginBottom: "16px",
-        }}
-      >
-        <h2 style={{ fontSize: "1.25rem", fontWeight: 600 }}>
-          Danh sách người dùng
-        </h2>
-        <UserSearch
-          searchTerm={searchTerm}
-          onSearch={handleSearch}
-          onEnter={handleEnter}
-        />
-      </div>
-      <UserTable
-        users={filteredUsers}
-        loading={loading}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        onToggleActive={handleToggleActive}
-      />
-      <UserFormModal
-        visible={isModalVisible}
-        onOk={handleModalOk}
-        onCancel={() => {
-          setIsModalVisible(false);
-          setForm({});
-          setFormTouched({});
-          setAvatar(
-            editingUser?.avatar ? [{ url: editingUser.avatar, uid: "1" }] : []
-          );
-        }}
-        form={{
-          ...form,
-          setFieldsValue: (values) => setForm({ ...form, ...values }),
-          touched: formTouched,
-        }}
-        editingUser={editingUser}
-        avatar={avatar}
-        onUploadChange={handleUploadChange}
-      />
-      <Dialog
-        open={isDeleteDialogOpen}
-        onClose={() => setIsDeleteDialogOpen(false)}
-      >
-        <DialogTitle sx={{ fontSize: "1rem" }}>Xác nhận xóa</DialogTitle>
-        <DialogContent>
-          <Typography sx={{ fontSize: "0.85rem" }}>
-            Bạn có chắc muốn xóa người dùng {userToDelete?.name}?
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => setIsDeleteDialogOpen(false)}
-            sx={{ fontSize: "0.85rem" }}
-          >
-            Hủy
-          </Button>
-          <Button
-            onClick={confirmDelete}
-            color="error"
-            variant="contained"
-            sx={{ fontSize: "0.85rem" }}
-          >
-            Xóa
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </div>
-  );
+  return {
+    users,
+    setUsers,
+    filteredUsers,
+    setFilteredUsers,
+    isModalVisible,
+    setIsModalVisible,
+    isDeleteDialogOpen,
+    setIsDeleteDialogOpen,
+    userToDelete,
+    form,
+    formTouched,
+    editingUser,
+    setEditingUser,
+    loading,
+    searchTerm,
+    avatar,
+    handleSearch,
+    handleEnter,
+    handleEdit,
+    handleAdd,
+    handleDelete,
+    confirmDelete,
+    handleToggleActive,
+    handleUploadChange,
+    handleModalOk,
+    handleModalCancel,
+    setForm,
+  };
 };
 
-export default UserScreen;
+export default UserScreenViewModel;

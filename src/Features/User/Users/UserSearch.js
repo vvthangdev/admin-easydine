@@ -1,7 +1,9 @@
-import React from "react";
-import { TextField } from "@mui/material";
+"use client"
 
-const UserSearch = ({ searchTerm, onSearch }) => {
+import { TextField, InputAdornment } from "@mui/material"
+import { Search } from 'lucide-react'
+
+const UserSearch = ({ searchTerm, onSearch, onEnter }) => {
   return (
     <TextField
       placeholder="Tìm kiếm theo tên, số điện thoại hoặc ID"
@@ -9,17 +11,40 @@ const UserSearch = ({ searchTerm, onSearch }) => {
       onChange={(e) => onSearch(e.target.value)}
       onKeyDown={(e) => {
         if (e.key === "Enter") {
-          onSearch(e.target.value);
+          onEnter?.(e.target.value)
         }
       }}
+      fullWidth
       size="small"
       autoComplete="off"
       sx={{
-        width: { xs: "100%", sm: "256px", lg: "320px" },
-        "& .MuiInputBase-input": { fontSize: "0.85rem" },
+        "& .MuiOutlinedInput-root": {
+          borderRadius: 2,
+          height: 40,
+          "&:hover .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#0071e3",
+          },
+          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#0071e3",
+            borderWidth: 2,
+          },
+          "& .MuiInputBase-input": {
+            fontSize: "0.875rem",
+          },
+        },
+        "& .MuiInputLabel-root.Mui-focused": {
+          color: "#0071e3",
+        },
+      }}
+      InputProps={{
+        startAdornment: (
+          <InputAdornment position="start">
+            <Search size={18} color="#0071e3" />
+          </InputAdornment>
+        ),
       }}
     />
-  );
-};
+  )
+}
 
-export default UserSearch;
+export default UserSearch
