@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import VoucherFormModal from "./VoucherFormModal";
 import { voucherAPI } from "../../../services/apis/Voucher";
+import { userAPI } from "../../../services/apis/User";
 
 const VoucherScreen = ({ selectedUsers, setSelectedUsers, setSnackbar }) => {
   const [vouchers, setVouchers] = useState([]);
@@ -20,17 +21,43 @@ const VoucherScreen = ({ selectedUsers, setSelectedUsers, setSnackbar }) => {
   const [formTouched, setFormTouched] = useState({});
   const [editingVoucher, setEditingVoucher] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [allUsers, setAllUsers] = useState([]);
 
-  const fetchVouchers = async () => {
-    setLoading(true);
+  const fetchUsers = async () => {
     try {
-      const response = await voucherAPI.getAllVouchers();
-      const data = Array.isArray(response) ? response : [];
-      setVouchers(data);
+      const users = await userAPI.getAllUser();
+      setAllUsers(Array.isArray(users) ? users : []);
     } catch (error) {
       setSnackbar({
         open: true,
-        message: "Lỗi khi tải danh sách voucher: " + error.message,
+        message: `Lỗi khi tải danh sách người dùng: ${error.message}`,
+        severity: "error",
+      });
+      setAllUsers([]);
+    }
+  };
+
+  const fetchVouchers = async () => {
+    setLoading(true);
+   
+
+ try {
+      const data = await voucherAPI.getAllVouchers();
+      const vouchersWithUserData = data.map((voucher) => {
+        const userIds = [...new Set(voucher.applicableUsers || [])]; // Loại bỏ trùng lặp
+        const userData = userIds
+          .map((id) => allUsers.find((user) => user._id === id))
+          .filter(Boolean);
+        return {
+          ...voucher,
+          applicableUsersData: userData,
+        };
+      });
+      setVouchers(Array.isArray(vouchersWithUserData) ? vouchersWithUserData : []);
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: `Lỗi khi tải danh sách voucher: ${error.message}`,
         severity: "error",
       });
       setVouchers([]);
@@ -40,21 +67,27 @@ const VoucherScreen = ({ selectedUsers, setSelectedUsers, setSnackbar }) => {
   };
 
   useEffect(() => {
-    fetchVouchers();
+    fetchUsers();
   }, []);
+
+  useEffect(() => {
+    if (allUsers.length > 0) {
+      fetchVouchers();
+    }
+  }, [allUsers]);
 
   const handleAdd = () => {
     setEditingVoucher(null);
     setForm({
       code: "",
       discount: "",
-      discountType: "",
+      discountType: "percentage",
       minOrderValue: 0,
       startDate: null,
       endDate: null,
       isActive: true,
       usageLimit: null,
-      usedCount: 0,
+      usedCount: 0, // Giá trị mặc định cho voucher mới
       applicableUsers: [],
     });
     setSelectedUsers([]);
@@ -72,48 +105,50 @@ const VoucherScreen = ({ selectedUsers, setSelectedUsers, setSnackbar }) => {
       endDate: voucher.endDate ? new Date(voucher.endDate) : null,
       isActive: voucher.isActive,
       usageLimit: voucher.usageLimit,
-      usedCount: voucher.usedCount,
+      usedCount: voucher.usedCount, // Lấy usedCount từ voucher
       applicableUsers: voucher.applicableUsers || [],
     });
-    setSelectedUsers(voucher.applicableUsersData || []);
+    setSelectedUsers(voucher.applicableUsers || []);
     setIsModalVisible(true);
   };
 
   const handleDelete = async (voucher) => {
-    try {
-      await voucherAPI.deleteVoucher(voucher._id);
-      const updatedVouchers = vouchers.filter((v) => v._id !== voucher._id);
-      setVouchers(updatedVouchers);
-      setSnackbar({
-        open: true,
-        message: "Xóa voucher thành công",
-        severity: "success",
-      });
-    } catch (error) {
-      setSnackbar({
-        open: true,
-        message: "Xóa voucher không thành công: " + error.message,
-        severity: "error",
-      });
+    if (window.confirm(`Bạn có chắc muốn xóa voucher ${voucher.code}?`)) {
+      try {
+        await voucherAPI.deleteVoucher(voucher._id);
+        setVouchers(vouchers.filter((v) => v._id !== voucher._id));
+        setSnackbar({
+          open: true,
+          message: "Xóa voucher thành công",
+          severity: "success",
+        });
+      } catch (error) {
+        setSnackbar({
+          open: true,
+          message: `Xóa voucher không thành công: ${error.message}`,
+          severity: "error",
+        });
+      }
     }
   };
 
   const handleModalOk = async () => {
     const errors = {};
-    if (!form.code) errors.code = true;
+    if (!form.code) errors.code = "Mã voucher là bắt buộc";
     if (!form.discount || form.discount <= 0 || isNaN(form.discount))
-      errors.discount = true;
-    if (!form.discountType) errors.discountType = true;
-    if (form.minOrderValue < 0) errors.minOrderValue = true;
-    if (!form.startDate) errors.startDate = true;
-    if (!form.endDate) errors.endDate = true;
+      errors.discount = "Giảm giá phải là số lớn hơn 0";
+    if (!form.discountType) errors.discountType = "Loại giảm giá là bắt buộc";
+    if (form.minOrderValue < 0) errors.minOrderValue = "Đơn tối thiểu không được âm";
+    if (!form.startDate) errors.startDate = "Ngày bắt đầu là bắt buộc";
+    if (!form.endDate) errors.endDate = "Ngày kết thúc là bắt buộc";
     if (
       form.startDate &&
       form.endDate &&
       new Date(form.endDate) <= new Date(form.startDate)
     )
-      errors.endDate = true;
-    if (form.usageLimit && form.usageLimit < 0) errors.usageLimit = true;
+      errors.endDate = "Ngày kết thúc phải sau ngày bắt đầu";
+    if (form.usageLimit && form.usageLimit < 0)
+      errors.usageLimit = "Giới hạn sử dụng không được âm";
 
     setFormTouched(errors);
 
@@ -129,44 +164,44 @@ const VoucherScreen = ({ selectedUsers, setSelectedUsers, setSnackbar }) => {
     try {
       const voucherData = {
         code: form.code,
-        discount: form.discount,
+        discount: parseFloat(form.discount),
         discountType: form.discountType,
-        minOrderValue: form.minOrderValue,
-        startDate: form.startDate,
-        endDate: form.endDate,
+        minOrderValue: parseFloat(form.minOrderValue) || 0,
+        startDate: form.startDate.toISOString(),
+        endDate: form.endDate.toISOString(),
         isActive: form.isActive,
-        usageLimit: form.usageLimit,
-        applicableUsers: form.applicableUsers,
+        usageLimit: form.usageLimit ? parseInt(form.usageLimit) : null,
+        usedCount: form.usedCount || 0, // Gửi usedCount
+        applicableUsers: [...new Set(selectedUsers)], // Loại bỏ trùng lặp
       };
 
+      let updatedVoucher;
       if (editingVoucher) {
-        await voucherAPI.updateVoucher(editingVoucher._id, voucherData);
-        const updatedVoucher = {
-          ...editingVoucher,
-          ...voucherData,
-          applicableUsersData: selectedUsers,
-        };
-        const updatedVouchers = vouchers.map((v) =>
-          v._id === editingVoucher._id ? updatedVoucher : v
-        );
-        setVouchers(updatedVouchers);
-        setSnackbar({
-          open: true,
-          message: "Cập nhật voucher thành công",
-          severity: "success",
-        });
+        updatedVoucher = await voucherAPI.updateVoucher(editingVoucher._id, voucherData);
       } else {
-        const response = await voucherAPI.createVoucher(voucherData);
-        setVouchers([
-          ...vouchers,
-          { ...response, applicableUsersData: selectedUsers },
-        ]);
-        setSnackbar({
-          open: true,
-          message: "Tạo voucher thành công",
-          severity: "success",
-        });
+        updatedVoucher = await voucherAPI.createVoucher(voucherData);
       }
+
+      const userData = updatedVoucher.applicableUsers
+        .map((id) => allUsers.find((user) => user._id === id))
+        .filter(Boolean);
+
+      setVouchers((prev) =>
+        editingVoucher
+          ? prev.map((v) =>
+              v._id === editingVoucher._id
+                ? { ...updatedVoucher, applicableUsersData: userData }
+                : v
+            )
+          : [...prev, { ...updatedVoucher, applicableUsersData: userData }]
+      );
+
+      setSnackbar({
+        open: true,
+        message: editingVoucher ? "Cập nhật voucher thành công" : "Tạo voucher thành công",
+        severity: "success",
+      });
+
       setIsModalVisible(false);
       setForm({});
       setFormTouched({});
@@ -174,10 +209,7 @@ const VoucherScreen = ({ selectedUsers, setSelectedUsers, setSnackbar }) => {
     } catch (error) {
       setSnackbar({
         open: true,
-        message:
-          error.response?.data?.message ||
-          error.message ||
-          "Có lỗi xảy ra khi lưu voucher",
+        message: error.message || "Có lỗi xảy ra khi lưu voucher",
         severity: "error",
       });
     }
@@ -187,11 +219,12 @@ const VoucherScreen = ({ selectedUsers, setSelectedUsers, setSnackbar }) => {
     { id: "code", label: "Mã Voucher", width: "15%" },
     { id: "discount", label: "Giảm giá", width: "10%" },
     { id: "discountType", label: "Loại", width: "10%" },
-    { id: "minOrderValue", label: "Đơn tối thiểu", width: "15%" },
-    { id: "startDate", label: "Bắt đầu", width: "15%" },
-    { id: "endDate", label: "Kết thúc", width: "15%" },
-    { id: "isActive", label: "Trạng thái", width: "10%" },
-    { id: "action", label: "Thao tác", width: "20%" },
+    { id: "minOrderValue", label: "Đơn tối thiểu", width: "12%" },
+    { id: "startDate", label: "Bắt đầu", width: "12%" },
+    { id: "endDate", label: "Kết thúc", width: "12%" },
+    { id: "isActive", label: "Trạng thái", width: "8%" },
+    { id: "usedCount", label: "Số lượt sử dụng", width: "10%" }, // Thêm cột usedCount
+    { id: "action", label: "Thao tác", width: "21%" },
   ];
 
   return (
@@ -241,21 +274,25 @@ const VoucherScreen = ({ selectedUsers, setSelectedUsers, setSnackbar }) => {
                   </TableCell>
                   <TableCell sx={{ fontSize: "0.75rem", padding: "6px" }}>
                     {voucher.discount}
+                    {voucher.discountType === "percentage" ? "%" : " VNĐ"}
                   </TableCell>
                   <TableCell sx={{ fontSize: "0.75rem", padding: "6px" }}>
-                    {voucher.discountType}
+                    {voucher.discountType === "percentage" ? "Phần trăm" : "Cố định"}
                   </TableCell>
                   <TableCell sx={{ fontSize: "0.75rem", padding: "6px" }}>
-                    {voucher.minOrderValue}
+                    {voucher.minOrderValue} VNĐ
                   </TableCell>
                   <TableCell sx={{ fontSize: "0.75rem", padding: "6px" }}>
-                    {new Date(voucher.startDate).toLocaleDateString()}
+                    {new Date(voucher.startDate).toLocaleDateString("vi-VN")}
                   </TableCell>
                   <TableCell sx={{ fontSize: "0.75rem", padding: "6px" }}>
-                    {new Date(voucher.endDate).toLocaleDateString()}
+                    {new Date(voucher.endDate).toLocaleDateString("vi-VN")}
                   </TableCell>
                   <TableCell sx={{ fontSize: "0.75rem", padding: "6px" }}>
                     {voucher.isActive ? "Kích hoạt" : "Không kích hoạt"}
+                  </TableCell>
+                  <TableCell sx={{ fontSize: "0.75rem", padding: "6px" }}>
+                    {voucher.usedCount}
                   </TableCell>
                   <TableCell sx={{ fontSize: "0.75rem", padding: "6px" }}>
                     <Button
@@ -319,6 +356,7 @@ const VoucherScreen = ({ selectedUsers, setSelectedUsers, setSnackbar }) => {
         selectedUsers={selectedUsers}
         setSelectedUsers={setSelectedUsers}
         setSnackbar={setSnackbar}
+        allUsers={allUsers}
       />
     </Box>
   );

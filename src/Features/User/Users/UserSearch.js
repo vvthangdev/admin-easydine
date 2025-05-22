@@ -1,7 +1,7 @@
 import React from "react";
 import { TextField } from "@mui/material";
 
-const UserSearch = ({ searchTerm, onSearch, onEnter }) => {
+const UserSearch = ({ searchTerm, onSearch }) => {
   return (
     <TextField
       placeholder="Tìm kiếm theo tên, số điện thoại hoặc ID"
@@ -9,12 +9,15 @@ const UserSearch = ({ searchTerm, onSearch, onEnter }) => {
       onChange={(e) => onSearch(e.target.value)}
       onKeyDown={(e) => {
         if (e.key === "Enter") {
-          onEnter(e.target.value);
+          onSearch(e.target.value);
         }
       }}
       size="small"
-      autoComplete="off" // Tắt tự động điền
-      sx={{ width: { xs: "100%", sm: "256px", lg: "320px" }, "& .MuiInputBase-input": { fontSize: "0.85rem" } }}
+      autoComplete="off"
+      sx={{
+        width: { xs: "100%", sm: "256px", lg: "320px" },
+        "& .MuiInputBase-input": { fontSize: "0.85rem" },
+      }}
     />
   );
 };

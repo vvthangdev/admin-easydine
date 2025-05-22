@@ -2,11 +2,11 @@ import axiosInstance from "../../config/axios.config";
 import { handleApiResponse } from "./handleApiResponse";
 
 export const adminAPI = {
-  // Cập nhật người dùng
+  // Cập nhật người dùng (nhận id hoặc username trong body)
   updateUser: (data) =>
     axiosInstance.patch("/admin/update", data).then(handleApiResponse),
 
-  // Xóa người dùng
+  // Xóa người dùng (nhận id hoặc username trong body)
   deleteUser: (data) =>
     axiosInstance.delete("/admin/delete", { data }).then(handleApiResponse),
 
