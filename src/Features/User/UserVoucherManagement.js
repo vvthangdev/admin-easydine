@@ -1,22 +1,20 @@
-"use client"
+// UserVoucherManagementView.jsx (đã được tách trước đó)
+"use client";
 
-import { useState } from "react"
-import { Box, Tabs, Tab, Snackbar, Alert } from "@mui/material"
-import UserScreen from "./Users/UserScreenView"
-import VoucherScreenView from "./Vouchers/VoucherScreenView"
+import { Box, Tabs, Tab, Snackbar, Alert } from "@mui/material";
+import UserScreen from "./Users/UserScreenView";
+import VoucherScreenView from "./Vouchers/VoucherScreenView";
+import UserVoucherManagementViewModel from "./UserVoucherManagementViewModel";
 
-const UserVoucherManagement = () => {
-  const [activeTab, setActiveTab] = useState(0)
-  const [selectedUsers, setSelectedUsers] = useState([])
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success",
-  })
-
-  const handleTabChange = (event, newValue) => {
-    setActiveTab(newValue)
-  }
+const UserVoucherManagementView = () => {
+  const {
+    activeTab,
+    selectedUsers,
+    snackbar,
+    handleTabChange,
+    setSelectedUsers,
+    setSnackbar,
+  } = UserVoucherManagementViewModel();
 
   return (
     <Box
@@ -72,7 +70,11 @@ const UserVoucherManagement = () => {
           }}
         >
           {activeTab === 0 && (
-            <UserScreen selectedUsers={selectedUsers} setSelectedUsers={setSelectedUsers} setSnackbar={setSnackbar} />
+            <UserScreen
+              selectedUsers={selectedUsers}
+              setSelectedUsers={setSelectedUsers}
+              setSnackbar={setSnackbar}
+            />
           )}
           {activeTab === 1 && (
             <VoucherScreenView
@@ -112,7 +114,7 @@ const UserVoucherManagement = () => {
         </Alert>
       </Snackbar>
     </Box>
-  )
-}
+  );
+};
 
-export default UserVoucherManagement
+export default UserVoucherManagementView;

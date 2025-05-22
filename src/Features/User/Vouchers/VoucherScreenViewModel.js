@@ -1,3 +1,4 @@
+// VoucherScreenViewModel.js
 import { useEffect, useState, useCallback } from "react";
 import { voucherAPI } from "../../../services/apis/Voucher";
 import { userAPI } from "../../../services/apis/User";
@@ -10,6 +11,8 @@ const VoucherScreenViewModel = ({ selectedUsers, setSelectedUsers, setSnackbar }
   const [editingVoucher, setEditingVoucher] = useState(null);
   const [loading, setLoading] = useState(false);
   const [allUsers, setAllUsers] = useState([]);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [voucherToDelete, setVoucherToDelete] = useState(null);
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -89,24 +92,40 @@ const VoucherScreenViewModel = ({ selectedUsers, setSelectedUsers, setSnackbar }
   }, [setSelectedUsers]);
 
   const handleDelete = useCallback(async (voucher) => {
-    if (window.confirm(`Bạn có chắc muốn xóa voucher ${voucher.code}?`)) {
-      try {
-        await voucherAPI.deleteVoucher(voucher._id);
-        setVouchers((prev) => prev.filter((v) => v._id !== voucher._id));
-        setSnackbar({
-          open: true,
-          message: "Xóa voucher thành công",
-          severity: "success",
-        });
-      } catch (error) {
-        setSnackbar({
-          open: true,
-          message: `Xóa voucher không thành công: ${error.message}`,
-          severity: "error",
-        });
-      }
+    try {
+      await voucherAPI.deleteVoucher(voucher._id);
+      setVouchers((prev) => prev.filter((v) => v._id !== voucher._id));
+      setSnackbar({
+        open: true,
+        message: "Xóa voucher thành công",
+        severity: "success",
+      });
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: `Xóa voucher không thành công: ${error.message}`,
+        severity: "error",
+      });
     }
   }, [setSnackbar]);
+
+  const confirmDelete = useCallback((voucher) => {
+    setVoucherToDelete(voucher);
+    setIsDeleteDialogOpen(true);
+  }, []);
+
+  const executeDelete = useCallback(() => {
+    if (voucherToDelete) {
+      handleDelete(voucherToDelete);
+    }
+    setIsDeleteDialogOpen(false);
+    setVoucherToDelete(null);
+  }, [voucherToDelete, handleDelete]);
+
+  const cancelDelete = useCallback(() => {
+    setIsDeleteDialogOpen(false);
+    setVoucherToDelete(null);
+  }, []);
 
   const handleModalOk = useCallback(async () => {
     const errors = {};
@@ -216,14 +235,17 @@ const VoucherScreenViewModel = ({ selectedUsers, setSelectedUsers, setSnackbar }
     editingVoucher,
     loading,
     allUsers,
-    selectedUsers,
-    setSelectedUsers,
+    isDeleteDialogOpen,
+    voucherToDelete,
     handleAdd,
     handleEdit,
     handleDelete,
     handleModalOk,
     handleModalCancel,
     setForm,
+    confirmDelete,
+    executeDelete,
+    cancelDelete,
   };
 };
 

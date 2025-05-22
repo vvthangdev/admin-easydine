@@ -1,4 +1,6 @@
-"use client"
+// VoucherFormModalView.jsx
+"use client";
+
 import {
   Dialog,
   DialogTitle,
@@ -24,14 +26,15 @@ import {
   IconButton,
   Tooltip,
   FormHelperText,
-} from "@mui/material"
-import { DatePicker } from "@mui/x-date-pickers/DatePicker"
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns"
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider"
-import viLocale from "date-fns/locale/vi"
-import { Ticket, Calendar, Percent, DollarSign, Users, UserPlus, Trash2 } from "lucide-react"
-import UserSelectModalView from "./UserSelectModalView"
-import VoucherFormModalViewModel from "./VoucherFormModalViewModel"
+  CircularProgress,
+} from "@mui/material";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import viLocale from "date-fns/locale/vi";
+import { Ticket, Calendar, Percent, DollarSign, Users, UserPlus, Trash2 } from "lucide-react";
+import UserSelectModalView from "./UserSelectModalView";
+import VoucherFormModalViewModel from "./VoucherFormModalViewModel";
 
 const VoucherFormModalView = ({
   visible,
@@ -44,26 +47,34 @@ const VoucherFormModalView = ({
   setSnackbar,
   allUsers,
 }) => {
-  const { userSelectModalOpen, setUserSelectModalOpen, handleFieldChange, handleRemoveUser, handleAddUsers } =
-    VoucherFormModalViewModel({
-      form,
-      editingVoucher,
-      selectedUsers,
-      setSelectedUsers,
-      setSnackbar,
-    })
+  const {
+    userSelectModalOpen,
+    setUserSelectModalOpen,
+    handleFieldChange,
+    handleRemoveUser,
+    handleConfirmUserSelection,
+    loading,
+    handleCancelWithConfirmation,
+  } = VoucherFormModalViewModel({
+    form,
+    editingVoucher,
+    selectedUsers,
+    setSelectedUsers,
+    setSnackbar,
+    onCancel
+  });
 
   const userColumns = [
     { id: "name", label: "Tên", width: "40%" },
     { id: "username", label: "Tên người dùng", width: "40%" },
     { id: "action", label: "Thao tác", width: "20%" },
-  ]
+  ];
 
   return (
     <>
       <Dialog
         open={visible}
-        onClose={onCancel}
+        onClose={handleCancelWithConfirmation}
         maxWidth="sm"
         fullWidth
         PaperProps={{
@@ -411,6 +422,7 @@ const VoucherFormModalView = ({
                 variant="outlined"
                 startIcon={<UserPlus size={16} />}
                 onClick={() => setUserSelectModalOpen(true)}
+                disabled={loading}
                 sx={{
                   borderColor: "#0071e3",
                   color: "#0071e3",
@@ -424,6 +436,11 @@ const VoucherFormModalView = ({
                     borderColor: "#0071e3",
                     background: "rgba(0, 113, 227, 0.05)",
                   },
+                  "&:disabled": {
+                    borderColor: "#86868b",
+                    color: "#86868b",
+                    cursor: "not-allowed",
+                  },
                 }}
               >
                 Thêm người dùng
@@ -433,25 +450,24 @@ const VoucherFormModalView = ({
             <TableContainer
               component={Paper}
               sx={{
-                maxHeight: 280, // Tăng chiều cao tối đa
-                minHeight: 120, // Chiều cao tối thiểu
+                maxHeight: 280,
+                minHeight: 120,
                 boxShadow: "none",
                 border: "1px solid rgba(0, 0, 0, 0.05)",
                 borderRadius: 3,
-                overflow: "auto", // Đảm bảo có thanh cuộn
-                // Custom scroll bar styling
-                '&::-webkit-scrollbar': {
-                  width: '6px',
+                overflow: "auto",
+                "&::-webkit-scrollbar": {
+                  width: "6px",
                 },
-                '&::-webkit-scrollbar-track': {
-                  background: 'rgba(0, 0, 0, 0.05)',
-                  borderRadius: '3px',
+                "&::-webkit-scrollbar-track": {
+                  background: "rgba(0, 0, 0, 0.05)",
+                  borderRadius: "3px",
                 },
-                '&::-webkit-scrollbar-thumb': {
-                  background: 'rgba(0, 113, 227, 0.3)',
-                  borderRadius: '3px',
-                  '&:hover': {
-                    background: 'rgba(0, 113, 227, 0.5)',
+                "&::-webkit-scrollbar-thumb": {
+                  background: "rgba(0, 113, 227, 0.3)",
+                  borderRadius: "3px",
+                  "&:hover": {
+                    background: "rgba(0, 113, 227, 0.5)",
                   },
                 },
               }}
@@ -468,7 +484,7 @@ const VoucherFormModalView = ({
                           color: "#1d1d1f",
                           py: 1,
                           fontSize: "0.75rem",
-                          position: 'sticky',
+                          position: "sticky",
                           top: 0,
                           backgroundColor: "rgba(0, 113, 227, 0.05)",
                           zIndex: 1,
@@ -480,10 +496,16 @@ const VoucherFormModalView = ({
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {selectedUsers.length > 0 ? (
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={3} sx={{ textAlign: "center", py: 4 }}>
+                        <CircularProgress size={24} sx={{ color: "#0071e3" }} />
+                      </TableCell>
+                    </TableRow>
+                  ) : selectedUsers.length > 0 ? (
                     selectedUsers
                       .map((userId) => {
-                        const user = allUsers.find((u) => u._id === userId)
+                        const user = allUsers.find((u) => u._id === userId);
                         return user ? (
                           <TableRow
                             key={userId}
@@ -492,25 +514,29 @@ const VoucherFormModalView = ({
                               transition: "background-color 0.2s",
                             }}
                           >
-                            <TableCell sx={{ 
-                              fontSize: "0.75rem", 
-                              py: 1.5, 
-                              fontWeight: 500, 
-                              color: "#1d1d1f",
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              whiteSpace: 'nowrap'
-                            }}>
+                            <TableCell
+                              sx={{
+                                fontSize: "0.75rem",
+                                py: 1.5,
+                                fontWeight: 500,
+                                color: "#1d1d1f",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
                               {user.name}
                             </TableCell>
-                            <TableCell sx={{ 
-                              fontSize: "0.75rem", 
-                              py: 1.5, 
-                              color: "#86868b",
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              whiteSpace: 'nowrap'
-                            }}>
+                            <TableCell
+                              sx={{
+                                fontSize: "0.75rem",
+                                py: 1.5,
+                                color: "#86868b",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
                               {user.username}
                             </TableCell>
                             <TableCell sx={{ fontSize: "0.75rem", py: 1.5 }}>
@@ -518,10 +544,15 @@ const VoucherFormModalView = ({
                                 <IconButton
                                   size="small"
                                   onClick={() => handleRemoveUser(userId)}
+                                  disabled={loading}
                                   sx={{
                                     color: "#ff3b30",
                                     "&:hover": {
                                       backgroundColor: "rgba(255, 59, 48, 0.1)",
+                                    },
+                                    "&:disabled": {
+                                      color: "#86868b",
+                                      cursor: "not-allowed",
                                     },
                                   }}
                                 >
@@ -530,7 +561,7 @@ const VoucherFormModalView = ({
                               </Tooltip>
                             </TableCell>
                           </TableRow>
-                        ) : null
+                        ) : null;
                       })
                       .filter(Boolean)
                   ) : (
@@ -562,7 +593,8 @@ const VoucherFormModalView = ({
         </DialogContent>
         <DialogActions sx={{ p: 3, borderTop: "1px solid rgba(0, 0, 0, 0.05)" }}>
           <Button
-            onClick={onCancel}
+            onClick={handleCancelWithConfirmation}
+            disabled={loading}
             sx={{
               borderColor: "#86868b",
               color: "#86868b",
@@ -575,6 +607,11 @@ const VoucherFormModalView = ({
                 color: "#1d1d1f",
                 background: "rgba(0, 0, 0, 0.05)",
               },
+              "&:disabled": {
+                borderColor: "#86868b",
+                color: "#86868b",
+                cursor: "not-allowed",
+              },
             }}
             variant="outlined"
           >
@@ -582,6 +619,7 @@ const VoucherFormModalView = ({
           </Button>
           <Button
             onClick={onOk}
+            disabled={loading}
             sx={{
               background: "linear-gradient(145deg, #0071e3 0%, #42a5f5 100%)",
               color: "#ffffff",
@@ -594,24 +632,30 @@ const VoucherFormModalView = ({
                 background: "linear-gradient(145deg, #0071e3 0%, #42a5f5 100%)",
                 boxShadow: "0 6px 16px rgba(0, 113, 227, 0.3)",
               },
+              "&:disabled": {
+                background: "rgba(0, 113, 227, 0.3)",
+                color: "#ffffff",
+                cursor: "not-allowed",
+              },
               transition: "all 0.3s ease",
             }}
             variant="contained"
           >
-            {editingVoucher ? "Cập nhật" : "Thêm mới"}
+            {loading ? <CircularProgress size={20} sx={{ color: "#ffffff" }} /> : editingVoucher ? "Cập nhật" : "Thêm mới"}
           </Button>
         </DialogActions>
       </Dialog>
+
       <UserSelectModalView
         visible={userSelectModalOpen}
-        onOk={() => setUserSelectModalOpen(false)}
+        onOk={() => handleConfirmUserSelection()}
         onCancel={() => setUserSelectModalOpen(false)}
         selectedUsers={selectedUsers}
-        setSelectedUsers={handleAddUsers}
+        setSelectedUsers={setSelectedUsers}
         setSnackbar={setSnackbar}
       />
     </>
-  )
-}
+  );
+};
 
-export default VoucherFormModalView
+export default VoucherFormModalView;

@@ -1,4 +1,5 @@
-"use client"
+// VoucherScreenView.jsx
+"use client";
 
 import {
   Box,
@@ -9,12 +10,11 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-} from "@mui/material"
-import { Plus, RefreshCw, AlertTriangle } from 'lucide-react'
-import VoucherFormModalView from "./VoucherFormModalView"
-import VoucherTable from "./VoucherTable"
-import VoucherScreenViewModel from "./VoucherScreenViewModel"
-import { useState } from "react"
+} from "@mui/material";
+import { Plus, RefreshCw, AlertTriangle } from "lucide-react";
+import VoucherFormModalView from "./VoucherFormModalView";
+import VoucherTable from "./VoucherTable";
+import VoucherScreenViewModel from "./VoucherScreenViewModel";
 
 const VoucherScreenView = ({ selectedUsers, setSelectedUsers, setSnackbar }) => {
   const {
@@ -25,27 +25,17 @@ const VoucherScreenView = ({ selectedUsers, setSelectedUsers, setSnackbar }) => 
     editingVoucher,
     loading,
     allUsers,
+    isDeleteDialogOpen,
+    voucherToDelete,
     handleAdd,
     handleEdit,
-    handleDelete,
     handleModalOk,
     handleModalCancel,
     setForm,
-  } = VoucherScreenViewModel({ selectedUsers, setSelectedUsers, setSnackbar })
-
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const [voucherToDelete, setVoucherToDelete] = useState(null)
-
-  const confirmDelete = (voucher) => {
-    setVoucherToDelete(voucher)
-    setIsDeleteDialogOpen(true)
-  }
-
-  const executeDelete = () => {
-    handleDelete(voucherToDelete)
-    setIsDeleteDialogOpen(false)
-    setVoucherToDelete(null)
-  }
+    confirmDelete,
+    executeDelete,
+    cancelDelete,
+  } = VoucherScreenViewModel({ selectedUsers, setSelectedUsers, setSnackbar });
 
   return (
     <Box>
@@ -115,24 +105,24 @@ const VoucherScreenView = ({ selectedUsers, setSelectedUsers, setSnackbar }) => 
       )}
 
       <VoucherFormModalView
-        visible={isModalVisible}
-        onOk={handleModalOk}
-        onCancel={handleModalCancel}
-        form={{
-          ...form,
-          setFieldsValue: (values) => setForm({ ...form, ...values }),
-          touched: formTouched,
-        }}
-        editingVoucher={editingVoucher}
-        selectedUsers={selectedUsers}
-        setSelectedUsers={setSelectedUsers}
-        setSnackbar={setSnackbar}
-        allUsers={allUsers}
-      />
+  visible={isModalVisible}
+  onOk={handleModalOk}
+  onCancel={handleModalCancel}
+  form={{
+    ...form,
+    setFieldsValue: (values) => setForm({ ...form, ...values }),
+    touched: formTouched,
+  }}
+  editingVoucher={editingVoucher}
+  selectedUsers={selectedUsers}
+  setSelectedUsers={setSelectedUsers}
+  setSnackbar={setSnackbar}
+  allUsers={allUsers}
+/>
 
       <Dialog
         open={isDeleteDialogOpen}
-        onClose={() => setIsDeleteDialogOpen(false)}
+        onClose={cancelDelete}
         PaperProps={{
           sx: {
             borderRadius: 4,
@@ -171,7 +161,7 @@ const VoucherScreenView = ({ selectedUsers, setSelectedUsers, setSnackbar }) => 
         </DialogContent>
         <DialogActions sx={{ p: 3, borderTop: "1px solid rgba(0, 0, 0, 0.05)" }}>
           <Button
-            onClick={() => setIsDeleteDialogOpen(false)}
+            onClick={cancelDelete}
             sx={{
               borderColor: "#86868b",
               color: "#86868b",
@@ -212,7 +202,7 @@ const VoucherScreenView = ({ selectedUsers, setSelectedUsers, setSnackbar }) => 
         </DialogActions>
       </Dialog>
     </Box>
-  )
-}
+  );
+};
 
-export default VoucherScreenView
+export default VoucherScreenView;

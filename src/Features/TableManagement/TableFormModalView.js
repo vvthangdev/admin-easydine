@@ -1,4 +1,4 @@
-
+import React from "react";
 import {
   Dialog,
   DialogTitle,
@@ -12,20 +12,18 @@ import {
   FormControl,
   Typography,
 } from "@mui/material";
-import { useForm, Controller } from "react-hook-form";
+import { Controller } from "react-hook-form";
+import TableFormModalViewModel from "./TableFormModalViewModel";
 
-const TableFormModal = ({ open, onClose, onSubmit, editingTable, areas }) => {
-  const { control, handleSubmit, reset } = useForm({
-    defaultValues: editingTable || { table_number: "", capacity: "", area: "" },
+const TableFormModalView = ({ open, onClose, onSubmit, editingTable, areas }) => {
+  const { control, handleSubmit, reset, handleFormSubmit, handleClose } = TableFormModalViewModel({
+    onClose,
+    onSubmit,
+    editingTable,
   });
 
-  const handleFormSubmit = (data) => {
-    onSubmit(data);
-    reset();
-  };
-
   return (
-    <Dialog open={open} onClose={() => { onClose(); reset(); }} maxWidth="sm" fullWidth>
+    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle>
         {editingTable ? "Sửa thông tin bàn" : "Thêm bàn mới"}
       </DialogTitle>
@@ -95,7 +93,7 @@ const TableFormModal = ({ open, onClose, onSubmit, editingTable, areas }) => {
       </DialogContent>
       <DialogActions>
         <Button
-          onClick={() => { onClose(); reset(); }}
+          onClick={handleClose}
           color="inherit"
           variant="outlined"
         >
@@ -113,4 +111,4 @@ const TableFormModal = ({ open, onClose, onSubmit, editingTable, areas }) => {
   );
 };
 
-export default TableFormModal;
+export default TableFormModalView;

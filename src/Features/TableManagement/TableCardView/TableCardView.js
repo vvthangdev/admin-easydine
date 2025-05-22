@@ -1,89 +1,26 @@
-import React, { useState } from "react";
+import React from "react";
 import { Modal, Button, Tooltip, List, Typography } from "@mui/material";
+import OrderFormModalView from "../../OrderFormModal/OrderFormModalView";
+import TableCardViewModel from "./TableCardViewModel";
 import moment from "moment";
-import { orderAPI } from "../../../services/apis/Order";
-import { toast } from "react-toastify";
-import {
-  getTableImage,
-  getSourceTables,
-  handleMergeOrder,
-  getVietnameseStatus,
-} from "./TableCardUtils";
-import OrderFormModal from "../../OrderFormModal/OrderFormModal";
 
-const TableCard = ({
-  table,
-  onRelease,
-  tables,
-  onMergeSuccess,
-  onOrderSuccess,
-}) => {
-  const [isMergeModalVisible, setIsMergeModalVisible] = useState(false);
-  const [isOrderModalVisible, setIsOrderModalVisible] = useState(false);
-  const [editingOrder, setEditingOrder] = useState(null);
-
-  // Tính thời gian từ start_time đến hiện tại, phân biệt Reserved và Occupied
-  const calculateServingTime = (startTime, status) => {
-    if (!startTime || status === "Available") return "-";
-    const start = moment.utc(startTime).local();
-    const now = moment();
-    const duration = moment.duration(now.diff(start));
-    const hours = Math.floor(duration.asHours());
-    const minutes = Math.floor(duration.asMinutes()) % 60;
-    const prefix = status === "Reserved" ? "Đã đặt" : "Đã phục vụ";
-    if (hours > 0) {
-      return `${prefix}: ${hours} giờ ${minutes} phút`;
-    }
-    return `${prefix}: ${minutes} phút`;
-  };
-
-  const handleCardClick = async () => {
-    if (table.status === "Available") {
-      setIsOrderModalVisible(true);
-      setEditingOrder(null);
-    } else {
-      try {
-        const response = await orderAPI.getOrderInfo({
-          table_id: table.table_id,
-        });
-        if (response) {
-          setEditingOrder({
-            id: response.order.id,
-            type: response.order.type,
-            status: response.order.status,
-            time: response.order.time,
-            customer_id: response.order.customer_id || response.customer_id,
-            reservedTables: response.reservedTables,
-            itemOrders: response.itemOrders,
-          });
-          setIsOrderModalVisible(true);
-        } else {
-          toast.error("Không tìm thấy thông tin đơn hàng");
-        }
-      } catch (error) {
-        console.error("Error fetching order details:", error);
-        toast.error("Không thể tải thông tin đơn hàng");
-      }
-    }
-  };
-
-  const handleOrderSubmit = async (orderData) => {
-    try {
-      if (orderData.id) {
-        await orderAPI.updateOrder(orderData);
-        toast.success("Cập nhật đơn hàng thành công");
-      } else {
-        await orderAPI.createOrder(orderData);
-        toast.success("Thêm đơn hàng mới thành công");
-      }
-      setIsOrderModalVisible(false);
-      setEditingOrder(null);
-      onOrderSuccess();
-    } catch (error) {
-      console.error("Error submitting order:", error);
-      toast.error("Không thể lưu đơn hàng");
-    }
-  };
+const TableCardView = ({ table, onRelease, tables, onMergeSuccess, onOrderSuccess }) => {
+  const {
+    isMergeModalVisible,
+    setIsMergeModalVisible,
+    isOrderModalVisible,
+    setIsOrderModalVisible,
+    editingOrder,
+    calculateServingTime,
+    getTableImage,
+    getVietnameseStatus,
+    getSourceTables,
+    handleCardClick,
+    handleOrderSubmit,
+    handleMergeOrder,
+    setEditingOrder,
+    
+  } = TableCardViewModel({ table, onRelease, tables, onMergeSuccess, onOrderSuccess });
 
   return (
     <>
@@ -143,18 +80,13 @@ const TableCard = ({
             boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
             transition: "box-shadow 0.3s",
             cursor: "pointer",
-            width: 250, // Chiều ngang cố định
-            height: 200, // Chiều cao cố định
+            width: 250,
+            height: 200,
             margin: "auto",
             display: "flex",
             flexDirection: "column",
             justifyContent: "space-between",
             backgroundColor: "#ffffff",
-              // table.status === "Available"
-              //   ? "#e8f5e9"
-              //   : table.status === "Reserved"
-              //   ? "#fff3e0"
-              //   : "#ffebee",
           }}
         >
           <div
@@ -206,7 +138,7 @@ const TableCard = ({
                 Trả bàn
               </Button>
             ) : (
-              <div style={{ height: 36 }} /> // Giữ khoảng trống để đồng nhất chiều cao
+              <div style={{ height: 36 }} />
             )}
           </div>
         </div>
@@ -289,7 +221,7 @@ const TableCard = ({
         </div>
       </Modal>
 
-      <OrderFormModal
+      <OrderFormModalView
         visible={isOrderModalVisible}
         editingOrder={editingOrder}
         selectedCustomer={
@@ -306,4 +238,4 @@ const TableCard = ({
   );
 };
 
-export default TableCard;
+export default TableCardView;

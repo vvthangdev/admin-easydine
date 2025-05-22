@@ -9,7 +9,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import Profile from "./Features/Profile/profile";
 import AdminLayout from "./Features/Admin/layouts/AdminLayout";
 import BanKhongPhaiLaAdmin from "./Features/BanKhongPhaiLaAdmin/BanKhongPhaiLaAdmin";
-import TableManagement from "./Features/TableManagement/TableManagements";
+import MergeOrderModalViewModel from "./Features/TableManagement/TableManagementView";
 import ItemManagements from "./Features/ItemManagement/ItemManagements";
 import UserVoucherManagement from "./Features/User/UserVoucherManagement";
 import Header from "../src/components/HomePage/Header";
@@ -45,7 +45,7 @@ const AppRoutes = () => {
           >
             <Route index element={<Overview />} />
             <Route path="overview" element={<Overview />} />
-            <Route path="tables" element={<TableManagement />} />
+            <Route path="tables" element={<MergeOrderModalViewModel />} />
             <Route path="menu" element={<ItemManagements />} />
             <Route path="orders" element={<OrderManagements />} />
             <Route path="users" element={<UserVoucherManagement />} />

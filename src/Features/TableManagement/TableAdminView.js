@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Box,
   Button,
@@ -7,11 +7,11 @@ import {
   Typography,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
+import TableAdminViewModel from "./TableAdminViewModel";
 import { getVietnameseStatus } from "./TableCardView/TableCardUtils";
 
-const TableAdmin = ({ tables, onEdit, onDelete, onAdd, areas }) => {
-  const initialArea = areas.length > 0 ? areas[0] : "";
-  const [activeArea, setActiveArea] = useState(initialArea);
+const TableAdminView = ({ tables, onEdit, onDelete, onAdd, areas }) => {
+  const { activeArea, setActiveArea, filteredTables, tabAreas } = TableAdminViewModel({ tables, areas });
 
   const columns = [
     {
@@ -52,7 +52,7 @@ const TableAdmin = ({ tables, onEdit, onDelete, onAdd, areas }) => {
       ),
     },
     {
-      fieldXRD: "action",
+      field: "action",
       headerName: "Hành động",
       width: 200,
       renderCell: (params) => (
@@ -77,13 +77,6 @@ const TableAdmin = ({ tables, onEdit, onDelete, onAdd, areas }) => {
       ),
     },
   ];
-
-  const filteredTables =
-    activeArea === ""
-      ? tables
-      : tables.filter((table) => table.area === activeArea);
-
-  const tabAreas = [...new Set(tables.map((table) => table.area))];
 
   return (
     <Box sx={{ p: 2 }}>
@@ -135,4 +128,4 @@ const TableAdmin = ({ tables, onEdit, onDelete, onAdd, areas }) => {
   );
 };
 
-export default TableAdmin;
+export default TableAdminView;

@@ -1,36 +1,36 @@
 import React, { useState, useEffect } from "react";
-import { Modal, Button, Select, message } from "antd";
+import {
+  Modal as MuiModal,
+  Button as MuiButton,
+  FormControl,
+  InputLabel,
+  Select as MuiSelect,
+  MenuItem,
+  Box,
+} from "@mui/material";
 import { tableAPI } from "../../services/apis/Table";
 import { orderAPI } from "../../services/apis/Order";
 import moment from "moment";
+import { toast } from "react-toastify";
 
-const { Option } = Select;
-
-const MergeOrderModal = ({
-  visible,
-  targetOrder,
-  onCancel,
-  onSuccess,
-  zIndex,
-}) => {
+const MergeOrderModal = ({ visible, targetOrder, onCancel, onSuccess, zIndex }) => {
   const [sourceOrderId, setSourceOrderId] = useState(null);
   const [availableOrders, setAvailableOrders] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Lấy danh sách trạng thái bàn để tạo danh sách đơn hàng nguồn
   useEffect(() => {
+    console.log("MergeOrderModal rendered", { visible, targetOrder });
     if (!visible) return;
+
     const fetchTableStatus = async () => {
       setLoading(true);
       try {
         const tableStatus = await tableAPI.getAllTablesStatus();
-        // Lọc các bàn có reservation_id (Occupied hoặc Reserved)
         const reservedTables = tableStatus.filter(
           (table) =>
             (table.status === "Occupied" || table.status === "Reserved") &&
             table.reservation_id
         );
-        // Nhóm theo reservation_id để tạo danh sách đơn hàng nguồn
         const ordersByReservation = reservedTables.reduce((acc, table) => {
           const reservationId = table.reservation_id;
           if (!acc[reservationId]) {
@@ -46,30 +46,28 @@ const MergeOrderModal = ({
           });
           return acc;
         }, {});
-        // Chuyển thành mảng và loại trừ đơn đích
         const orders = Object.values(ordersByReservation).filter(
-          (order) => order.id !== targetOrder?.id
+          (order) => order.id !== targetOrder?.id && order.tables.length > 0
         );
+        console.log("Available orders detailed:", orders);
         setAvailableOrders(orders);
       } catch (error) {
-        message.error(
-          "Không thể tải danh sách đơn hàng: " + (error.message || "Lỗi không xác định.")
-        );
+        toast.error("Không thể tải danh sách đơn hàng: " + (error.message || "Lỗi không xác định."));
       } finally {
         setLoading(false);
       }
     };
-    fetchTableStatus();
-  }, [visible, targetOrder]);
 
-  // Xử lý gộp đơn
+    fetchTableStatus();
+  }, [visible, targetOrder?.id]);
+
   const handleMergeOrder = async () => {
     if (!sourceOrderId) {
-      message.error("Vui lòng chọn đơn hàng muốn gộp!");
+      toast.error("Vui lòng chọn đơn hàng muốn gộp!");
       return;
     }
     if (!targetOrder?.id) {
-      message.error("Đơn hàng hiện tại chưa được lưu. Vui lòng lưu đơn hàng trước!");
+      toast.error("Đơn hàng hiện tại chưa được lưu. Vui lòng lưu đơn hàng trước!");
       return;
     }
 
@@ -79,67 +77,79 @@ const MergeOrderModal = ({
         source_order_id: sourceOrderId,
         target_order_id: targetOrder.id,
       });
-      message.success(`Gộp đơn thành công! Đơn hàng đích: ${targetOrder.id}`);
+      toast.success(`Gộp đơn thành công! Đơn hàng đích: ${targetOrder.id}`);
       onSuccess();
       onCancel();
     } catch (error) {
-      message.error(`Gộp đơn thất bại: ${error.message || "Lỗi không xác định."}`);
+      toast.error(`Gộp đơn thất bại: ${error.message || "Lỗi không xác định."}`);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Modal
-      title="Gộp Đơn Hàng"
+    <MuiModal
       open={visible}
-      onCancel={onCancel}
-      className="rounded-xl"
-      footer={[
-        <Button
-          key="cancel"
-          className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-200 rounded-lg hover:bg-gray-300 transition-all duration-300"
-          onClick={onCancel}
-          disabled={loading}
-        >
-          Hủy
-        </Button>,
-        <Button
-          key="merge"
-          className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-all duration-300"
-          onClick={handleMergeOrder}
-          loading={loading}
-        >
-          Gộp Đơn
-        </Button>,
-      ]}
-      width={600}
-      style={{ top: 50 }}
-      zIndex={zIndex || 1001}
+      onClose={onCancel}
+      sx={{ display: "flex", alignItems: "center", justifyContent: "center", zIndex: zIndex || 1001 }}
     >
-      <div className="flex flex-col gap-4">
-        <div>
-          <label className="text-sm font-medium text-gray-900">
-            Chọn Đơn Hàng Muốn Gộp
-          </label>
-          <Select
-            value={sourceOrderId}
-            onChange={setSourceOrderId}
-            placeholder="Chọn đơn hàng muốn gộp vào đơn hiện tại"
-            className="w-full mt-2"
-            allowClear
-            loading={loading}
-          >
-            {availableOrders.map((order) => (
-              <Option key={order.id} value={order.id}>
-                Đơn {order.id.slice(-6)} - Bàn {order.tables.map((t) => t.table_number).join(", ")} - {order.tables[0].area} -{" "}
-                {moment.utc(order.time).local().format("DD/MM/YY HH:mm")}
-              </Option>
-            ))}
-          </Select>
-        </div>
-      </div>
-    </Modal>
+      <Box
+        sx={{
+          width: 600,
+          bgcolor: "background.paper",
+          borderRadius: 2,
+          p: 3,
+          boxShadow: 24,
+          mt: "50px",
+        }}
+      >
+        <h2>Gộp Đơn Hàng</h2>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <FormControl fullWidth>
+            <InputLabel>Chọn Đơn Hàng Muốn Gộp</InputLabel>
+            <MuiSelect
+              value={sourceOrderId || ""}
+              onChange={(e) => {
+                console.log("Selected source order:", e.target.value);
+                setSourceOrderId(e.target.value);
+              }}
+              label="Chọn Đơn Hàng Muốn Gộp"
+              disabled={loading}
+              onClick={(e) => {
+                console.log("Select clicked", e);
+                e.stopPropagation();
+              }}
+            >
+              <MenuItem value="">Chọn đơn hàng</MenuItem>
+              {availableOrders.map((order) => (
+                <MenuItem key={order.id} value={order.id}>
+                  Đơn {order.id.slice(-6)} - Bàn {order.tables.map((t) => t.table_number).join(", ")} - {order.tables[0].area} -{" "}
+                  {moment.utc(order.time).local().format("DD/MM/YY HH:mm")}
+                </MenuItem>
+              ))}
+            </MuiSelect>
+          </FormControl>
+          <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, mt: 2 }}>
+            <MuiButton
+              variant="outlined"
+              color="error"
+              onClick={onCancel}
+              disabled={loading}
+            >
+              Hủy
+            </MuiButton>
+            <MuiButton
+              variant="contained"
+              color="primary"
+              onClick={handleMergeOrder}
+              disabled={loading}
+            >
+              Gộp Đơn
+            </MuiButton>
+          </Box>
+        </Box>
+      </Box>
+    </MuiModal>
   );
 };
 
