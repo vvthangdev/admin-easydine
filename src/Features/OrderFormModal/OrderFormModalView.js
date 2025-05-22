@@ -42,6 +42,9 @@ const OrderFormModalView = ({ visible, editingOrder, selectedCustomer, onCancel,
     handleOpenSplitModal,
     handleOpenMergeModal,
     handleOpenPaymentModal,
+    setMergeModalVisible,
+    setSplitModalVisible,
+    setPaymentModalVisible
   } = OrderFormModalViewModel({ visible, editingOrder, selectedCustomer, onCancel, onSubmit, table });
 
   return (

@@ -405,6 +405,8 @@ const OrderFormModalViewModel = ({ visible, editingOrder, selectedCustomer, onCa
     handleOpenSplitModal,
     handleOpenMergeModal,
     handleOpenPaymentModal,
+    setSplitModalVisible,
+    setPaymentModalVisible
   };
 };
 
