@@ -3,7 +3,6 @@ import {
   Modal,
   Box,
   Button,
-  Grid,
   CircularProgress,
   Typography,
 } from "@mui/material";
@@ -221,7 +220,7 @@ const OrderFormModalView = ({
                 sx={{ minWidth: 80, fontSize: "0.875rem" }}
                 startIcon={loading && <CircularProgress size={16} color="inherit" />}
               >
-                {editingOrder ? "Cập nhật" : "Tạo Đơn"}
+                Cập nhật
               </Button>
             )}
           </Box>

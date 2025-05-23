@@ -155,7 +155,7 @@ const OrderFormModalViewModel = ({
     setSelectedItems([]);
     setAvailableTables([]);
     setMenuItems([]);
-    setShowItemSelector(true);
+    setShowItemSelector(true); // Đơn mới: Hiển thị ItemSelectorView
     setOrderDetails(null);
     setCurrentOrderId(null);
 
@@ -285,15 +285,25 @@ const OrderFormModalViewModel = ({
   };
 
   const handleDoneSelectingItems = async () => {
-    if (selectedItems.length === 0) {
-      toast.error("Vui lòng chọn ít nhất một món ăn");
-      return;
-    }
-
     setLoading(true);
     try {
+      // Cập nhật formData.items từ selectedItems
+      setFormData((prev) => ({
+        ...prev,
+        items: selectedItems.map((item) => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          size: item.size || null,
+          note: item.note || "",
+          itemName: item.itemName || item.name,
+          itemImage: item.itemImage || "https://via.placeholder.com/80",
+        })),
+      }));
+
       if (editingOrder) {
-        // Thêm món vào đơn hàng hiện tại
+        // Đơn đã tồn tại: Gọi API thêm món
         const orderId = currentOrderId || editingOrder.id;
         const itemsToAdd = selectedItems.map((item) => ({
           id: item.id,
@@ -306,27 +316,20 @@ const OrderFormModalViewModel = ({
           items: itemsToAdd,
         });
         toast.success("Thêm món thành công");
+        setShowItemSelector(false);
+        onCancel();
       } else {
-        // Đơn hàng mới: Lưu selectedItems vào formData.items
-        setFormData((prev) => ({
-          ...prev,
-          items: selectedItems.map((item) => ({
-            id: item.id,
-            name: item.name,
-            price: item.price,
-            quantity: item.quantity,
-            size: item.size || null,
-            note: item.note || "",
-            itemName: item.itemName,
-            itemImage: item.itemImage,
-          })),
-        }));
+        // Đơn mới: Validate và gọi handleModalOk
+        if (!formData.tables || formData.tables.length === 0) {
+          toast.error("Vui lòng chọn ít nhất một bàn");
+          setLoading(false);
+          return;
+        }
+        await handleModalOk();
       }
-      setShowItemSelector(false); // Đóng ItemSelectorView và SelectedItemsView
-      onCancel(); // Đóng OrderFormModalView
     } catch (error) {
-      console.error("Error adding items to order:", error);
-      toast.error("Lỗi khi thêm món vào đơn hàng");
+      console.error("Error processing items:", error);
+      toast.error("Lỗi khi xử lý món ăn");
     } finally {
       setLoading(false);
     }
@@ -335,6 +338,7 @@ const OrderFormModalViewModel = ({
   const handleCancelAddItems = () => {
     setSelectedItems([]);
     setShowItemSelector(false);
+    onCancel();
   };
 
   const handleConfirmOrder = async () => {
