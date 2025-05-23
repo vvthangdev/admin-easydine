@@ -1,6 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
-import { adminAPI } from "../../services/apis/Admin"; // Thay userAPI bằng adminAPI
+import { useEffect, useMemo, useState, useCallback } from "react";
+import { adminAPI } from "../../services/apis/Admin";
+import { voucherAPI } from "../../services/apis/Voucher";
 import moment from "moment";
+import { toast } from "react-toastify";
 
 const OrderBasicInfoViewModel = ({
   formData,
@@ -10,16 +12,35 @@ const OrderBasicInfoViewModel = ({
   isTableAvailable,
 }) => {
   const [staffList, setStaffList] = useState([]);
+  const [voucherData, setVoucherData] = useState(null);
 
   const fetchStaffList = async () => {
     try {
-      const response = await adminAPI.getAllStaff(); // Sử dụng adminAPI
+      const response = await adminAPI.getAllStaff();
       setStaffList(Array.isArray(response) ? response : []);
     } catch (error) {
       console.error("Error fetching staff list:", error);
       setStaffList([]);
     }
   };
+
+  const applyVoucher = useCallback(async (voucherCode, orderId) => {
+    try {
+      const response = await voucherAPI.applyVoucher(voucherCode, orderId);
+      setVoucherData(response);
+      toast.success("Áp dụng voucher thành công");
+      setFormData((prev) => ({
+        ...prev,
+        voucherCode,
+        voucherId: response.voucherId,
+        discountAmount: response.discountAmount,
+        finalAmount: response.finalAmount,
+      }));
+    } catch (error) {
+      console.error("Error applying voucher:", error);
+      toast.error(error.message || "Không thể áp dụng voucher");
+    }
+  }, [setFormData]);
 
   useEffect(() => {
     fetchStaffList();
@@ -43,11 +64,9 @@ const OrderBasicInfoViewModel = ({
     }
   }, [formData.date, formData.start_time, formData.end_time, fetchAvailableTables]);
 
-  // Gộp availableTables và bàn đã chọn từ formData.tables
   const groupedTables = useMemo(() => {
     const tables = Array.isArray(availableTables) ? [...availableTables] : [];
 
-    // Thêm các bàn đã chọn từ formData.tables nếu chưa có trong availableTables
     if (Array.isArray(formData.tables) && formData.reservedTables) {
       formData.tables.forEach((tableId) => {
         if (!tables.some((table) => table._id === tableId)) {
@@ -66,7 +85,6 @@ const OrderBasicInfoViewModel = ({
       });
     }
 
-    // Nhóm bàn theo khu vực
     return tables.reduce((acc, table) => {
       const area = table.area || "Không xác định";
       if (!acc[area]) {
@@ -90,7 +108,6 @@ const OrderBasicInfoViewModel = ({
       })
       .filter((id) => id !== null);
 
-    // Cập nhật formData.tables, giữ các bàn ở khu vực khác
     setFormData((prev) => {
       const tables = Array.isArray(prev.tables) ? prev.tables : [];
       const otherAreaTableIds = tables.filter((tableId) => {
@@ -106,7 +123,6 @@ const OrderBasicInfoViewModel = ({
     });
   };
 
-  // Tính toán hóa đơn từ formData.items
   const subtotal = useMemo(() => {
     const items = Array.isArray(formData.items) ? formData.items : [];
     return items.reduce(
@@ -115,13 +131,12 @@ const OrderBasicInfoViewModel = ({
     );
   }, [formData.items]);
 
-  const vat = useMemo(() => {
-    return Math.round(subtotal * 0.1);
-  }, [subtotal]);
-
   const total = useMemo(() => {
-    return subtotal + vat;
-  }, [subtotal, vat]);
+    if (voucherData && formData.voucherId) {
+      return formData.finalAmount || subtotal;
+    }
+    return subtotal;
+  }, [subtotal, voucherData, formData.voucherId, formData.finalAmount]);
 
   return {
     staffList,
@@ -129,8 +144,9 @@ const OrderBasicInfoViewModel = ({
     handleChange,
     handleTableChange,
     subtotal,
-    vat,
     total,
+    applyVoucher,
+    voucherData,
   };
 };
 

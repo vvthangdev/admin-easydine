@@ -16,8 +16,10 @@ import {
   TableRow,
   TableCell,
   Grid,
+  Button,
 } from "@mui/material";
 import OrderBasicInfoViewModel from "./OrderBasicInfoViewModel";
+import { toast } from "react-toastify";
 
 const OrderBasicInfoView = ({
   formData,
@@ -26,6 +28,7 @@ const OrderBasicInfoView = ({
   fetchAvailableTables,
   isTableAvailable,
   editingOrder,
+  orderId,
 }) => {
   const {
     staffList,
@@ -33,8 +36,9 @@ const OrderBasicInfoView = ({
     handleChange,
     handleTableChange,
     subtotal,
-    vat,
     total,
+    applyVoucher,
+    voucherData,
   } = OrderBasicInfoViewModel({
     formData,
     setFormData,
@@ -45,10 +49,23 @@ const OrderBasicInfoView = ({
 
   const activeTab = Object.keys(groupedTables)[0] || "Tầng 1";
   const [currentTab, setCurrentTab] = React.useState(activeTab);
+  const [voucherCode, setVoucherCode] = React.useState(formData.voucherCode || "");
 
   React.useEffect(() => {
     setCurrentTab(activeTab);
   }, [activeTab]);
+
+  const handleApplyVoucher = () => {
+    if (!voucherCode) {
+      toast.error("Vui lòng nhập mã voucher");
+      return;
+    }
+    if (!orderId && !editingOrder) {
+      toast.error("Vui lòng lưu đơn hàng trước khi áp dụng voucher");
+      return;
+    }
+    applyVoucher(voucherCode, orderId || editingOrder?.id);
+  };
 
   return (
     <Box sx={{ height: "100%", overflowY: "auto" }}>
@@ -56,7 +73,6 @@ const OrderBasicInfoView = ({
         Thông tin đơn hàng
       </Typography>
       <Grid container spacing={2}>
-        {/* Bên trái: Các trường chỉnh sửa */}
         <Grid item xs={12} md={6}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2, p: 1 }}>
             <FormControl fullWidth>
@@ -132,6 +148,24 @@ const OrderBasicInfoView = ({
               placeholder="HH:mm"
             />
 
+            <Box sx={{ display: "flex", gap: 1 }}>
+              <TextField
+                label="Mã voucher"
+                value={voucherCode}
+                onChange={(e) => setVoucherCode(e.target.value)}
+                fullWidth
+                placeholder="Nhập mã voucher"
+              />
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleApplyVoucher}
+                sx={{ minWidth: 100 }}
+              >
+                Áp dụng
+              </Button>
+            </Box>
+
             <Box sx={{ maxHeight: 200, overflowY: "auto" }}>
               <Typography variant="subtitle1" sx={{ mb: 1 }}>
                 Chọn bàn
@@ -197,7 +231,6 @@ const OrderBasicInfoView = ({
           </Box>
         </Grid>
 
-        {/* Bên phải: Danh sách món ăn chỉ đọc */}
         <Grid item xs={12} md={6}>
           <Box sx={{ p: 1, mt: { xs: 2, md: 0 } }}>
             <Typography variant="subtitle1" sx={{ mb: 1 }}>
@@ -205,7 +238,7 @@ const OrderBasicInfoView = ({
             </Typography>
             <TableContainer
               sx={{
-                maxHeight: 300, // Giữ cuộn cho danh sách món
+                maxHeight: 300,
                 overflowY: "auto",
               }}
             >
@@ -259,19 +292,21 @@ const OrderBasicInfoView = ({
               <Box
                 sx={{ display: "flex", justifyContent: "space-between", mt: 1 }}
               >
-                <Typography>Tổng tiền món:</Typography>
+                <Typography>Tổng tiền món (Đã bao gồm VAT):</Typography>
                 <Typography fontWeight="bold">
                   {subtotal.toLocaleString()} VND
                 </Typography>
               </Box>
-              <Box
-                sx={{ display: "flex", justifyContent: "space-between", mt: 1 }}
-              >
-                <Typography>VAT (10%):</Typography>
-                <Typography fontWeight="bold">
-                  {vat.toLocaleString()} VND
-                </Typography>
-              </Box>
+              {voucherData && formData.voucherId && (
+                <Box
+                  sx={{ display: "flex", justifyContent: "space-between", mt: 1 }}
+                >
+                  <Typography>Giảm giá ({formData.voucherCode}):</Typography>
+                  <Typography fontWeight="bold" color="success.main">
+                    -{formData.discountAmount?.toLocaleString()} VND
+                  </Typography>
+                </Box>
+              )}
               <Box
                 sx={{
                   display: "flex",
@@ -282,7 +317,7 @@ const OrderBasicInfoView = ({
                   borderColor: "divider",
                 }}
               >
-                <Typography fontWeight="bold">Tổng cộng:</Typography>
+                <Typography fontWeight="bold">Tổng cộng (Đã bao gồm VAT):</Typography>
                 <Typography fontWeight="bold" color="primary">
                   {total.toLocaleString()} VND
                 </Typography>
