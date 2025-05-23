@@ -15,7 +15,14 @@ import SplitOrderModalView from "../OrderUpdate/SplitOrderModalView";
 import PaymentModal from "./PaymentModal";
 import OrderFormModalViewModel from "./OrderFormModalViewModel";
 
-const OrderFormModalView = ({ visible, editingOrder, selectedCustomer, onCancel, onSubmit, table }) => {
+const OrderFormModalView = ({
+  visible,
+  editingOrder,
+  selectedCustomer,
+  onCancel,
+  onSubmit,
+  table,
+}) => {
   const {
     availableTables,
     selectedItems,
@@ -42,16 +49,29 @@ const OrderFormModalView = ({ visible, editingOrder, selectedCustomer, onCancel,
     handleOpenSplitModal,
     handleOpenMergeModal,
     handleOpenPaymentModal,
+    handleConfirmOrder,
+    handleCancelOrder,
+    handleCancelAddItems,
     setMergeModalVisible,
     setSplitModalVisible,
-    setPaymentModalVisible
-  } = OrderFormModalViewModel({ visible, editingOrder, selectedCustomer, onCancel, onSubmit, table });
+    setPaymentModalVisible,
+  } = OrderFormModalViewModel({
+    visible,
+    editingOrder,
+    selectedCustomer,
+    onCancel,
+    onSubmit,
+    table,
+  });
+
+  const isNewOrEmptyTable = !editingOrder || table?.status === "Available";
+  const isPending = formData.status === "pending";
 
   return (
     <>
       <Modal
         open={visible}
-        onClose={onCancel}
+        onClose={showItemSelector ? handleCancelAddItems : onCancel}
         sx={{
           display: "flex",
           alignItems: "center",
@@ -71,14 +91,16 @@ const OrderFormModalView = ({ visible, editingOrder, selectedCustomer, onCancel,
             flexDirection: "column",
           }}
         >
+          {/* Header */}
           <Box
             sx={{
-              p: 2,
+              p: 1,
               bgcolor: "primary.main",
               color: "primary.contrastText",
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
+              flexShrink: 0,
             }}
           >
             <Typography variant="h6">
@@ -87,30 +109,74 @@ const OrderFormModalView = ({ visible, editingOrder, selectedCustomer, onCancel,
             <Button
               variant="contained"
               color="error"
-              onClick={onCancel}
+              onClick={showItemSelector ? handleCancelAddItems : onCancel}
               disabled={loading}
-              sx={{ minWidth: 100 }}
+              sx={{ minWidth: 80, fontSize: "0.875rem" }}
             >
               Hủy
             </Button>
           </Box>
-          <Grid container sx={{ flex: 1, overflow: "hidden" }}>
-            <Grid
-              sx={{
-                p: 2,
-                borderRight: { md: "1px solid", borderColor: "divider" },
-                overflowY: "auto",
-                width: { xs: "100%", md: "50%" },
-              }}
-            >
-              {showItemSelector ? (
-                <ItemSelectorView
-                  setSelectedItems={setSelectedItems}
-                  menuItems={menuItems}
-                  setMenuItems={setMenuItems}
-                  sx={{ maxWidth: "100%", width: "100%" }}
-                />
-              ) : (
+
+          {/* Nội dung chính, hỗ trợ cuộn */}
+          <Box
+            sx={{
+              flex: 1,
+              overflowY: "auto",
+              bgcolor: "background.paper",
+              display: "flex",
+              flexDirection: "row",
+            }}
+          >
+            {showItemSelector ? (
+              <>
+                <Box
+                  sx={{
+                    width: "50%", // Cố định 50%
+                    p: 1,
+                    overflowY: "auto",
+                    height: "100%",
+                    borderRight: "1px solid",
+                    borderColor: "divider",
+                  }}
+                >
+                  <ItemSelectorView
+                    setSelectedItems={setSelectedItems}
+                    menuItems={menuItems}
+                    setMenuItems={setMenuItems}
+                    sx={{ maxWidth: "100%", width: "100%" }}
+                    availableTables={availableTables}
+                    selectedTables={formData.tables}
+                    setFormData={setFormData}
+                    defaultTable={table}
+                    fetchAvailableTables={fetchAvailableTables}
+                    isExistingOrder={!!editingOrder}
+                  />
+                </Box>
+                <Box
+                  sx={{
+                    width: "50%", // Cố định 50%
+                    p: 1,
+                    overflowY: "auto",
+                    height: "100%",
+                  }}
+                >
+                  <SelectedItemsView
+                    selectedItems={selectedItems}
+                    setSelectedItems={setSelectedItems}
+                    menuItems={menuItems}
+                    readOnly={false}
+                  />
+                </Box>
+              </>
+            ) : (
+              <Box
+                sx={{
+                  width: "100%",
+                  p: 1,
+                  overflowY: "auto",
+                  height: "100%",
+                }}
+              >
                 <OrderBasicInfoView
                   formData={formData}
                   setFormData={setFormData}
@@ -119,104 +185,126 @@ const OrderFormModalView = ({ visible, editingOrder, selectedCustomer, onCancel,
                   isTableAvailable={table?.status === "Available"}
                   editingOrder={editingOrder}
                 />
-              )}
-            </Grid>
-            <Grid
-              sx={{
-                p: 2,
-                overflowY: "auto",
-                width: { xs: "100%", md: "50%" },
-              }}
-            >
-              <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
-                {showItemSelector ? (
-                  <Button
-                    variant="contained"
-                    color="success"
-                    onClick={handleDoneSelectingItems}
-                    disabled={loading}
-                    sx={{ minWidth: 100 }}
-                  >
-                    Xong
-                  </Button>
-                ) : (
-                  <>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={handleAddItemClick}
-                      disabled={loading}
-                      sx={{ minWidth: 100 }}
-                    >
-                      Thêm Món
-                    </Button>
-                    {formData.type === "reservation" && (
-                      <>
-                        <Button
-                          variant="contained"
-                          color="success"
-                          onClick={handleOpenSplitModal}
-                          disabled={loading}
-                          sx={{ minWidth: 100 }}
-                        >
-                          Tách Đơn
-                        </Button>
-                        <Button
-                          variant="contained"
-                          color="secondary"
-                          onClick={handleOpenMergeModal}
-                          disabled={loading}
-                          sx={{ minWidth: 100 }}
-                        >
-                          Gộp Đơn
-                        </Button>
-                        <Button
-                          variant="contained"
-                          color="info"
-                          onClick={handleOpenPaymentModal}
-                          disabled={loading}
-                          sx={{ minWidth: 100 }}
-                        >
-                          Thanh Toán
-                        </Button>
-                      </>
-                    )}
-                  </>
-                )}
               </Box>
-              <SelectedItemsView
-                selectedItems={selectedItems}
-                setSelectedItems={setSelectedItems}
-                menuItems={menuItems}
-              />
-            </Grid>
-          </Grid>
+            )}
+          </Box>
+
+          {/* Footer nút chính */}
           <Box
             sx={{
-              p: 2,
+              p: 1,
               bgcolor: "background.default",
               display: "flex",
               justifyContent: "flex-end",
               gap: 1,
               borderTop: "1px solid",
               borderColor: "divider",
+              flexShrink: 0,
             }}
           >
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleModalOk}
-              disabled={loading}
-              sx={{ minWidth: 100 }}
-              startIcon={
-                loading && <CircularProgress size={20} color="inherit" />
-              }
-            >
-              {editingOrder ? "Cập nhật" : "Thêm"}
-            </Button>
+            {showItemSelector ? (
+              <Button
+                variant="contained"
+                color="success"
+                onClick={handleDoneSelectingItems}
+                disabled={loading}
+                sx={{ minWidth: 80, fontSize: "0.875rem" }}
+              >
+                Xong
+              </Button>
+            ) : (
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleModalOk}
+                disabled={loading}
+                sx={{ minWidth: 80, fontSize: "0.875rem" }}
+                startIcon={loading && <CircularProgress size={16} color="inherit" />}
+              >
+                {editingOrder ? "Cập nhật" : "Tạo Đơn"}
+              </Button>
+            )}
           </Box>
+
+          {/* Footer nút hành động phụ */}
+          {!showItemSelector && (
+            <Box
+              sx={{
+                p: 1,
+                bgcolor: "background.default",
+                display: "flex",
+                justifyContent: "flex-start",
+                gap: 1,
+                borderTop: "1px solid",
+                borderColor: "divider",
+                flexShrink: 0,
+              }}
+            >
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleAddItemClick}
+                disabled={loading}
+                sx={{ minWidth: 80, fontSize: "0.875rem" }}
+              >
+                Thêm Món
+              </Button>
+              <Button
+                variant="contained"
+                color="success"
+                onClick={handleOpenSplitModal}
+                disabled={loading}
+                sx={{ minWidth: 80, fontSize: "0.875rem" }}
+              >
+                Tách Đơn
+              </Button>
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={handleOpenMergeModal}
+                disabled={loading}
+                sx={{ minWidth: 80, fontSize: "0.875rem" }}
+              >
+                Gộp Đơn
+              </Button>
+              {isPending ? (
+                <>
+                  <Button
+                    variant="contained"
+                    color="info"
+                    onClick={handleConfirmOrder}
+                    disabled={loading}
+                    sx={{ minWidth: 80, fontSize: "0.875rem" }}
+                  >
+                    Xác Nhận
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="error"
+                    onClick={handleCancelOrder}
+                    disabled={loading}
+                    sx={{ minWidth: 80, fontSize: "0.875rem" }}
+                  >
+                    Hủy Đơn
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  variant="contained"
+                  color="info"
+                  onClick={handleOpenPaymentModal}
+                  disabled={loading}
+                  sx={{ minWidth: 80, fontSize: "0.875rem" }}
+                >
+                  Thanh Toán
+                </Button>
+              )}
+            </Box>
+          )}
         </Box>
       </Modal>
+
+      {/* Modal con */}
       <SplitOrderModalView
         visible={splitModalVisible}
         orderDetails={orderDetails}

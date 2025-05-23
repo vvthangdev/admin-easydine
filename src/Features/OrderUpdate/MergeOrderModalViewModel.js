@@ -9,7 +9,7 @@ const MergeOrderModalViewModel = ({ visible, targetOrder, onCancel, onSuccess })
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    console.log("MergeOrderModalViewModel initialized", { visible, targetOrder });
+    // console.log("MergeOrderModalViewModel initialized", { visible, targetOrder });
     if (!visible) return;
 
     const fetchTableStatus = async () => {

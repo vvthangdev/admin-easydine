@@ -55,31 +55,19 @@ const ItemSelectorViewModel = ({ setSelectedItems, menuItems, setMenuItems }) =>
     return () => clearTimeout(delayDebounceFn);
   }, [searchTerm, selectedCategory, fetchMenuItems]);
 
-  const handleAddItem = (record) => {
+  const handleAddItem = (itemData) => {
     setSelectedItems((prev) => {
-      const defaultSize = record.sizes?.length > 0 ? record.sizes[0].name : null;
-      const price = defaultSize ? record.sizes[0].price : record.price;
       const existing = prev.find(
-        (item) => item.id === record._id && item.size === defaultSize
+        (item) => item.id === itemData.id && item.size === itemData.size
       );
       if (existing) {
         return prev.map((item) =>
-          item.id === record._id && item.size === defaultSize
-            ? { ...item, quantity: item.quantity + 1 }
+          item.id === itemData.id && item.size === itemData.size
+            ? { ...item, quantity: item.quantity + itemData.quantity, note: itemData.note }
             : item
         );
       }
-      return [
-        ...prev,
-        {
-          id: record._id,
-          name: record.name,
-          price: price,
-          quantity: 1,
-          size: defaultSize,
-          note: "",
-        },
-      ];
+      return [...prev, itemData];
     });
   };
 

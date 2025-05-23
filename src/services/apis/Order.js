@@ -1,6 +1,5 @@
-// import { data } from "autoprefixer";
 import axiosInstance from "../../config/axios.config";
-import {handleApiResponse} from "./handleApiResponse";
+import { handleApiResponse } from "./handleApiResponse";
 
 export const orderAPI = {
   getAllOrders: () => axiosInstance.get("/orders").then(handleApiResponse),
@@ -33,7 +32,13 @@ export const orderAPI = {
 
   getOrderInfo: (data) => axiosInstance.get("/orders/order-info", { params: data }).then(handleApiResponse),
 
-  // Thêm các hàm mới cho thanh toán
   createPayment: (data) => axiosInstance.post("/orders/create-payment", data).then(handleApiResponse),
+
   updateOrderStatus: (data) => axiosInstance.patch("/orders/update-order", data).then(handleApiResponse),
+
+  // Thêm món vào đơn hàng
+  addItemsToOrder: (data) => axiosInstance.post("/orders/add-items-to-order", data).then(handleApiResponse),
+
+  // Hủy món trong đơn hàng
+  cancelItems: (data) => axiosInstance.post("/orders/cancel-items", data).then(handleApiResponse),
 };

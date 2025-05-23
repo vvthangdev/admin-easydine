@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Table,
   TableContainer,
@@ -7,37 +7,45 @@ import {
   TableRow,
   TableCell,
   Button,
-  TextField,
-  Select,
-  MenuItem,
   Typography,
   Box,
-  FormControl,
-  InputLabel,
 } from "@mui/material";
 import SelectedItemsViewModel from "./SelectedItemsViewModel";
+import ItemDetailsModal from "./ItemDetailsModal";
 
-const SelectedItemsView = ({ selectedItems, setSelectedItems, menuItems }) => {
+const SelectedItemsView = ({ selectedItems, setSelectedItems, menuItems, readOnly = false }) => {
   const {
-    handleQuantityChange,
-    handleSizeChange,
-    handleNoteChange,
     handleRemove,
+    handleEditItem,
     subtotal,
     vat,
     total,
   } = SelectedItemsViewModel({ selectedItems, setSelectedItems, menuItems });
 
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+
+  const handleOpenItemModal = (record) => {
+    if (!readOnly) {
+      setSelectedItem(record);
+      setModalOpen(true);
+    }
+  };
+
+  const handleConfirmEdit = (itemData) => {
+    handleEditItem(itemData);
+  };
+
   return (
-    <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      <Typography variant="h6" sx={{ mb: 2, flexShrink: 0 }}>
+    <Box sx={{ height: "100%", display: "flex", flexDirection: "column", p: 1 }}>
+      <Typography variant="h6" sx={{ mb: 1, flexShrink: 0 }}>
         Món đã chọn
       </Typography>
       <TableContainer
         sx={{
           flex: 1,
           overflowY: "auto",
-          maxHeight: "calc(100% - 180px)",
+          maxHeight: "calc(100% - 140px)",
           maxWidth: "100%",
         }}
       >
@@ -56,57 +64,30 @@ const SelectedItemsView = ({ selectedItems, setSelectedItems, menuItems }) => {
             {selectedItems.map((record) => (
               <TableRow
                 key={`${record.id}-${record.size || "default"}`}
-                sx={{ "&:hover": { bgcolor: "grey.100" } }}
+                sx={{
+                  "&:hover": { bgcolor: readOnly ? "inherit" : "grey.100", cursor: readOnly ? "default" : "pointer" },
+                }}
+                onClick={() => handleOpenItemModal(record)}
               >
                 <TableCell>{record.name}</TableCell>
                 <TableCell>
-                  {menuItems.find((m) => m._id === record.id)?.sizes?.length > 0 ? (
-                    <FormControl fullWidth>
-                      <InputLabel>Chọn kích thước</InputLabel>
-                      <Select
-                        value={record.size || ""}
-                        label="Chọn kích thước"
-                        onChange={(e) => handleSizeChange(record.id, record.size, e.target.value)}
-                      >
-                        <MenuItem value="">Không chọn</MenuItem>
-                        {menuItems
-                          .find((m) => m._id === record.id)
-                          ?.sizes.map((s) => (
-                            <MenuItem key={s._id} value={s.name}>
-                              {`${s.name} - ${s.price.toLocaleString()}`}
-                            </MenuItem>
-                          ))}
-                      </Select>
-                    </FormControl>
-                  ) : (
-                    record.price.toLocaleString()
-                  )}
+                  {record.size
+                    ? `${record.size} - ${record.price.toLocaleString()} VND`
+                    : `${record.price.toLocaleString()} VND`}
                 </TableCell>
-                <TableCell>
-                  <TextField
-                    type="number"
-                    value={record.quantity}
-                    onChange={(e) => handleQuantityChange(record.id, record.size, e.target.value)}
-                    inputProps={{ min: 1 }}
-                    sx={{ width: 60 }}
-                  />
-                </TableCell>
-                <TableCell>{(record.price * record.quantity).toLocaleString()}</TableCell>
-                <TableCell>
-                  <TextField
-                    multiline
-                    rows={3}
-                    value={record.note}
-                    onChange={(e) => handleNoteChange(record.id, record.size, e.target.value)}
-                    placeholder="Nhập ghi chú (ví dụ: Ít đá)"
-                    fullWidth
-                  />
-                </TableCell>
+                <TableCell>{record.quantity}</TableCell>
+                <TableCell>{(record.price * record.quantity).toLocaleString()} VND</TableCell>
+                <TableCell>{record.note || "Không có ghi chú"}</TableCell>
                 <TableCell>
                   <Button
                     variant="text"
                     color="error"
-                    onClick={() => handleRemove(record.id, record.size)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemove(record.id, record.size);
+                    }}
+                    disabled={readOnly}
+                    sx={{ fontSize: "0.875rem" }}
                   >
                     Xóa
                   </Button>
@@ -118,8 +99,8 @@ const SelectedItemsView = ({ selectedItems, setSelectedItems, menuItems }) => {
       </TableContainer>
       <Box
         sx={{
-          mt: 2,
-          p: 2,
+          mt: 1,
+          p: 1,
           bgcolor: "grey.50",
           borderRadius: 1,
           flexShrink: 0,
@@ -150,6 +131,14 @@ const SelectedItemsView = ({ selectedItems, setSelectedItems, menuItems }) => {
           </Typography>
         </Box>
       </Box>
+      <ItemDetailsModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onConfirm={handleConfirmEdit}
+        item={selectedItem}
+        sizes={menuItems.find((m) => m._id === selectedItem?.id)?.sizes || []}
+        isEditing={true}
+      />
     </Box>
   );
 };

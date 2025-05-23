@@ -23,4 +23,7 @@ export const adminAPI = {
   // Mở khóa người dùng
   activateUser: (data) =>
     axiosInstance.patch("/admin/activate", data).then(handleApiResponse),
+
+  getAllStaff: () =>
+    axiosInstance.get("/admin/staff").then(handleApiResponse)
 };

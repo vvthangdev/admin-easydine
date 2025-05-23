@@ -3,7 +3,7 @@ import { Table, Button, Modal, message, Tabs, Space, Select } from "antd";
 import moment from "moment";
 import { orderAPI } from "../../services/apis/Order";
 import { adminAPI } from "../../services/apis/Admin";
-import OrderFormModal from "../OrderFormModal/OrderFormModal";
+import OrderFormModalView from "../OrderFormModal/OrderFormModalView";
 
 const { TabPane } = Tabs;
 
@@ -344,7 +344,7 @@ const OrderList = ({ selectedCustomer, onClearFilter }) => {
         </TabPane>
       </Tabs>
 
-      <OrderFormModal
+      <OrderFormModalView
         visible={isModalVisible}
         editingOrder={editingOrder}
         selectedCustomer={selectedCustomer}

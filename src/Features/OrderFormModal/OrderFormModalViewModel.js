@@ -4,17 +4,25 @@ import moment from "moment";
 import { tableAPI } from "../../services/apis/Table";
 import { orderAPI } from "../../services/apis/Order";
 
-const OrderFormModalViewModel = ({ visible, editingOrder, selectedCustomer, onCancel, onSubmit, table }) => {
+const OrderFormModalViewModel = ({
+  visible,
+  editingOrder,
+  selectedCustomer,
+  onCancel,
+  onSubmit,
+  table,
+}) => {
   const [availableTables, setAvailableTables] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
   const [menuItems, setMenuItems] = useState([]);
   const [formData, setFormData] = useState({
     type: "reservation",
-    status: table?.status === "Available" ? "pending" : "pending",
+    status: table?.status === "Available" || !editingOrder ? "confirmed" : "pending",
     date: moment().format("DD/MM/YYYY"),
     start_time: moment().format("HH:mm"),
     end_time: "23:59",
     tables: table ? [table.table_id] : [],
+    items: [],
   });
   const [loading, setLoading] = useState(false);
   const [showItemSelector, setShowItemSelector] = useState(false);
@@ -24,7 +32,10 @@ const OrderFormModalViewModel = ({ visible, editingOrder, selectedCustomer, onCa
   const [orderDetails, setOrderDetails] = useState(null);
   const [currentOrderId, setCurrentOrderId] = useState(null);
 
-  const targetOrder = useMemo(() => ({ id: currentOrderId || editingOrder?.id }), [currentOrderId, editingOrder?.id]);
+  const targetOrder = useMemo(
+    () => ({ id: currentOrderId || editingOrder?.id }),
+    [currentOrderId, editingOrder?.id]
+  );
 
   const fetchAvailableTables = useCallback(async (date, startTime, endTime) => {
     if (!date || !startTime || !endTime) return;
@@ -38,6 +49,7 @@ const OrderFormModalViewModel = ({ visible, editingOrder, selectedCustomer, onCa
     } catch (error) {
       console.error("Error fetching available tables:", error);
       toast.error("Không thể tải danh sách bàn trống");
+      setAvailableTables([]);
     } finally {
       setLoading(false);
     }
@@ -51,8 +63,8 @@ const OrderFormModalViewModel = ({ visible, editingOrder, selectedCustomer, onCa
 
       const reservedTables =
         data.reservedTables?.map((table) => ({
-          _id: table.table_id,
           table_id: table.table_id,
+          _id: table.table_id,
           table_number: table.table_number,
           area: table.area,
           capacity: table.capacity,
@@ -71,7 +83,6 @@ const OrderFormModalViewModel = ({ visible, editingOrder, selectedCustomer, onCa
           note: item.note || "",
           itemName: item.itemName,
           itemImage: item.itemImage || "https://via.placeholder.com/80",
-          itemPrice: item.itemPrice,
         })) || [];
 
       const newFormData = {
@@ -83,20 +94,15 @@ const OrderFormModalViewModel = ({ visible, editingOrder, selectedCustomer, onCa
           .local()
           .format("DD/MM/YYYY"),
         start_time: data.reservedTables?.[0]
-          ? moment
-              .utc(data.reservedTables[0].start_time)
-              .local()
-              .format("HH:mm")
-          : moment
-              .utc(data.order?.time || editingOrder.time)
-              .local()
-              .format("HH:mm"),
+          ? moment.utc(data.reservedTables[0].start_time).local().format("HH:mm")
+          : moment.utc(data.order?.time || editingOrder.time).local().format("HH:mm"),
         end_time: "23:59",
-        tables: reservedTables.map((table) => table._id),
+        tables: reservedTables.map((table) => table.table_id),
+        items,
+        reservedTables,
       };
 
       setFormData(newFormData);
-      setSelectedItems(items);
       setOrderDetails({
         ...data,
         order: {
@@ -123,19 +129,12 @@ const OrderFormModalViewModel = ({ visible, editingOrder, selectedCustomer, onCa
       });
 
       const availableTablesFromAPI = Array.isArray(response) ? response : [];
-      const existingTableIds = availableTablesFromAPI.map((table) => table._id);
-      const additionalReservedTables = reservedTables.filter(
-        (table) => !existingTableIds.includes(table._id)
-      );
-      const mergedTables = [
-        ...availableTablesFromAPI,
-        ...additionalReservedTables,
-      ];
-
-      setAvailableTables(mergedTables);
+      setAvailableTables(availableTablesFromAPI);
     } catch (error) {
       console.error("Error loading order for edit:", error);
       toast.error("Không thể tải thông tin đơn hàng");
+      setAvailableTables([]);
+      setFormData((prev) => ({ ...prev, items: [], reservedTables: [] }));
     } finally {
       setLoading(false);
     }
@@ -148,14 +147,15 @@ const OrderFormModalViewModel = ({ visible, editingOrder, selectedCustomer, onCa
       start_time: now.format("HH:mm"),
       end_time: "23:59",
       type: "reservation",
-      status: table?.status === "Available" ? "pending" : "pending",
+      status: "confirmed",
       tables: table ? [table.table_id] : [],
+      items: [],
     };
     setFormData(newFormData);
     setSelectedItems([]);
     setAvailableTables([]);
     setMenuItems([]);
-    setShowItemSelector(false);
+    setShowItemSelector(true);
     setOrderDetails(null);
     setCurrentOrderId(null);
 
@@ -178,21 +178,15 @@ const OrderFormModalViewModel = ({ visible, editingOrder, selectedCustomer, onCa
     if (visible) {
       if (editingOrder) {
         fetchOrderDetails();
-        console.log("isTableAvailable:", table?.status === "Available");
-        console.log("Table status:", table?.status);
       } else {
         resetForm();
       }
     }
-  }, [visible, editingOrder, fetchOrderDetails, resetForm, table]);
+  }, [visible, editingOrder, fetchOrderDetails, resetForm]);
 
   const handleModalOk = async () => {
     const isValidDate = moment(formData.date, "DD/MM/YYYY", true).isValid();
-    const isValidStartTime = moment(
-      formData.start_time,
-      "HH:mm",
-      true
-    ).isValid();
+    const isValidStartTime = moment(formData.start_time, "HH:mm", true).isValid();
     const isValidEndTime = moment(formData.end_time, "HH:mm", true).isValid();
 
     if (
@@ -215,7 +209,7 @@ const OrderFormModalViewModel = ({ visible, editingOrder, selectedCustomer, onCa
       toast.error("Vui lòng chọn ít nhất một bàn");
       return;
     }
-    if (!selectedItems || selectedItems.length === 0) {
+    if (!formData.items || formData.items.length === 0) {
       toast.error("Vui lòng chọn ít nhất một món ăn");
       return;
     }
@@ -238,7 +232,7 @@ const OrderFormModalViewModel = ({ visible, editingOrder, selectedCustomer, onCa
         type: formData.type,
         status: formData.status,
         tables: formData.tables || [],
-        items: selectedItems.map((item) => ({
+        items: formData.items.map((item) => ({
           id: item.id,
           quantity: item.quantity,
           size: item.size || null,
@@ -264,10 +258,10 @@ const OrderFormModalViewModel = ({ visible, editingOrder, selectedCustomer, onCa
             start_time: startDateTime.toISOString(),
             end_time: endDateTime.toISOString(),
           })),
-          itemOrders: selectedItems.map((item) => ({
+          itemOrders: formData.items.map((item) => ({
             item_id: item.id,
-            itemName: item.itemName,
-            itemPrice: item.itemPrice,
+            itemName: item.name,
+            itemPrice: item.price,
             itemImage: item.itemImage,
             quantity: item.quantity,
             size: item.size || null,
@@ -276,16 +270,7 @@ const OrderFormModalViewModel = ({ visible, editingOrder, selectedCustomer, onCa
         });
       }
 
-      if (!splitModalVisible && !mergeModalVisible && !paymentModalVisible) {
-        setFormData({});
-        setSelectedItems([]);
-        setAvailableTables([]);
-        setMenuItems([]);
-        setShowItemSelector(false);
-        setCurrentOrderId(null);
-        setOrderDetails(null);
-        onCancel();
-      }
+      onCancel();
     } catch (error) {
       console.error("Error submitting order:", error);
       toast.error("Có lỗi xảy ra. Vui lòng thử lại.");
@@ -295,11 +280,95 @@ const OrderFormModalViewModel = ({ visible, editingOrder, selectedCustomer, onCa
   };
 
   const handleAddItemClick = () => {
+    setSelectedItems([]);
     setShowItemSelector(true);
   };
 
-  const handleDoneSelectingItems = () => {
+  const handleDoneSelectingItems = async () => {
+    if (selectedItems.length === 0) {
+      toast.error("Vui lòng chọn ít nhất một món ăn");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      if (editingOrder) {
+        // Thêm món vào đơn hàng hiện tại
+        const orderId = currentOrderId || editingOrder.id;
+        const itemsToAdd = selectedItems.map((item) => ({
+          id: item.id,
+          quantity: item.quantity,
+          size: item.size || null,
+          note: item.note || "",
+        }));
+        await orderAPI.addItemsToOrder({
+          order_id: orderId,
+          items: itemsToAdd,
+        });
+        toast.success("Thêm món thành công");
+      } else {
+        // Đơn hàng mới: Lưu selectedItems vào formData.items
+        setFormData((prev) => ({
+          ...prev,
+          items: selectedItems.map((item) => ({
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            size: item.size || null,
+            note: item.note || "",
+            itemName: item.itemName,
+            itemImage: item.itemImage,
+          })),
+        }));
+      }
+      setShowItemSelector(false); // Đóng ItemSelectorView và SelectedItemsView
+      onCancel(); // Đóng OrderFormModalView
+    } catch (error) {
+      console.error("Error adding items to order:", error);
+      toast.error("Lỗi khi thêm món vào đơn hàng");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancelAddItems = () => {
+    setSelectedItems([]);
     setShowItemSelector(false);
+  };
+
+  const handleConfirmOrder = async () => {
+    setLoading(true);
+    try {
+      await orderAPI.updateOrderStatus({
+        id: currentOrderId || editingOrder.id,
+        status: "confirmed",
+      });
+      setFormData((prev) => ({ ...prev, status: "confirmed" }));
+      toast.success("Đơn hàng đã được xác nhận");
+    } catch (error) {
+      console.error("Error confirming order:", error);
+      toast.error("Lỗi khi xác nhận đơn hàng");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancelOrder = async () => {
+    setLoading(true);
+    try {
+      await orderAPI.updateOrderStatus({
+        id: currentOrderId || editingOrder.id,
+        status: "canceled",
+      });
+      toast.success("Đơn hàng đã được hủy");
+      onCancel();
+    } catch (error) {
+      console.error("Error canceling order:", error);
+      toast.error("Lỗi khi hủy đơn hàng");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSplitSuccess = () => {
@@ -324,10 +393,11 @@ const OrderFormModalViewModel = ({ visible, editingOrder, selectedCustomer, onCa
         payment_status: paymentMethod === "vnpay" ? "success" : "success",
         payment_method: paymentMethod,
       });
+      toast.success("Thanh toán thành công");
       onCancel();
     } catch (error) {
       console.error("Error updating order status after payment:", error);
-      toast.error("Lỗi khi cập nhật trạng thái đơn hàng.");
+      toast.error("Lỗi khi cập nhật trạng thái đơn hàng");
     }
   };
 
@@ -344,7 +414,6 @@ const OrderFormModalViewModel = ({ visible, editingOrder, selectedCustomer, onCa
   };
 
   const handleOpenMergeModal = async () => {
-    console.log("Opening merge modal, targetOrder:", targetOrder);
     if (!currentOrderId && !editingOrder) {
       toast.info("Vui lòng lưu đơn hàng trước khi gộp!");
       await handleModalOk();
@@ -405,8 +474,12 @@ const OrderFormModalViewModel = ({ visible, editingOrder, selectedCustomer, onCa
     handleOpenSplitModal,
     handleOpenMergeModal,
     handleOpenPaymentModal,
+    handleConfirmOrder,
+    handleCancelOrder,
+    handleCancelAddItems,
+    setMergeModalVisible,
     setSplitModalVisible,
-    setPaymentModalVisible
+    setPaymentModalVisible,
   };
 };
 
