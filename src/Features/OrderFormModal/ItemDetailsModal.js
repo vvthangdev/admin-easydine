@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Modal,
   Box,
@@ -16,103 +16,152 @@ const ItemDetailsModal = ({
   onClose,
   onConfirm,
   item,
-  sizes = [], // Danh sách kích thước từ menuItem.sizes
-  isEditing = false, // Xác định đang thêm mới hay sửa
+  sizes = [],
+  isEditing = false,
 }) => {
-  const [size, setSize] = useState(item?.size || "");
-  const [quantity, setQuantity] = useState(item?.quantity || 1);
-  const [note, setNote] = useState(item?.note || "");
+  const [size, setSize] = useState("");
+  const [quantity, setQuantity] = useState(1);
+  const [note, setNote] = useState("");
+
+  useEffect(() => {
+    console.log("ItemDetailsModal opened. Item:", item, "Sizes:", sizes);
+    if (open) {
+      if (isEditing && item) {
+        setSize(item.size || "");
+        setQuantity(item.quantity || 1);
+        setNote(item.note || "");
+      } else {
+        setSize("");
+        setQuantity(1);
+        setNote("");
+      }
+    }
+  }, [open, isEditing, item]);
 
   const handleConfirm = () => {
-    const selectedSizeInfo = sizes.find((s) => s.name === size);
-    const price = selectedSizeInfo ? selectedSizeInfo.price : item?.price || 0;
-    onConfirm({
+    const validQuantity = parseInt(quantity) || 1;
+    if (validQuantity < 1) {
+      return;
+    }
+
+    let finalPrice = item?.price || 0;
+    if (size && sizes.length > 0) {
+      const selectedSizeInfo = sizes.find((s) => s.name === size);
+      if (selectedSizeInfo) {
+        finalPrice = selectedSizeInfo.price;
+      }
+    }
+
+    const itemData = {
       id: item.id,
       name: item.name,
-      price,
+      itemName: item.itemName || item.name,
+      itemImage: item.itemImage || item.image || "https://via.placeholder.com/80",
+      price: finalPrice,
       size: size || null,
-      quantity: parseInt(quantity) || 1,
-      note,
-    });
+      quantity: validQuantity,
+      note: note.trim(),
+    };
+
+    onConfirm(itemData);
     onClose();
   };
 
+  const handleClose = () => {
+    setSize("");
+    setQuantity(1);
+    setNote("");
+    onClose();
+  };
+
+  const handleQuantityChange = (e) => {
+    const value = e.target.value;
+    if (value === "" || (parseInt(value) > 0 && parseInt(value) <= 999)) {
+      setQuantity(value);
+    }
+  };
+
+  const displayPrice = () => {
+    if (size && sizes.length > 0) {
+      const selectedSizeInfo = sizes.find((s) => s.name === size);
+      if (selectedSizeInfo) {
+        return selectedSizeInfo.price.toLocaleString();
+      }
+    }
+    return item?.price ? item.price.toLocaleString() : "0";
+  };
+
+  if (!item) return null;
+
   return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
-    >
+    <Modal open={open} onClose={handleClose}>
       <Box
         sx={{
-          bgcolor: "background.paper",
-          p: 2,
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          bgcolor: "white",
+          p: 3,
           borderRadius: 2,
-          maxWidth: 400,
-          width: "90%",
-          display: "flex",
-          flexDirection: "column",
-          gap: 2,
+          width: 400,
+          maxWidth: "90%",
         }}
       >
-        <Typography variant="h6">
-          {isEditing ? "Sửa món ăn" : "Thêm món ăn"}
-        </Typography>
-        <Typography variant="subtitle1">{item?.name}</Typography>
+        <Typography variant="h6">{isEditing ? "Chỉnh sửa món" : "Thêm món"}</Typography>
+        <Typography variant="subtitle1">{item.name}</Typography>
+        <Typography>Giá: {displayPrice()} VND</Typography>
 
-        {sizes.length > 0 && (
-          <FormControl fullWidth>
-            <InputLabel>Chọn kích thước</InputLabel>
+        {sizes && sizes.length > 0 ? (
+          <FormControl fullWidth sx={{ mt: 2 }}>
+            <InputLabel>Kích thước</InputLabel>
             <Select
               value={size}
-              label="Chọn kích thước"
+              label="Kích thước"
               onChange={(e) => setSize(e.target.value)}
             >
-              <MenuItem value="">Không chọn</MenuItem>
+              <MenuItem value="">
+                <em>Chọn kích thước</em>
+              </MenuItem>
               {sizes.map((s) => (
-                <MenuItem key={s._id} value={s.name}>
-                  {`${s.name} - ${s.price.toLocaleString()} VND`}
+                <MenuItem key={s._id || s.name} value={s.name}>
+                  {s.name} - {s.price.toLocaleString()} VND
                 </MenuItem>
               ))}
             </Select>
           </FormControl>
+        ) : (
+          <Typography sx={{ mt: 2 }}>Không có kích thước bổ sung</Typography>
         )}
 
         <TextField
           label="Số lượng"
           type="number"
           value={quantity}
-          onChange={(e) => setQuantity(e.target.value)}
-          inputProps={{ min: 1 }}
+          onChange={handleQuantityChange}
+          inputProps={{ min: 1, max: 999 }}
           fullWidth
+          sx={{ mt: 2 }}
         />
 
         <TextField
           label="Ghi chú"
           multiline
-          rows={3}
+          rows={2}
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          placeholder="Nhập ghi chú (ví dụ: Ít đá)"
           fullWidth
+          sx={{ mt: 2 }}
         />
 
-        <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1 }}>
+        <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end", gap: 1 }}>
+          <Button onClick={handleClose}>Hủy</Button>
           <Button
             variant="contained"
-            color="primary"
             onClick={handleConfirm}
-            sx={{ fontSize: "0.875rem" }}
+            disabled={!quantity || parseInt(quantity) < 1}
           >
-            Xác nhận
-          </Button>
-          <Button
-            variant="contained"
-            color="error"
-            onClick={onClose}
-            sx={{ fontSize: "0.875rem" }}
-          >
-            Hủy
+            {isEditing ? "Cập nhật" : "Thêm"}
           </Button>
         </Box>
       </Box>

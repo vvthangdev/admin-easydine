@@ -85,7 +85,7 @@ const OrderBasicInfoViewModel = ({
       });
     }
 
-    return tables.reduce((acc, table) => {
+    const grouped = tables.reduce((acc, table) => {
       const area = table.area || "Không xác định";
       if (!acc[area]) {
         acc[area] = [];
@@ -93,6 +93,8 @@ const OrderBasicInfoViewModel = ({
       acc[area].push(table);
       return acc;
     }, {});
+    console.log("OrderBasicInfoViewModel: groupedTables:", grouped);
+    return grouped;
   }, [availableTables, formData.tables, formData.reservedTables]);
 
   const handleChange = (e) => {
@@ -116,9 +118,11 @@ const OrderBasicInfoViewModel = ({
         ).find((t) => t._id === tableId || t.table_id === tableId);
         return table && table.area !== area;
       });
+      const newTables = [...otherAreaTableIds, ...selectedTableIds];
+      console.log("handleTableChange: area:", area, "selectedTableIds:", selectedTableIds, "newTables:", newTables);
       return {
         ...prev,
-        tables: [...otherAreaTableIds, ...selectedTableIds],
+        tables: newTables,
       };
     });
   };

@@ -17,7 +17,8 @@ const OrderFormModalViewModel = ({
   const [menuItems, setMenuItems] = useState([]);
   const [formData, setFormData] = useState({
     type: "reservation",
-    status: table?.status === "Available" || !editingOrder ? "confirmed" : "pending",
+    status:
+      table?.status === "Available" || !editingOrder ? "confirmed" : "pending",
     date: moment().format("DD/MM/YYYY"),
     start_time: moment().format("HH:mm"),
     end_time: "23:59",
@@ -94,8 +95,14 @@ const OrderFormModalViewModel = ({
           .local()
           .format("DD/MM/YYYY"),
         start_time: data.reservedTables?.[0]
-          ? moment.utc(data.reservedTables[0].start_time).local().format("HH:mm")
-          : moment.utc(data.order?.time || editingOrder.time).local().format("HH:mm"),
+          ? moment
+              .utc(data.reservedTables[0].start_time)
+              .local()
+              .format("HH:mm")
+          : moment
+              .utc(data.order?.time || editingOrder.time)
+              .local()
+              .format("HH:mm"),
         end_time: "23:59",
         tables: reservedTables.map((table) => table.table_id),
         items,
@@ -155,7 +162,7 @@ const OrderFormModalViewModel = ({
     setSelectedItems([]);
     setAvailableTables([]);
     setMenuItems([]);
-    setShowItemSelector(true); // Đơn mới: Hiển thị ItemSelectorView
+    setShowItemSelector(true);
     setOrderDetails(null);
     setCurrentOrderId(null);
 
@@ -184,9 +191,16 @@ const OrderFormModalViewModel = ({
     }
   }, [visible, editingOrder, fetchOrderDetails, resetForm]);
 
-  const handleModalOk = async () => {
+  // Helper function để validate form data với items tùy chỉnh
+  const validateFormData = (customItems = null) => {
+    const itemsToCheck = customItems || formData.items;
+
     const isValidDate = moment(formData.date, "DD/MM/YYYY", true).isValid();
-    const isValidStartTime = moment(formData.start_time, "HH:mm", true).isValid();
+    const isValidStartTime = moment(
+      formData.start_time,
+      "HH:mm",
+      true
+    ).isValid();
     const isValidEndTime = moment(formData.end_time, "HH:mm", true).isValid();
 
     if (
@@ -196,21 +210,41 @@ const OrderFormModalViewModel = ({
       !formData.end_time
     ) {
       toast.error("Vui lòng điền đầy đủ thông tin bắt buộc");
-      return;
+      return false;
     }
     if (!isValidDate || !isValidStartTime || !isValidEndTime) {
       toast.error("Định dạng ngày hoặc giờ không hợp lệ");
-      return;
+      return false;
     }
     if (
       formData.type === "reservation" &&
       (!formData.tables || formData.tables.length === 0)
     ) {
       toast.error("Vui lòng chọn ít nhất một bàn");
-      return;
+      return false;
     }
-    if (!formData.items || formData.items.length === 0) {
+    if (!itemsToCheck || itemsToCheck.length === 0) {
       toast.error("Vui lòng chọn ít nhất một món ăn");
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleModalOk = async (customItems = null) => {
+    console.log(
+      "handleModalOk called. customItems:",
+      customItems,
+      "formData.items:",
+      formData.items
+    );
+    const itemsToUse = Array.isArray(customItems)
+      ? customItems
+      : Array.isArray(formData.items)
+      ? formData.items
+      : [];
+
+    if (!validateFormData(itemsToUse)) {
       return;
     }
 
@@ -232,7 +266,7 @@ const OrderFormModalViewModel = ({
         type: formData.type,
         status: formData.status,
         tables: formData.tables || [],
-        items: formData.items.map((item) => ({
+        items: itemsToUse.map((item) => ({
           id: item.id,
           quantity: item.quantity,
           size: item.size || null,
@@ -258,7 +292,7 @@ const OrderFormModalViewModel = ({
             start_time: startDateTime.toISOString(),
             end_time: endDateTime.toISOString(),
           })),
-          itemOrders: formData.items.map((item) => ({
+          itemOrders: itemsToUse.map((item) => ({
             item_id: item.id,
             itemName: item.name,
             itemPrice: item.price,
@@ -284,22 +318,20 @@ const OrderFormModalViewModel = ({
     setShowItemSelector(true);
   };
 
+  // FIX: Sửa lại handleDoneSelectingItems
   const handleDoneSelectingItems = async () => {
     setLoading(true);
     try {
-      // Cập nhật formData.items từ selectedItems
-      setFormData((prev) => ({
-        ...prev,
-        items: selectedItems.map((item) => ({
-          id: item.id,
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity,
-          size: item.size || null,
-          note: item.note || "",
-          itemName: item.itemName || item.name,
-          itemImage: item.itemImage || "https://via.placeholder.com/80",
-        })),
+      // Chuẩn bị items từ selectedItems
+      const processedItems = selectedItems.map((item) => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        size: item.size || null,
+        note: item.note || "",
+        itemName: item.itemName || item.name,
+        itemImage: item.itemImage || "https://via.placeholder.com/80",
       }));
 
       if (editingOrder) {
@@ -319,13 +351,21 @@ const OrderFormModalViewModel = ({
         setShowItemSelector(false);
         onCancel();
       } else {
-        // Đơn mới: Validate và gọi handleModalOk
+        // Đơn mới: Validate với processedItems và gọi handleModalOk
         if (!formData.tables || formData.tables.length === 0) {
           toast.error("Vui lòng chọn ít nhất một bàn");
           setLoading(false);
           return;
         }
-        await handleModalOk();
+
+        // Cập nhật formData.items
+        setFormData((prev) => ({
+          ...prev,
+          items: processedItems,
+        }));
+
+        // Gọi handleModalOk với items được chuẩn bị sẵn
+        await handleModalOk(processedItems);
       }
     } catch (error) {
       console.error("Error processing items:", error);

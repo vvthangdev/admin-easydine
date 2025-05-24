@@ -9,6 +9,7 @@ const ItemSelectorViewModel = ({ setSelectedItems, menuItems, setMenuItems }) =>
   const [loading, setLoading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedDescription, setSelectedDescription] = useState("");
+  const [selectedItem, setSelectedItem] = useState(null);
 
   const fetchCategories = async () => {
     try {
@@ -51,7 +52,6 @@ const ItemSelectorViewModel = ({ setSelectedItems, menuItems, setMenuItems }) =>
     const delayDebounceFn = setTimeout(() => {
       fetchMenuItems(searchTerm, selectedCategory);
     }, 300);
-
     return () => clearTimeout(delayDebounceFn);
   }, [searchTerm, selectedCategory, fetchMenuItems]);
 
@@ -69,6 +69,18 @@ const ItemSelectorViewModel = ({ setSelectedItems, menuItems, setMenuItems }) =>
       }
       return [...prev, itemData];
     });
+    setIsModalVisible(false);
+    setSelectedItem(null);
+  };
+
+  const showItemDetails = (item) => {
+    setSelectedItem({
+      id: item._id,
+      name: item.name,
+      price: item.price,
+      sizes: item.sizes || [],
+    });
+    setIsModalVisible(true);
   };
 
   const showDescriptionModal = (description) => {
@@ -78,6 +90,7 @@ const ItemSelectorViewModel = ({ setSelectedItems, menuItems, setMenuItems }) =>
 
   const handleModalClose = () => {
     setIsModalVisible(false);
+    setSelectedItem(null);
     setSelectedDescription("");
   };
 
@@ -90,7 +103,9 @@ const ItemSelectorViewModel = ({ setSelectedItems, menuItems, setMenuItems }) =>
     loading,
     isModalVisible,
     selectedDescription,
+    selectedItem,
     handleAddItem,
+    showItemDetails,
     showDescriptionModal,
     handleModalClose,
   };

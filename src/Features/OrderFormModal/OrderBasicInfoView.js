@@ -52,8 +52,9 @@ const OrderBasicInfoView = ({
   const [voucherCode, setVoucherCode] = React.useState(formData.voucherCode || "");
 
   React.useEffect(() => {
+    console.log("OrderBasicInfoView: groupedTables:", groupedTables, "formData.tables:", formData.tables);
     setCurrentTab(activeTab);
-  }, [activeTab]);
+  }, [activeTab, groupedTables, formData.tables]);
 
   const handleApplyVoucher = () => {
     if (!voucherCode) {
@@ -210,15 +211,29 @@ const OrderBasicInfoView = ({
                               .join(", ")
                           }
                         >
-                          {groupedTables[area].map((table) => (
-                            <MenuItem
-                              key={table._id}
-                              value={`${table.table_number}|${table.area}|${table._id}`}
-                            >
-                              Bàn {table.table_number} (Sức chứa: {table.capacity})
-                              {formData.tables.includes(table._id) && " - Đã chọn"}
-                            </MenuItem>
-                          ))}
+                          {groupedTables[area]
+                            .sort((a, b) => {
+                              const aSelected = formData.tables.includes(a._id);
+                              const bSelected = formData.tables.includes(b._id);
+                              return bSelected - aSelected; // Bàn đã chọn lên đầu
+                            })
+                            .map((table) => (
+                              <MenuItem
+                                key={table._id}
+                                value={`${table.table_number}|${table.area}|${table._id}`}
+                                sx={{
+                                  fontWeight: formData.tables.includes(table._id)
+                                    ? "bold"
+                                    : "normal",
+                                  color: formData.tables.includes(table._id)
+                                    ? "primary.main"
+                                    : "inherit",
+                                }}
+                              >
+                                Bàn {table.table_number} (Sức chứa: {table.capacity})
+                                {formData.tables.includes(table._id) && " - Đã chọn"}
+                              </MenuItem>
+                            ))}
                         </Select>
                       </FormControl>
                     </Box>

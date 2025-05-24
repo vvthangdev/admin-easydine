@@ -116,7 +116,7 @@ const OrderFormModalView = ({
             </Button>
           </Box>
 
-          {/* Nội dung chính, hỗ trợ cuộn */}
+          {/* Nội dung chính */}
           <Box
             sx={{
               flex: 1,
@@ -130,7 +130,7 @@ const OrderFormModalView = ({
               <>
                 <Box
                   sx={{
-                    width: "50%", // Cố định 50%
+                    width: "50%",
                     p: 1,
                     overflowY: "auto",
                     height: "100%",
@@ -153,7 +153,7 @@ const OrderFormModalView = ({
                 </Box>
                 <Box
                   sx={{
-                    width: "50%", // Cố định 50%
+                    width: "50%",
                     p: 1,
                     overflowY: "auto",
                     height: "100%",
@@ -183,6 +183,7 @@ const OrderFormModalView = ({
                   fetchAvailableTables={fetchAvailableTables}
                   isTableAvailable={table?.status === "Available"}
                   editingOrder={editingOrder}
+                  orderId={currentOrderId || editingOrder?.id}
                 />
               </Box>
             )}
@@ -201,7 +202,7 @@ const OrderFormModalView = ({
               flexShrink: 0,
             }}
           >
-            {showItemSelector ? (
+            {showItemSelector && (
               <Button
                 variant="contained"
                 color="success"
@@ -210,17 +211,6 @@ const OrderFormModalView = ({
                 sx={{ minWidth: 80, fontSize: "0.875rem" }}
               >
                 Xong
-              </Button>
-            ) : (
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleModalOk}
-                disabled={loading}
-                sx={{ minWidth: 80, fontSize: "0.875rem" }}
-                startIcon={loading && <CircularProgress size={16} color="inherit" />}
-              >
-                Cập nhật
               </Button>
             )}
           </Box>
@@ -239,6 +229,18 @@ const OrderFormModalView = ({
                 flexShrink: 0,
               }}
             >
+              {(editingOrder || currentOrderId) && (
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => handleModalOk(null)}
+                  disabled={loading}
+                  sx={{ minWidth: 80, fontSize: "0.875rem" }}
+                  startIcon={loading && <CircularProgress size={16} color="inherit" />}
+                >
+                  Cập nhật
+                </Button>
+              )}
               <Button
                 variant="contained"
                 color="primary"

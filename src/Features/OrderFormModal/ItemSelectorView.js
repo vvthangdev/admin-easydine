@@ -50,8 +50,8 @@ const ItemSelectorView = ({
 
   const [activeTab, setActiveTab] = useState("Tầng 1");
   const [showTableSelector, setShowTableSelector] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
+  const [itemModalOpen, setItemModalOpen] = useState(false);
+  const [selectedItemForModal, setSelectedItemForModal] = useState(null);
 
   const groupedTables = availableTables.reduce((acc, table) => {
     const area = table.area || "Không xác định";
@@ -84,16 +84,39 @@ const ItemSelectorView = ({
   };
 
   const handleOpenItemModal = (record) => {
-    setSelectedItem({
+    // Chuẩn bị dữ liệu item để truyền vào modal
+    const itemData = {
       id: record._id,
       name: record.name,
+      itemName: record.name, // Đảm bảo có itemName
+      itemImage: record.image || "https://via.placeholder.com/80",
       price: record.price,
-    });
-    setModalOpen(true);
+      sizes: record.sizes || [],
+    };
+    
+    setSelectedItemForModal(itemData);
+    setItemModalOpen(true);
   };
 
   const handleConfirmItem = (itemData) => {
     handleAddItem(itemData);
+    setItemModalOpen(false);
+    setSelectedItemForModal(null);
+  };
+
+  const handleCloseItemModal = () => {
+    setItemModalOpen(false);
+    setSelectedItemForModal(null);
+  };
+
+  // Xử lý click row - tránh trigger khi click vào button
+  const handleRowClick = (e, record) => {
+    if (
+      e.target.tagName !== "BUTTON" &&
+      !e.target.closest("button")
+    ) {
+      handleOpenItemModal(record);
+    }
   };
 
   return (
@@ -110,6 +133,7 @@ const ItemSelectorView = ({
       <Typography variant="h6" sx={{ mb: 1 }}>
         Chọn món ăn
       </Typography>
+      
       {!isExistingOrder && (
         <Box sx={{ display: "flex", gap: 1, mb: 1 }}>
           <Button
@@ -138,11 +162,14 @@ const ItemSelectorView = ({
             value={activeTab}
             onChange={(e, newValue) => setActiveTab(newValue)}
             sx={{ mb: 1 }}
+            variant="scrollable"
+            scrollButtons="auto"
           >
             {Object.keys(groupedTables).map((area) => (
               <Tab key={area} label={area} value={area} />
             ))}
           </Tabs>
+          
           {Object.keys(groupedTables).map((area) => (
             <Box key={area} sx={{ display: activeTab === area ? "block" : "none" }}>
               <FormControl fullWidth>
@@ -191,6 +218,7 @@ const ItemSelectorView = ({
               onChange={(e) => setSearchTerm(e.target.value)}
               fullWidth
               sx={{ flex: 1 }}
+              size="small"
             />
             <FormControl sx={{ width: { xs: "100%", sm: 200 } }}>
               <InputLabel>Lọc theo danh mục</InputLabel>
@@ -198,6 +226,7 @@ const ItemSelectorView = ({
                 value={selectedCategory || ""}
                 label="Lọc theo danh mục"
                 onChange={(e) => setSelectedCategory(e.target.value || null)}
+                size="small"
               >
                 <MenuItem value="">Tất cả</MenuItem>
                 {categories.map((cat) => (
@@ -208,84 +237,139 @@ const ItemSelectorView = ({
               </Select>
             </FormControl>
           </Box>
+          
           <TableContainer
             sx={{
               flex: 1,
               overflowY: "auto",
               maxHeight: isExistingOrder ? "calc(100% - 100px)" : "calc(100% - 140px)",
               maxWidth: "100%",
+              border: 1,
+              borderColor: "divider",
+              borderRadius: 1,
             }}
           >
             <Table size="small" stickyHeader>
               <TableHead>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: "bold" }}>Ảnh</TableCell>
-                  <TableCell sx={{ fontWeight: "bold" }}>Tên món</TableCell>
-                  <TableCell sx={{ fontWeight: "bold" }}>Giá</TableCell>
-                  <TableCell sx={{ fontWeight: "bold" }}>Kích thước</TableCell>
-                  <TableCell sx={{ fontWeight: "bold" }}>Công thức</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", bgcolor: "grey.50" }}>Ảnh</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", bgcolor: "grey.50" }}>Tên món</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", bgcolor: "grey.50" }}>Giá</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", bgcolor: "grey.50" }}>Kích thước</TableCell>
+                  <TableCell sx={{ fontWeight: "bold", bgcolor: "grey.50" }}>Công thức</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {menuItems.map((record) => (
-                  <TableRow
-                    key={record._id}
-                    sx={{ "&:hover": { bgcolor: "grey.100", cursor: "pointer" }}}
-                    onClick={(e) => {
-                      if (
-                        e.target.tagName !== "BUTTON" &&
-                        !e.target.closest("button")
-                      ) {
-                        handleOpenItemModal(record);
-                      }
-                    }}
-                  >
-                    <TableCell>
-                      {record.image ? (
-                        <img
-                          src={record.image}
-                          alt="Món ăn"
-                          style={{
-                            width: 60,
-                            height: 60,
-                            objectFit: "cover",
-                            borderRadius: 4,
-                          }}
-                        />
-                      ) : (
-                        <Typography color="text.secondary">Không có ảnh</Typography>
-                      )}
-                    </TableCell>
-                    <TableCell>{record.name}</TableCell>
-                    <TableCell>{record.price.toLocaleString()} VND</TableCell>
-                    <TableCell>
-                      {record.sizes?.length > 0
-                        ? record.sizes
-                            .map(
-                              (s) => `${s.name} (${s.price.toLocaleString()} VND)`
-                            )
-                            .join(", ")
-                        : "Mặc định"}
-                    </TableCell>
-                    <TableCell>
-                      {record.description && (
-                        <Button
-                          variant="text"
-                          color="primary"
-                          onClick={() => showDescriptionModal(record.description)}
-                        >
-                          Chi tiết
-                        </Button>
-                      )}
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={5} sx={{ textAlign: "center", py: 4 }}>
+                      <CircularProgress size={24} />
+                      <Typography variant="body2" sx={{ mt: 1 }}>
+                        Đang tải món ăn...
+                      </Typography>
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : menuItems.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} sx={{ textAlign: "center", py: 4 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Không tìm thấy món ăn nào
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  menuItems.map((record) => (
+                    <TableRow
+                      key={record._id}
+                      sx={{ 
+                        "&:hover": { bgcolor: "grey.100", cursor: "pointer" },
+                        transition: "background-color 0.2s"
+                      }}
+                      onClick={(e) => handleRowClick(e, record)}
+                    >
+                      <TableCell>
+                        {record.image ? (
+                          <img
+                            src={record.image}
+                            alt={record.name}
+                            style={{
+                              width: 60,
+                              height: 60,
+                              objectFit: "cover",
+                              borderRadius: 4,
+                            }}
+                            onError={(e) => {
+                              e.target.src = "https://via.placeholder.com/60";
+                            }}
+                          />
+                        ) : (
+                          <Box
+                            sx={{
+                              width: 60,
+                              height: 60,
+                              bgcolor: "grey.200",
+                              borderRadius: 1,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <Typography variant="caption" color="text.secondary">
+                              No Image
+                            </Typography>
+                          </Box>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                          {record.name}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2" sx={{ color: "success.main", fontWeight: 500 }}>
+                          {record.price.toLocaleString()} VND
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        {record.sizes?.length > 0 ? (
+                          <Box>
+                            {record.sizes.map((size, index) => (
+                              <Typography key={index} variant="caption" sx={{ display: "block" }}>
+                                {size.name} ({size.price.toLocaleString()} VND)
+                              </Typography>
+                            ))}
+                          </Box>
+                        ) : (
+                          <Typography variant="caption" color="text.secondary">
+                            Kích thước mặc định
+                          </Typography>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {record.description && (
+                          <Button
+                            variant="text"
+                            color="primary"
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              showDescriptionModal(record.description);
+                            }}
+                          >
+                            Chi tiết
+                          </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </TableContainer>
         </>
       )}
-      {loading && <CircularProgress sx={{ alignSelf: "center", mt: 1 }} />}
+
+      {/* Modal hiển thị mô tả món ăn */}
       <Modal
         open={isModalVisible}
         onClose={handleModalClose}
@@ -294,19 +378,22 @@ const ItemSelectorView = ({
         <Box
           sx={{
             bgcolor: "background.paper",
-            p: 2,
+            p: 3,
             borderRadius: 2,
-            maxWidth: 400,
+            maxWidth: 500,
+            width: "90%",
+            boxShadow: 24,
           }}
         >
-          <Typography variant="h6" sx={{ mb: 1 }}>
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
             Thông tin món ăn
           </Typography>
-          <Typography>{selectedDescription || "Không có mô tả."}</Typography>
-          <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
+          <Typography variant="body1" sx={{ mb: 3, lineHeight: 1.6 }}>
+            {selectedDescription || "Không có mô tả."}
+          </Typography>
+          <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
             <Button
               variant="contained"
-              color="error"
               onClick={handleModalClose}
               sx={{ fontSize: "0.875rem" }}
             >
@@ -315,12 +402,14 @@ const ItemSelectorView = ({
           </Box>
         </Box>
       </Modal>
+
+      {/* Modal thêm món ăn */}
       <ItemDetailsModal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
+        open={itemModalOpen}
+        onClose={handleCloseItemModal}
         onConfirm={handleConfirmItem}
-        item={selectedItem}
-        sizes={menuItems.find((m) => m._id === selectedItem?.id)?.sizes || []}
+        item={selectedItemForModal}
+        sizes={selectedItemForModal?.sizes || []}
         isEditing={false}
       />
     </Box>
