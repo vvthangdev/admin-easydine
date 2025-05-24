@@ -11,7 +11,6 @@ import ItemSelectorView from "./ItemSelectorView";
 import SelectedItemsView from "./SelectedItemsView";
 import MergeOrderModalView from "../OrderUpdate/MergeOrderModalView";
 import SplitOrderModalView from "../OrderUpdate/SplitOrderModalView";
-import PaymentModal from "./PaymentModal";
 import OrderFormModalViewModel from "./OrderFormModalViewModel";
 
 const OrderFormModalView = ({
@@ -34,7 +33,6 @@ const OrderFormModalView = ({
     showItemSelector,
     splitModalVisible,
     mergeModalVisible,
-    paymentModalVisible,
     orderDetails,
     currentOrderId,
     targetOrder,
@@ -44,16 +42,13 @@ const OrderFormModalView = ({
     handleDoneSelectingItems,
     handleSplitSuccess,
     handleMergeSuccess,
-    handlePaymentSuccess,
     handleOpenSplitModal,
     handleOpenMergeModal,
-    handleOpenPaymentModal,
     handleConfirmOrder,
     handleCancelOrder,
     handleCancelAddItems,
     setMergeModalVisible,
     setSplitModalVisible,
-    setPaymentModalVisible,
   } = OrderFormModalViewModel({
     visible,
     editingOrder,
@@ -63,7 +58,6 @@ const OrderFormModalView = ({
     table,
   });
 
-  const isNewOrEmptyTable = !editingOrder || table?.status === "Available";
   const isPending = formData.status === "pending";
 
   return (
@@ -90,7 +84,6 @@ const OrderFormModalView = ({
             flexDirection: "column",
           }}
         >
-          {/* Header */}
           <Box
             sx={{
               p: 1,
@@ -116,7 +109,6 @@ const OrderFormModalView = ({
             </Button>
           </Box>
 
-          {/* Nội dung chính */}
           <Box
             sx={{
               flex: 1,
@@ -189,7 +181,6 @@ const OrderFormModalView = ({
             )}
           </Box>
 
-          {/* Footer nút chính */}
           <Box
             sx={{
               p: 1,
@@ -215,7 +206,6 @@ const OrderFormModalView = ({
             )}
           </Box>
 
-          {/* Footer nút hành động phụ */}
           {!showItemSelector && (
             <Box
               sx={{
@@ -289,23 +279,12 @@ const OrderFormModalView = ({
                     Hủy Đơn
                   </Button>
                 </>
-              ) : (
-                <Button
-                  variant="contained"
-                  color="info"
-                  onClick={handleOpenPaymentModal}
-                  disabled={loading}
-                  sx={{ minWidth: 80, fontSize: "0.875rem" }}
-                >
-                  Thanh Toán
-                </Button>
-              )}
+              ) : null}
             </Box>
           )}
         </Box>
       </Modal>
 
-      {/* Modal con */}
       <SplitOrderModalView
         visible={splitModalVisible}
         orderDetails={orderDetails}
@@ -318,13 +297,6 @@ const OrderFormModalView = ({
         targetOrder={targetOrder}
         onCancel={() => setMergeModalVisible(false)}
         onSuccess={handleMergeSuccess}
-        zIndex={1001}
-      />
-      <PaymentModal
-        visible={paymentModalVisible}
-        orderDetails={orderDetails}
-        onCancel={() => setPaymentModalVisible(false)}
-        onConfirm={handlePaymentSuccess}
         zIndex={1001}
       />
     </>

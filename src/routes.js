@@ -15,6 +15,8 @@ import UserVoucherManagement from "./Features/User/UserVoucherManagement";
 import Header from "../src/components/HomePage/Header";
 import OrderManagements from "./Features/OrderManagement/OrderManagement";
 import ContactManagement from "./Features/Admin/pages/ContactManagement";
+import PaymentSuccess from "./Features/OrderFormModal/PaymentSuccess";
+import PaymentFailed from "./Features/OrderFormModal/PaymentFailed";
 
 const AppRoutes = () => {
   const navLinks = [{ path: "/", label: "Trang chủ" }];
@@ -27,6 +29,8 @@ const AppRoutes = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/unauthorized" element={<BanKhongPhaiLaAdmin />} />
+          <Route path="/payment-success" element={<PaymentSuccess />} />{" "}
+          <Route path="/payment-failed" element={<PaymentFailed />} />{" "}
           <Route
             path="/profile"
             element={
@@ -49,6 +53,8 @@ const AppRoutes = () => {
             <Route path="menu" element={<ItemManagements />} />
             <Route path="orders" element={<OrderManagements />} />
             <Route path="users" element={<UserVoucherManagement />} />
+            <Route path="contacts" element={<ContactManagement />} />
+            <Route path="payment" element={<ContactManagement />} />
             <Route path="contacts" element={<ContactManagement />} />
           </Route>
         </Routes>

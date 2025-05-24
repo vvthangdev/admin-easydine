@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Typography,
@@ -19,6 +19,7 @@ import {
   Button,
 } from "@mui/material";
 import OrderBasicInfoViewModel from "./OrderBasicInfoViewModel";
+import PaymentModal from "./PaymentModal";
 import { toast } from "react-toastify";
 
 const OrderBasicInfoView = ({
@@ -38,34 +39,38 @@ const OrderBasicInfoView = ({
     subtotal,
     total,
     applyVoucher,
-    voucherData,
   } = OrderBasicInfoViewModel({
     formData,
     setFormData,
     availableTables,
     fetchAvailableTables,
     isTableAvailable,
+    orderId,
   });
 
   const activeTab = Object.keys(groupedTables)[0] || "Tầng 1";
   const [currentTab, setCurrentTab] = React.useState(activeTab);
   const [voucherCode, setVoucherCode] = React.useState(formData.voucherCode || "");
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
 
   React.useEffect(() => {
-    console.log("OrderBasicInfoView: groupedTables:", groupedTables, "formData.tables:", formData.tables);
     setCurrentTab(activeTab);
-  }, [activeTab, groupedTables, formData.tables]);
+  }, [activeTab, groupedTables]);
 
   const handleApplyVoucher = () => {
     if (!voucherCode) {
       toast.error("Vui lòng nhập mã voucher");
       return;
     }
-    if (!orderId && !editingOrder) {
-      toast.error("Vui lòng lưu đơn hàng trước khi áp dụng voucher");
-      return;
-    }
     applyVoucher(voucherCode, orderId || editingOrder?.id);
+  };
+
+  const handleOpenPaymentModal = () => {
+    setPaymentModalOpen(true);
+  };
+
+  const handleClosePaymentModal = () => {
+    setPaymentModalOpen(false);
   };
 
   return (
@@ -85,7 +90,7 @@ const OrderBasicInfoView = ({
                 onChange={handleChange}
               >
                 <MenuItem value="reservation">Đặt chỗ</MenuItem>
-                <MenuItem value="walk-in">Khách vãng lai</MenuItem>
+                <MenuItem value="ship">Giao hàng</MenuItem>
               </Select>
             </FormControl>
 
@@ -149,24 +154,6 @@ const OrderBasicInfoView = ({
               placeholder="HH:mm"
             />
 
-            <Box sx={{ display: "flex", gap: 1 }}>
-              <TextField
-                label="Mã voucher"
-                value={voucherCode}
-                onChange={(e) => setVoucherCode(e.target.value)}
-                fullWidth
-                placeholder="Nhập mã voucher"
-              />
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleApplyVoucher}
-                sx={{ minWidth: 100 }}
-              >
-                Áp dụng
-              </Button>
-            </Box>
-
             <Box sx={{ maxHeight: 200, overflowY: "auto" }}>
               <Typography variant="subtitle1" sx={{ mb: 1 }}>
                 Chọn bàn
@@ -215,7 +202,7 @@ const OrderBasicInfoView = ({
                             .sort((a, b) => {
                               const aSelected = formData.tables.includes(a._id);
                               const bSelected = formData.tables.includes(b._id);
-                              return bSelected - aSelected; // Bàn đã chọn lên đầu
+                              return bSelected - aSelected;
                             })
                             .map((table) => (
                               <MenuItem
@@ -309,16 +296,16 @@ const OrderBasicInfoView = ({
               >
                 <Typography>Tổng tiền món (Đã bao gồm VAT):</Typography>
                 <Typography fontWeight="bold">
-                  {subtotal.toLocaleString()} VND
+                  {(formData.totalAmount || subtotal).toLocaleString()} VND
                 </Typography>
               </Box>
-              {voucherData && formData.voucherId && (
+              {formData.voucherCode && formData.discountAmount > 0 && (
                 <Box
                   sx={{ display: "flex", justifyContent: "space-between", mt: 1 }}
                 >
                   <Typography>Giảm giá ({formData.voucherCode}):</Typography>
                   <Typography fontWeight="bold" color="success.main">
-                    -{formData.discountAmount?.toLocaleString()} VND
+                    -{formData.discountAmount.toLocaleString()} VND
                   </Typography>
                 </Box>
               )}
@@ -337,10 +324,55 @@ const OrderBasicInfoView = ({
                   {total.toLocaleString()} VND
                 </Typography>
               </Box>
+              <Box sx={{ mt: 2, display: "flex", flexDirection: "column", gap: 1 }}>
+                <Box sx={{ display: "flex", gap: 1 }}>
+                  <TextField
+                    label="Mã voucher"
+                    value={voucherCode}
+                    onChange={(e) => setVoucherCode(e.target.value)}
+                    fullWidth
+                    placeholder="Nhập mã voucher"
+                  />
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleApplyVoucher}
+                    sx={{ minWidth: 100 }}
+                  >
+                    Áp dụng
+                  </Button>
+                </Box>
+                <Button
+                  variant="contained"
+                  color="info"
+                  onClick={handleOpenPaymentModal}
+                  sx={{ alignSelf: "flex-start", minWidth: 100 }}
+                  disabled={formData.status !== "confirmed"}
+                >
+                  Thanh toán
+                </Button>
+              </Box>
             </Box>
           </Box>
         </Grid>
       </Grid>
+
+      <PaymentModal
+        visible={paymentModalOpen}
+        onCancel={handleClosePaymentModal}
+        orderDetails={{
+          order: {
+            id: orderId || editingOrder?.id,
+            final_amount: formData.finalAmount || total,
+          },
+          itemOrders: formData.items.map((item) => ({
+            itemPrice: item.price,
+            quantity: item.quantity,
+            itemName: item.name,
+          })),
+        }}
+        zIndex={1300}
+      />
     </Box>
   );
 };

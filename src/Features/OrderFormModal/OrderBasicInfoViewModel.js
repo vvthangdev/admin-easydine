@@ -10,9 +10,9 @@ const OrderBasicInfoViewModel = ({
   availableTables,
   fetchAvailableTables,
   isTableAvailable,
+  orderId,
 }) => {
   const [staffList, setStaffList] = useState([]);
-  const [voucherData, setVoucherData] = useState(null);
 
   const fetchStaffList = async () => {
     try {
@@ -24,23 +24,30 @@ const OrderBasicInfoViewModel = ({
     }
   };
 
-  const applyVoucher = useCallback(async (voucherCode, orderId) => {
-    try {
-      const response = await voucherAPI.applyVoucher(voucherCode, orderId);
-      setVoucherData(response);
-      toast.success("Áp dụng voucher thành công");
-      setFormData((prev) => ({
-        ...prev,
-        voucherCode,
-        voucherId: response.voucherId,
-        discountAmount: response.discountAmount,
-        finalAmount: response.finalAmount,
-      }));
-    } catch (error) {
-      console.error("Error applying voucher:", error);
-      toast.error(error.message || "Không thể áp dụng voucher");
-    }
-  }, [setFormData]);
+  const applyVoucher = useCallback(
+    async (voucherCode, orderId) => {
+      if (!orderId) {
+        toast.error("Vui lòng lưu đơn hàng trước khi áp dụng voucher");
+        return;
+      }
+      try {
+        const response = await voucherAPI.applyVoucher(voucherCode, orderId);
+        toast.success("Áp dụng voucher thành công");
+        setFormData((prev) => ({
+          ...prev,
+          voucherCode,
+          voucherId: response.voucherId,
+          discountAmount: response.discountAmount,
+          finalAmount: response.finalAmount,
+          totalAmount: response.totalAmount || prev.totalAmount,
+        }));
+      } catch (error) {
+        console.error("Error applying voucher:", error);
+        toast.error(error.message || "Không thể áp dụng voucher");
+      }
+    },
+    [setFormData]
+  );
 
   useEffect(() => {
     fetchStaffList();
@@ -62,7 +69,12 @@ const OrderBasicInfoViewModel = ({
         endDateTime.format("YYYY-MM-DDTHH:mm:ss[Z]")
       );
     }
-  }, [formData.date, formData.start_time, formData.end_time, fetchAvailableTables]);
+  }, [
+    formData.date,
+    formData.start_time,
+    formData.end_time,
+    fetchAvailableTables,
+  ]);
 
   const groupedTables = useMemo(() => {
     const tables = Array.isArray(availableTables) ? [...availableTables] : [];
@@ -93,7 +105,6 @@ const OrderBasicInfoViewModel = ({
       acc[area].push(table);
       return acc;
     }, {});
-    console.log("OrderBasicInfoViewModel: groupedTables:", grouped);
     return grouped;
   }, [availableTables, formData.tables, formData.reservedTables]);
 
@@ -113,13 +124,12 @@ const OrderBasicInfoViewModel = ({
     setFormData((prev) => {
       const tables = Array.isArray(prev.tables) ? prev.tables : [];
       const otherAreaTableIds = tables.filter((tableId) => {
-        const table = (Array.isArray(availableTables) ? availableTables : []).concat(
-          prev.reservedTables || []
-        ).find((t) => t._id === tableId || t.table_id === tableId);
+        const table = (Array.isArray(availableTables) ? availableTables : [])
+          .concat(prev.reservedTables || [])
+          .find((t) => t._id === tableId || t.table_id === tableId);
         return table && table.area !== area;
       });
       const newTables = [...otherAreaTableIds, ...selectedTableIds];
-      console.log("handleTableChange: area:", area, "selectedTableIds:", selectedTableIds, "newTables:", newTables);
       return {
         ...prev,
         tables: newTables,
@@ -136,11 +146,8 @@ const OrderBasicInfoViewModel = ({
   }, [formData.items]);
 
   const total = useMemo(() => {
-    if (voucherData && formData.voucherId) {
-      return formData.finalAmount || subtotal;
-    }
-    return subtotal;
-  }, [subtotal, voucherData, formData.voucherId, formData.finalAmount]);
+    return formData.finalAmount || subtotal;
+  }, [subtotal, formData.finalAmount]);
 
   return {
     staffList,
@@ -150,7 +157,6 @@ const OrderBasicInfoViewModel = ({
     subtotal,
     total,
     applyVoucher,
-    voucherData,
   };
 };
 
