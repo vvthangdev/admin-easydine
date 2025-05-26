@@ -1,42 +1,47 @@
-import { useEffect } from 'react';
-import { notification } from 'antd';
-import { useAuth } from '../contexts/AuthContext';
-import { getSocket } from '../services/socket';
+import React, { useEffect } from "react";
+import { toast } from "react-toastify";
+import { useAuth } from "../contexts/AuthContext";
 
-const Notification = () => {
-  const { user } = useAuth();
+function Notification() {
+  const { user, socket, socketInitialized } = useAuth();
+
+  console.log("[Notification.js] Rendering Notification, user:", user ? user.username : "null", "socket:", socket ? socket.id : "null");
 
   useEffect(() => {
-    if (user?.role !== 'ADMIN') return;
+    if (!user || !socket || !socketInitialized) {
+      console.log("[Notification.js] Skipping event listeners: user or socket not ready");
+      return;
+    }
 
-    const socket = getSocket();
-    if (!socket) return;
+    console.log("[Notification.js] Setting up socket event listeners for socket:", socket.id);
 
-    socket.emit('joinAdminRoom', { room: 'adminRoom' });
-
-    socket.on('newOrder', (data) => {
-      notification.info({
-        message: 'New Order Received',
-        description: (
-          <div>
-            <p>{data.message}</p>
-            <p><strong>Order ID:</strong> {data.orderId}</p>
-            <p><strong>Type:</strong> {data.type}</p>
-            <p><strong>Status:</strong> {data.status}</p>
-            <p><strong>Time:</strong> {new Date(data.time).toLocaleString()}</p>
-          </div>
-        ),
-        placement: 'topRight',
-        duration: 5,
+    socket.on("admintest", (data) => {
+      console.log("[Notification.js] Received admintest event:", data);
+      toast.success(`Admin test: ${data.message || JSON.stringify(data)}`, {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        newestOnTop: true,
+        closeOnClick: true,
+        rtl: false,
+        pauseOnFocusLoss: true,
+        draggable: true,
+        theme: "light",
       });
     });
 
+    socket.onAny((event, ...args) => {
+      console.log(`[Notification.js] Received event: ${event}, Payload:`, args);
+    });
+
     return () => {
-      socket.off('newOrder');
+      console.log("[Notification.js] Cleaning up socket listeners");
+      socket.off("admintest");
+      socket.offAny();
     };
-  }, [user]);
+  }, [user, socketInitialized]);
 
   return null;
-};
+}
 
 export default Notification;

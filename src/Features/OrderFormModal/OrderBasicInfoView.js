@@ -20,6 +20,7 @@ import {
 } from "@mui/material";
 import OrderBasicInfoViewModel from "./OrderBasicInfoViewModel";
 import PaymentModal from "./PaymentModal";
+import CancelItemsModal from "./CancelItemsModal"; // Import modal mới
 import { toast } from "react-toastify";
 
 const OrderBasicInfoView = ({
@@ -52,6 +53,7 @@ const OrderBasicInfoView = ({
   const [currentTab, setCurrentTab] = React.useState(activeTab);
   const [voucherCode, setVoucherCode] = React.useState(formData.voucherCode || "");
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [cancelItemsModalOpen, setCancelItemsModalOpen] = useState(false); // Trạng thái modal hủy món
 
   React.useEffect(() => {
     setCurrentTab(activeTab);
@@ -71,6 +73,33 @@ const OrderBasicInfoView = ({
 
   const handleClosePaymentModal = () => {
     setPaymentModalOpen(false);
+  };
+
+  const handleOpenCancelItemsModal = () => {
+    setCancelItemsModalOpen(true);
+  };
+
+  const handleCloseCancelItemsModal = () => {
+    setCancelItemsModalOpen(false);
+  };
+
+  const handleCancelItemsSuccess = (remainingItems) => {
+    // Cập nhật danh sách món ăn sau khi hủy thành công
+    setFormData((prev) => ({
+      ...prev,
+      items: remainingItems.map((item) => ({
+        id: item.item_id,
+        name: item.itemName,
+        price: item.itemPrice,
+        quantity: item.quantity,
+        size: item.size || null,
+        note: item.note || "",
+        itemName: item.itemName,
+        itemImage: item.itemImage || "https://via.placeholder.com/80",
+      })),
+    }));
+    setCancelItemsModalOpen(false);
+    toast.success("Hủy món thành công!");
   };
 
   return (
@@ -94,26 +123,28 @@ const OrderBasicInfoView = ({
               </Select>
             </FormControl>
 
-            <Typography variant="subtitle1">Trạng thái</Typography>
-  <Typography
-    sx={{
-      p: 1,
-      border: 1,
-      borderColor: "divider",
-      borderRadius: 1,
-      bgcolor: "grey.50",
-    }}
-  >
-    {formData.status === "pending"
-      ? "Chờ xác nhận"
-      : formData.status === "confirmed"
-      ? "Đã xác nhận"
-      : formData.status === "completed"
-      ? "Hoàn thành"
-      : formData.status === "canceled"
-      ? "Đã hủy"
-      : "Không xác định"}
-  </Typography>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1, p: 1 }}>
+              <Typography variant="subtitle1">Trạng thái</Typography>
+              <Typography
+                sx={{
+                  p: 1,
+                  border: 1,
+                  borderColor: "divider",
+                  borderRadius: 1,
+                  bgcolor: "grey.50",
+                }}
+              >
+                {formData.status === "pending"
+                  ? "Chờ xác nhận"
+                  : formData.status === "confirmed"
+                  ? "Đã xác nhận"
+                  : formData.status === "completed"
+                  ? "Hoàn thành"
+                  : formData.status === "canceled"
+                  ? "Đã hủy"
+                  : "Không xác định"}
+              </Typography>
+            </Box>
 
             <FormControl fullWidth>
               <InputLabel>Nhân viên phụ trách</InputLabel>
@@ -240,9 +271,18 @@ const OrderBasicInfoView = ({
 
         <Grid item xs={12} md={6}>
           <Box sx={{ p: 1, mt: { xs: 2, md: 0 } }}>
-            <Typography variant="subtitle1" sx={{ mb: 1 }}>
-              Danh sách món ăn
-            </Typography>
+            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
+              <Typography variant="subtitle1">Danh sách món ăn</Typography>
+              <Button
+                variant="contained"
+                color="error"
+                onClick={handleOpenCancelItemsModal}
+                disabled={!formData.items || formData.items.length === 0 || formData.status === "pending"}
+                sx={{ minWidth: 100 }}
+              >
+                Hủy Món
+              </Button>
+            </Box>
             <TableContainer
               sx={{
                 maxHeight: 300,
@@ -376,6 +416,14 @@ const OrderBasicInfoView = ({
             itemName: item.name,
           })),
         }}
+        zIndex={1300}
+      />
+      <CancelItemsModal
+        visible={cancelItemsModalOpen}
+        onCancel={handleCloseCancelItemsModal}
+        onSuccess={handleCancelItemsSuccess}
+        orderId={orderId || editingOrder?.id}
+        items={formData.items}
         zIndex={1300}
       />
     </Box>

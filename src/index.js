@@ -1,21 +1,23 @@
 // src/index.jsx
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import { ThemeProvider } from '@mui/material/styles';
-import './index.css';
-import App from './App';
-import './styles/global.css';
-import './styles/antd-custom.css';
-import theme from './theme';
-import reportWebVitals from './reportWebVitals';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { ThemeProvider } from "@mui/material/styles";
+import "./index.css";
+import App from "./App";
+import "./styles/global.css";
+import "./styles/antd-custom.css";
+import theme from "./theme";
+import reportWebVitals from "./reportWebVitals";
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+import { AuthProvider } from "./contexts/AuthContext";
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-
-    <ThemeProvider theme={theme}>
+  <ThemeProvider theme={theme}>
+    <AuthProvider>
       <App />
-    </ThemeProvider>
-
+    </AuthProvider>
+  </ThemeProvider>
 );
 
 // If you want to start measuring performance in your app, pass a function

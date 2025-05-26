@@ -1,55 +1,45 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { message } from 'antd';
-import { useEffect } from 'react';
 
 const ProtectedRoute = ({ children, roles }) => {
-  const { user } = useAuth();
-  const location = useLocation();
-  const token = localStorage.getItem('accessToken');
-  const refreshToken = localStorage.getItem('refreshToken');
+    const { user, loading } = useAuth();
+    const location = useLocation();
+    const token = localStorage.getItem('accessToken');
 
-  useEffect(() => {
+    console.log('✅ [ProtectedRoute.js] Checking auth for path:', location.pathname);
+    console.log('[ProtectedRoute.js] Loading:', loading);
+    console.log('[ProtectedRoute.js] User:', user ? { username: user.username, role: user.role } : 'null');
+    console.log('[ProtectedRoute.js] Token:', token ? token.slice(0, 10) + '...' : 'missing');
+    console.log('[ProtectedRoute.js] Required roles:', roles || 'none');
+
+    if (loading) {
+        console.log('⚠️ [ProtectedRoute.js] Waiting for auth loading');
+        return null; // Hoặc component loading
+    }
+
     if (!token || typeof token !== 'string' || token.trim() === '') {
-      console.log('No valid accessToken, checking refreshToken');
-      if (!refreshToken) {
+        console.log('❌ [ProtectedRoute.js] No valid accessToken, redirecting to login');
         message.error('Vui lòng đăng nhập');
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
-      }
-    } else if (!user) {
-      console.log('No user data, checking refreshToken');
-      if (!refreshToken) {
+        localStorage.clear();
+        return <Navigate to="/login" state={{ from: location }} replace />;
+    }
+
+    if (!user) {
+        console.log('❌ [ProtectedRoute.js] No user data, redirecting to login');
         message.error('Vui lòng đăng nhập');
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
-      }
-    } else if (roles && !roles.includes(user.role)) {
-      message.error('Bạn không có quyền truy cập');
+        localStorage.clear();
+        return <Navigate to="/login" state={{ from: location }} replace />;
     }
-  }, [token, refreshToken, user, roles]);
 
-  if (!token || typeof token !== 'string' || token.trim() === '') {
-    if (!refreshToken) {
-      return <Navigate to="/login" state={{ from: location }} replace />;
+    if (roles && !roles.includes(user.role)) {
+        console.log('❌ [ProtectedRoute.js] User role not allowed:', user.role, 'Redirecting to unauthorized');
+        message.error('Bạn không có quyền truy cập');
+        return <Navigate to="/unauthorized" replace />;
     }
+
+    console.log('✅ [ProtectedRoute.js] Access granted for user:', user.username);
     return children;
-  }
-
-  if (!user) {
-    if (!refreshToken) {
-      return <Navigate to="/login" state={{ from: location }} replace />;
-    }
-    return children;
-  }
-
-  if (roles && !roles.includes(user.role)) {
-    return <Navigate to="/unauthorized" replace />;
-  }
-
-  return children;
 };
 
 export default ProtectedRoute;

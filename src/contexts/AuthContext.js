@@ -1,6 +1,6 @@
 import { createContext, useState, useContext, useEffect } from "react";
-import { message, notification } from "antd";
-import { connectSocket, disconnectSocket, getSocket } from "../services/socket";
+import { message } from "antd";
+import { initSocketClient, getSocket } from "../utils/socketClient";
 
 const AuthContext = createContext({});
 
@@ -8,94 +8,85 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [socketInitialized, setSocketInitialized] = useState(false);
+  const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    const user = localStorage.getItem("user");
-    const accessToken = localStorage.getItem("accessToken");
-    if (user && accessToken) {
-      try {
-        const parsedUser = JSON.parse(user);
-        setUser(parsedUser);
-        if (parsedUser.role === "ADMIN") {
-          const socket = connectSocket(accessToken);
-          socket.on("connect", () => {
-            setSocketInitialized(true);
-            console.log(
-              "Socket initialized in AuthContext, Socket ID:",
-              socket.id
-            );
-          });
+    console.log("[AuthContext.js] Initializing auth");
+    const initializeAuth = async () => {
+      const userData = localStorage.getItem("user");
+      const accessToken = localStorage.getItem("accessToken");
+
+      console.log("[AuthContext.js] userData:", userData ? userData : "missing");
+      console.log("[AuthContext.js] accessToken:", accessToken ? accessToken.slice(0, 10) + "..." : "missing");
+
+      if (userData && accessToken) {
+        try {
+          const parsedUser = JSON.parse(userData);
+          const normalizedUser = {
+            _id: parsedUser.id || parsedUser._id,
+            username: parsedUser.username,
+            role: parsedUser.role,
+            name: parsedUser.name,
+            email: parsedUser.email,
+            phone: parsedUser.phone,
+            address: parsedUser.address,
+            avatar: parsedUser.avatar,
+          };
+          setUser(normalizedUser);
+
+          if (normalizedUser._id && !socket?.connected) {
+            console.log("[AuthContext.js] Initializing socket for user:", normalizedUser.username);
+            const socketInstance = initSocketClient(setSocket);
+
+            socketInstance.on("connect", () => {
+              console.log("[AuthContext.js] Socket connected:", socketInstance.id);
+              setSocketInitialized(true);
+            });
+
+            socketInstance.on("connect_error", (error) => {
+              console.error("[AuthContext.js] Socket connect error:", error.message);
+              setSocketInitialized(false);
+              setSocket(null);
+            });
+
+            socketInstance.on("disconnect", () => {
+              console.log("[AuthContext.js] Socket disconnected");
+              setSocketInitialized(false);
+              setSocket(null);
+            });
+          }
+        } catch (error) {
+          console.error("[AuthContext.js] Error initializing auth:", error.message);
+          localStorage.clear();
+          setUser(null);
+          setSocketInitialized(false);
+          message.error("Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.");
         }
-      } catch (error) {
-        localStorage.removeItem("user");
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
+      } else {
+        console.log("[AuthContext.js] No user or accessToken in localStorage");
+        setUser(null);
+        setSocketInitialized(false);
       }
-    }
-    setLoading(false);
-  }, []);
-
-  useEffect(() => {
-    if (!user?.role || user.role !== "ADMIN" || !socketInitialized) return;
-
-    const socket = getSocket();
-    if (!socket) {
-      console.log("Socket not available in AuthContext");
-      return;
-    }
-
-    console.log(
-      "AuthContext: Attaching newOrder listener for user:",
-      user.username,
-      "Socket ID:",
-      socket.id
-    );
-
-    socket.emit("joinAdminRoom", { room: "adminRoom" });
-
-    const handleNewOrder = (data) => {
-      console.log(
-        "AuthContext: Received newOrder event:",
-        data,
-        "Socket ID:",
-        socket.id
-      );
-      notification.info({
-        message: "Có Đơn Hàng Mới",
-        description: (
-          <div>
-            <p>{data.message}</p>
-            <p>
-              <strong>ID Đơn Hàng:</strong> {data.orderId}
-            </p>
-            <p>
-              <strong>Loại:</strong> {data.type}
-            </p>
-            <p>
-              <strong>Trạng Thái:</strong> {data.status}
-            </p>
-            <p>
-              <strong>Thời Gian:</strong> {new Date(data.time).toLocaleString()}
-            </p>
-          </div>
-        ),
-        placement: "topRight",
-        duration: 5,
-      });
+      console.log("[AuthContext.js] Auth initialization complete");
+      setLoading(false);
     };
 
-    socket.on("newOrder", handleNewOrder);
+    initializeAuth();
 
     return () => {
-      console.log(
-        "AuthContext: Removing newOrder listener for user:",
-        user?.username,
-        "Socket ID:",
-        socket.id
-      );
-      socket.off("newOrder", handleNewOrder);
+      try {
+        const socket = getSocket();
+        if (socket) {
+          console.log("[AuthContext.js] Disconnecting socket on unmount");
+          socket.disconnect();
+          setSocketInitialized(false);
+          setSocket(null);
+        }
+      } catch (error) {
+        console.log("[AuthContext.js] No socket to disconnect");
+      }
     };
-  }, [user, socketInitialized]);
+  }, []);
 
   const login = (data) => {
     try {
@@ -107,38 +98,79 @@ export const AuthProvider = ({ children }) => {
       const cleanAccessToken = data.accessToken.replace(/^Bearer\s+/, "");
       const cleanRefreshToken = data.refreshToken.replace(/^Bearer\s+/, "");
 
+      const normalizedUser = {
+        _id: userData.id || userData._id,
+        username: userData.username,
+        role: userData.role,
+        name: userData.name,
+        email: userData.email,
+        phone: userData.phone,
+        address: userData.address,
+        avatar: userData.avatar,
+      };
+
+      console.log("[AuthContext.js] Storing user and tokens in localStorage");
       localStorage.setItem("accessToken", cleanAccessToken);
       localStorage.setItem("refreshToken", cleanRefreshToken);
-      localStorage.setItem("user", JSON.stringify(userData));
+      localStorage.setItem("user", JSON.stringify(normalizedUser));
 
-      setUser(userData);
+      console.log("[AuthContext.js] Setting user:", normalizedUser);
+      setUser(normalizedUser);
 
-      if (userData.role === "ADMIN") {
-        const socket = connectSocket(cleanAccessToken);
-        socket.on("connect", () => {
+      if (normalizedUser._id) {
+        console.log("[AuthContext.js] Initializing socket on login for user:", normalizedUser.username);
+        const socketInstance = initSocketClient((socket) => {
+          setSocket(socket);
+          setSocketInitialized(socket?.connected || false);
+        });
+
+        socketInstance.on("connect", () => {
+          console.log("[AuthContext.js] Socket connected on login:", socketInstance.id);
           setSocketInitialized(true);
-          console.log("Socket initialized on login, Socket ID:", socket.id);
+        });
+
+        socketInstance.on("connect_error", (error) => {
+          console.error("[AuthContext.js] Socket connect error on login:", error.message);
+          setSocketInitialized(false);
+          setSocket(null);
+        });
+
+        socketInstance.on("disconnect", () => {
+          console.log("[AuthContext.js] Socket disconnected on login");
+          setSocketInitialized(false);
+          setSocket(null);
         });
       }
     } catch (error) {
+      console.error("[AuthContext.js] Login error:", error.message);
       message.error("Đăng nhập thất bại do lỗi dữ liệu!");
       throw error;
     }
   };
 
   const logout = () => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("user");
+    console.log("[AuthContext.js] Logging out");
+    localStorage.clear();
     setUser(null);
     setSocketInitialized(false);
-    disconnectSocket();
+    try {
+      const socket = getSocket();
+      if (socket) {
+        console.log("[AuthContext.js] Disconnecting socket on logout");
+        socket.disconnect();
+        setSocket(null);
+      }
+    } catch (error) {
+      console.log("[AuthContext.js] No socket to disconnect on logout");
+    }
     message.success("Đăng xuất thành công");
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
-      {!loading && children}
+    <AuthContext.Provider
+      value={{ user, login, logout, loading, socketInitialized, socket }}
+    >
+      {children}
     </AuthContext.Provider>
   );
 };
