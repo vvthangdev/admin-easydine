@@ -75,7 +75,7 @@ const OrderFormModalView = ({
         <Box
           sx={{
             width: { xs: "95vw", md: "90vw" },
-            height: "80vh",
+            height: "90vh",
             bgcolor: "background.paper",
             borderRadius: 2,
             boxShadow: 24,
@@ -226,7 +226,9 @@ const OrderFormModalView = ({
                   onClick={() => handleModalOk(null)}
                   disabled={loading}
                   sx={{ minWidth: 80, fontSize: "0.875rem" }}
-                  startIcon={loading && <CircularProgress size={16} color="inherit" />}
+                  startIcon={
+                    loading && <CircularProgress size={16} color="inherit" />
+                  }
                 >
                   Cập nhật
                 </Button>
@@ -240,24 +242,28 @@ const OrderFormModalView = ({
               >
                 Thêm Món
               </Button>
-              <Button
-                variant="contained"
-                color="success"
-                onClick={handleOpenSplitModal}
-                disabled={loading}
-                sx={{ minWidth: 80, fontSize: "0.875rem" }}
-              >
-                Tách Đơn
-              </Button>
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={handleOpenMergeModal}
-                disabled={loading}
-                sx={{ minWidth: 80, fontSize: "0.875rem" }}
-              >
-                Gộp Đơn
-              </Button>
+              {formData.status !== "pending" && (
+                <>
+                  <Button
+                    variant="contained"
+                    color="success"
+                    onClick={handleOpenSplitModal}
+                    disabled={loading}
+                    sx={{ minWidth: 80, fontSize: "0.875rem" }}
+                  >
+                    Tách Đơn
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    onClick={handleOpenMergeModal}
+                    disabled={loading}
+                    sx={{ minWidth: 80, fontSize: "0.875rem" }}
+                  >
+                    Gộp Đơn
+                  </Button>
+                </>
+              )}
               {isPending ? (
                 <>
                   <Button

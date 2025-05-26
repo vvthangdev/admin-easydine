@@ -40,7 +40,7 @@ const TableManagementView = () => {
     handleRefresh,
     handleAdd,
     handleEdit,
-    handleDelete,
+    handleDeleteSuccess,
     handleReleaseTable,
     handleFormSubmit,
     handleMergeSuccess,
@@ -78,6 +78,7 @@ const TableManagementView = () => {
             color="secondary"
             startIcon={<RefreshIcon />}
             onClick={handleRefresh}
+            disabled={loading}
           >
             Làm mới
           </Button>
@@ -85,6 +86,7 @@ const TableManagementView = () => {
             variant="contained"
             color="primary"
             onClick={() => setIsTableListModalVisible(true)}
+            disabled={loading}
           >
             Quản lý danh sách bàn
           </Button>
@@ -92,6 +94,7 @@ const TableManagementView = () => {
             variant="contained"
             color="success"
             onClick={handleNewOrder}
+            disabled={loading}
           >
             Đặt đơn hàng mới
           </Button>
@@ -135,7 +138,11 @@ const TableManagementView = () => {
         </Box>
       )}
 
-      {tabAreas.length > 0 ? (
+      {loading ? (
+        <Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>
+          <CircularProgress />
+        </Box>
+      ) : tabAreas.length > 0 ? (
         <Tabs
           value={activeArea}
           onChange={(e, newValue) => setActiveArea(newValue)}
@@ -200,19 +207,18 @@ const TableManagementView = () => {
       >
         <TableAdminView
           tables={tables}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onAdd={handleAdd}
           areas={areas}
+          onAddSuccess={handleAdd}
+          onEditSuccess={handleEdit}
+          onDeleteSuccess={handleDeleteSuccess}
         />
       </Dialog>
 
       <TableFormModalView
         open={isFormModalVisible}
         onClose={() => setIsFormModalVisible(false)}
-        onSubmit={handleFormSubmit}
+        onSubmitSuccess={handleFormSubmit}
         editingTable={editingTable}
-        areas={areas}
       />
 
       <ReleaseTableModalView

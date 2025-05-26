@@ -94,21 +94,26 @@ const OrderBasicInfoView = ({
               </Select>
             </FormControl>
 
-            <FormControl fullWidth>
-              <InputLabel>Trạng thái</InputLabel>
-              <Select
-                name="status"
-                value={formData.status || ""}
-                label="Trạng thái"
-                onChange={handleChange}
-                disabled={editingOrder}
-              >
-                <MenuItem value="pending">Chờ xác nhận</MenuItem>
-                <MenuItem value="confirmed">Đã xác nhận</MenuItem>
-                <MenuItem value="completed">Hoàn thành</MenuItem>
-                <MenuItem value="canceled">Đã hủy</MenuItem>
-              </Select>
-            </FormControl>
+            <Typography variant="subtitle1">Trạng thái</Typography>
+  <Typography
+    sx={{
+      p: 1,
+      border: 1,
+      borderColor: "divider",
+      borderRadius: 1,
+      bgcolor: "grey.50",
+    }}
+  >
+    {formData.status === "pending"
+      ? "Chờ xác nhận"
+      : formData.status === "confirmed"
+      ? "Đã xác nhận"
+      : formData.status === "completed"
+      ? "Hoàn thành"
+      : formData.status === "canceled"
+      ? "Đã hủy"
+      : "Không xác định"}
+  </Typography>
 
             <FormControl fullWidth>
               <InputLabel>Nhân viên phụ trách</InputLabel>

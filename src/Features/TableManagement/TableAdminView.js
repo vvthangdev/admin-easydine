@@ -1,95 +1,54 @@
 import React from "react";
 import {
   Box,
+  Typography,
   Button,
   Tabs,
   Tab,
-  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  CircularProgress,
 } from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
 import TableAdminViewModel from "./TableAdminViewModel";
-import { getVietnameseStatus } from "./TableCardView/TableCardUtils";
 
-const TableAdminView = ({ tables, onEdit, onDelete, onAdd, areas }) => {
-  const { activeArea, setActiveArea, filteredTables, tabAreas } = TableAdminViewModel({ tables, areas });
-
-  const columns = [
-    {
-      field: "table_number",
-      headerName: "Số bàn",
-      width: 150,
-      sortable: true,
-    },
-    {
-      field: "capacity",
-      headerName: "Sức chứa",
-      width: 150,
-      sortable: true,
-    },
-    {
-      field: "area",
-      headerName: "Khu vực",
-      width: 150,
-      sortable: true,
-    },
-    {
-      field: "status",
-      headerName: "Trạng thái",
-      width: 150,
-      renderCell: (params) => (
-        <Typography
-          sx={{
-            color:
-              params.value === "Available"
-                ? "green"
-                : params.value === "Reserved"
-                ? "orange"
-                : "blue",
-          }}
-        >
-          {getVietnameseStatus(params.value)}
-        </Typography>
-      ),
-    },
-    {
-      field: "action",
-      headerName: "Hành động",
-      width: 200,
-      renderCell: (params) => (
-        <Box sx={{ display: "flex", gap: 1 }}>
-          <Button
-            variant="contained"
-            color="primary"
-            size="small"
-            onClick={() => onEdit(params.row)}
-          >
-            Sửa
-          </Button>
-          <Button
-            variant="contained"
-            color="error"
-            size="small"
-            onClick={() => onDelete(params.row.table_id)}
-          >
-            Xóa
-          </Button>
-        </Box>
-      ),
-    },
-  ];
+const TableAdminView = ({ tables, areas, onAddSuccess, onEditSuccess, onDeleteSuccess }) => {
+  const {
+    activeArea,
+    setActiveArea,
+    filteredTables,
+    tabAreas,
+    loading,
+    handleDelete,
+    handleAdd,
+    handleEdit,
+  } = TableAdminViewModel({
+    tables,
+    areas,
+    onAddSuccess,
+    onEditSuccess,
+    onDeleteSuccess,
+  });
 
   return (
-    <Box sx={{ p: 2 }}>
-      <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+    <Box sx={{ p: 3 }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+        <Typography variant="h6">Danh sách bàn</Typography>
         <Button
           variant="contained"
           color="primary"
-          onClick={onAdd}
+          onClick={handleAdd}
+          disabled={loading}
         >
           Thêm bàn mới
         </Button>
       </Box>
-      {tabAreas.length > 0 ? (
+
+      {tabAreas.length > 0 && (
         <Tabs
           value={activeArea}
           onChange={(e, newValue) => setActiveArea(newValue)}
@@ -99,31 +58,52 @@ const TableAdminView = ({ tables, onEdit, onDelete, onAdd, areas }) => {
             <Tab label={area} value={area} key={area} />
           ))}
         </Tabs>
-      ) : (
-        <Typography textAlign="center" sx={{ mb: 2 }}>
-          Không có khu vực nào
-        </Typography>
       )}
-      <Box sx={{ height: 400, width: "100%" }}>
-        <DataGrid
-          rows={filteredTables}
-          columns={columns}
-          getRowId={(row) => row.table_number}
-          pageSizeOptions={[10]}
-          pagination
-          disableRowSelectionOnClick
-          sx={{
-            "& .MuiDataGrid-columnHeaders": {
-              backgroundColor: "#f5f5f5",
-            },
-            "& .MuiDataGrid-row": {
-              "&:hover": {
-                backgroundColor: "#f0f0f0",
-              },
-            },
-          }}
-        />
-      </Box>
+
+      {loading ? (
+        <Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Số bàn</TableCell>
+                <TableCell>Sức chứa</TableCell>
+                <TableCell>Khu vực</TableCell>
+                <TableCell align="right">Hành động</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredTables.map((table) => (
+                <TableRow key={table._id || table.table_id}>
+                  <TableCell>{table.table_number}</TableCell>
+                  <TableCell>{table.capacity}</TableCell>
+                  <TableCell>{table.area}</TableCell>
+                  <TableCell align="right">
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      onClick={() => handleEdit(table)}
+                      sx={{ mr: 1 }}
+                    >
+                      Sửa
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      onClick={() => handleDelete(table.table_id)}
+                    >
+                      Xóa
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
     </Box>
   );
 };

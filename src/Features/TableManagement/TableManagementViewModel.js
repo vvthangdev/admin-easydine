@@ -15,6 +15,7 @@ const TableManagementViewModel = () => {
   const [loading, setLoading] = useState(false);
   const [activeArea, setActiveArea] = useState("");
 
+  // Fetch tables and their status
   const fetchTables = useCallback(async () => {
     setLoading(true);
     try {
@@ -51,9 +52,11 @@ const TableManagementViewModel = () => {
           table_number: tableNumber,
           same_order_tables: sameOrderTables.length ? sameOrderTables : null,
           order_number: orderNumber,
+          area: tablesResponse.find((t) => t._id === table.table_id)?.area || "Unknown",
         };
       });
 
+      console.log("Updated tables:", formattedTables); // Debug log
       setTables(formattedTables);
     } catch (error) {
       console.error("Error fetching tables:", error);
@@ -63,11 +66,15 @@ const TableManagementViewModel = () => {
     }
   }, []);
 
+  // Fetch areas
   const fetchAreas = useCallback(async () => {
     try {
       const response = await tableAPI.getAllAreas();
+      if (!Array.isArray(response)) {
+        throw new Error("Dữ liệu khu vực không hợp lệ");
+      }
       setAreas(response);
-      if (response.length > 0 && !response.includes(activeArea)) {
+      if (response.length > 0 && !activeArea) {
         setActiveArea(response[0]);
       }
     } catch (error) {
@@ -76,152 +83,161 @@ const TableManagementViewModel = () => {
     }
   }, [activeArea]);
 
-  const handleRefresh = () => {
+  // Initial data fetch
+  useEffect(() => {
     fetchTables();
     fetchAreas();
-  };
+  }, [fetchTables, fetchAreas]);
 
-  useEffect(() => {
-    if (tables.length === 0) {
-      fetchTables();
-    }
-    if (areas.length === 0) {
-      fetchAreas();
-    }
-  }, [fetchTables, fetchAreas, tables.length, areas.length]);
+  // Handle refresh
+  const handleRefresh = useCallback(() => {
+    fetchTables();
+    fetchAreas();
+  }, [fetchTables, fetchAreas]);
 
-  const tabAreas = [...new Set(tables.map((table) => table.area))];
-
-  const filteredTables =
-    activeArea === ""
-      ? tables
-      : tables.filter((table) => table.area === activeArea);
-
-  const handleAdd = () => {
+  // Handle add table
+  const handleAdd = useCallback(() => {
     setEditingTable(null);
     setIsFormModalVisible(true);
-  };
+  }, []);
 
-  const handleEdit = (table) => {
-    setEditingTable(table);
+  // Handle edit table
+  const handleEdit = useCallback((table) => {
+    console.log("Setting editingTable:", table); // Debug log
+    setEditingTable({
+      table_id: table.table_id || table._id,
+      table_number: table.table_number,
+      capacity: table.capacity,
+      area: table.area,
+    });
     setIsFormModalVisible(true);
-  };
+  }, []);
 
-  const handleDelete = async (tableId) => {
-    try {
-      await tableAPI.deleteTable({ table_id: tableId });
+  // Handle delete success
+  const handleDeleteSuccess = useCallback(
+    (tableId) => {
+      console.log("Removing table with ID:", tableId); // Debug log
       setTables(tables.filter((t) => t.table_id !== tableId));
-      toast.success(`Xóa bàn thành công`);
-    } catch (error) {
-      console.error("Error deleting table:", error);
-      toast.error("Xóa bàn không thành công");
-    }
-  };
+    },
+    [tables]
+  );
 
-  const handleReleaseTable = async () => {
-    if (!releasingTable?.reservation_id || !releasingTable?.table_id) {
-      toast.error("Thông tin đặt chỗ hoặc bàn không hợp lệ");
-      return;
-    }
+  // Handle release table
+  const handleReleaseTable = useCallback(
+    async () => {
+      if (!releasingTable?.reservation_id || !releasingTable?.table_id) {
+        toast.error("Thông tin đặt chỗ hoặc bàn không hợp lệ");
+        return;
+      }
 
-    try {
-      await tableAPI.releaseTable({
-        reservation_id: releasingTable.reservation_id,
-        table_id: releasingTable.table_id,
-      });
-      setTables(
-        tables.map((table) =>
-          table.table_id === releasingTable.table_id
-            ? {
-                ...table,
-                status: "Available",
-                start_time: null,
-                end_time: null,
-                reservation_id: null,
-                same_order_tables: null,
-                order_number: null,
-              }
-            : table
-        )
-      );
-      toast.success(`Trả bàn số ${releasingTable.table_number} thành công`);
-      setIsReleaseModalVisible(false);
-      setReleasingTable(null);
-    } catch (error) {
-      console.error("Error releasing table:", error);
-      toast.error("Trả bàn không thành công");
-    }
-  };
-
-  const handleFormSubmit = async (values) => {
-    const requestData = {
-      table_number: values.table_number,
-      capacity: values.capacity,
-      area: Array.isArray(values.area) ? values.area[0] : values.area,
-    };
-
-    try {
-      if (editingTable) {
-        await tableAPI.updateTable(requestData);
+      setLoading(true);
+      try {
+        await tableAPI.releaseTable({
+          reservation_id: releasingTable.reservation_id,
+          table_id: releasingTable.table_id,
+        });
         setTables(
           tables.map((table) =>
-            table.table_number === editingTable.table_number
-              ? { ...table, ...requestData }
+            table.table_id === releasingTable.table_id
+              ? {
+                  ...table,
+                  status: "Available",
+                  start_time: null,
+                  end_time: null,
+                  reservation_id: null,
+                  same_order_tables: null,
+                  order_number: null,
+                }
               : table
           )
         );
-        toast.success(`Cập nhật bàn số ${requestData.table_number} thành công`);
+        toast.success(`Trả bàn số ${releasingTable.table_number} thành công`);
+        setIsReleaseModalVisible(false);
+        setReleasingTable(null);
+      } catch (error) {
+        console.error("Error releasing table:", error);
+        toast.error("Trả bàn không thành công");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [releasingTable, tables]
+  );
+
+  // Handle form submit for add/edit table
+  const handleFormSubmit = useCallback(
+    (tableData) => {
+      console.log("Received table data for update:", tableData);
+      if (!tableData || !tableData.table_id || !tableData.table_number || !tableData.capacity || !tableData.area) {
+        console.error("Invalid table data received:", tableData);
+        return;
+      }
+
+      setLoading(true);
+      if (editingTable) {
+        setTables(
+          tables.map((table) =>
+            table.table_id === editingTable.table_id
+              ? { ...table, ...tableData }
+              : table
+          )
+        );
       } else {
-        const newTable = await tableAPI.addTable(requestData);
         setTables([
           ...tables,
           {
-            ...newTable,
+            ...tableData,
             status: "Available",
-            area: requestData.area,
             same_order_tables: null,
             order_number: null,
           },
         ]);
-        toast.success(`Thêm bàn số ${requestData.table_number} thành công`);
       }
       setIsFormModalVisible(false);
-      if (!areas.includes(requestData.area)) {
+      if (!areas.includes(tableData.area)) {
         fetchAreas();
       }
-    } catch (error) {
-      console.error("Error saving table:", error);
-      toast.error(
-        editingTable ? "Cập nhật bàn không thành công" : "Thêm bàn không thành công"
-      );
-    }
-  };
+      setLoading(false);
+    },
+    [editingTable, tables, areas, fetchAreas]
+  );
 
-  const handleMergeSuccess = () => {
+  // Handle merge success
+  const handleMergeSuccess = useCallback(() => {
     fetchTables();
-  };
+  }, [fetchTables]);
 
-  const handleOrderSuccess = () => {
+  // Handle order success
+  const handleOrderSuccess = useCallback(() => {
     fetchTables();
-  };
+  }, [fetchTables]);
 
-  const handleNewOrder = () => {
+  // Handle new order
+  const handleNewOrder = useCallback(() => {
     setIsOrderModalVisible(true);
-  };
+  }, []);
 
-  const handleOrderSubmit = async (orderData) => {
-    try {
-      await orderAPI.createOrder(orderData);
-      toast.success("Thêm đơn hàng mới thành công");
-      fetchTables();
-      setIsOrderModalVisible(false);
-    } catch (error) {
-      console.error("Error creating order:", error);
-      toast.error("Thêm đơn hàng không thành công");
-    }
-  };
+  // Handle order submit
+  const handleOrderSubmit = useCallback(
+    async (orderData) => {
+      setLoading(true);
+      try {
+        await orderAPI.createOrder(orderData);
+        toast.success("Thêm đơn hàng mới thành công");
+        fetchTables();
+        setIsOrderModalVisible(false);
+      } catch (error) {
+        console.error("Error creating order:", error);
+        toast.error("Thêm đơn hàng không thành công");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [fetchTables]
+  );
 
-  const orderSummary = () => {
+  // Order summary
+  const orderSummary = useCallback(() => {
     const orders = {};
     tables.forEach((table) => {
       if (table.reservation_id) {
@@ -235,9 +251,16 @@ const TableManagementViewModel = () => {
         orders[table.reservation_id].tables.push(table.table_number);
       }
     });
-
     return Object.values(orders);
-  };
+  }, [tables]);
+
+  // Filter tables by active area
+  const filteredTables = activeArea
+    ? tables.filter((table) => table.area === activeArea)
+    : tables;
+
+  // Get unique areas for tabs
+  const tabAreas = [...new Set(tables.map((table) => table.area))];
 
   return {
     tables,
@@ -261,7 +284,7 @@ const TableManagementViewModel = () => {
     handleRefresh,
     handleAdd,
     handleEdit,
-    handleDelete,
+    handleDeleteSuccess,
     handleReleaseTable,
     handleFormSubmit,
     handleMergeSuccess,
