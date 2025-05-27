@@ -2,6 +2,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { ThemeProvider } from "@mui/material/styles";
+import { BrowserRouter } from "react-router-dom"; // 👉 THÊM DÒNG NÀY
 import "./index.css";
 import App from "./App";
 import "./styles/global.css";
@@ -14,9 +15,11 @@ import { AuthProvider } from "./contexts/AuthContext";
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <ThemeProvider theme={theme}>
-    <AuthProvider>
-      <App />
-    </AuthProvider>
+    <BrowserRouter> {/* 👉 BỌC App TRONG BrowserRouter */}
+      <AuthProvider>
+        <App />
+      </AuthProvider>
+    </BrowserRouter>
   </ThemeProvider>
 );
 

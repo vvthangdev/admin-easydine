@@ -1,44 +1,41 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { message } from 'antd';
+import { useEffect, useState } from 'react';
 
 const ProtectedRoute = ({ children, roles }) => {
     const { user, loading } = useAuth();
     const location = useLocation();
     const token = localStorage.getItem('accessToken');
+    const [redirect, setRedirect] = useState(null);
 
-    console.log('✅ [ProtectedRoute.js] Checking auth for path:', location.pathname);
-    console.log('[ProtectedRoute.js] Loading:', loading);
-    console.log('[ProtectedRoute.js] User:', user ? { username: user.username, role: user.role } : 'null');
-    console.log('[ProtectedRoute.js] Token:', token ? token.slice(0, 10) + '...' : 'missing');
-    console.log('[ProtectedRoute.js] Required roles:', roles || 'none');
+    useEffect(() => {
+        if (loading) return;
 
-    if (loading) {
-        console.log('⚠️ [ProtectedRoute.js] Waiting for auth loading');
-        return null; // Hoặc component loading
-    }
+        if (!token || typeof token !== 'string' || token.trim() === '') {
+            message.error('Vui lòng đăng nhập');
+            localStorage.clear();
+            setRedirect(<Navigate to="/login" state={{ from: location }} replace />);
+            return;
+        }
 
-    if (!token || typeof token !== 'string' || token.trim() === '') {
-        console.log('❌ [ProtectedRoute.js] No valid accessToken, redirecting to login');
-        message.error('Vui lòng đăng nhập');
-        localStorage.clear();
-        return <Navigate to="/login" state={{ from: location }} replace />;
-    }
+        if (!user) {
+            message.error('Vui lòng đăng nhập');
+            localStorage.clear();
+            setRedirect(<Navigate to="/login" state={{ from: location }} replace />);
+            return;
+        }
 
-    if (!user) {
-        console.log('❌ [ProtectedRoute.js] No user data, redirecting to login');
-        message.error('Vui lòng đăng nhập');
-        localStorage.clear();
-        return <Navigate to="/login" state={{ from: location }} replace />;
-    }
+        if (roles && !roles.includes(user.role)) {
+            message.error('Bạn không có quyền truy cập');
+            setRedirect(<Navigate to="/unauthorized" replace />);
+            return;
+        }
+    }, [loading, token, user, roles, location]);
 
-    if (roles && !roles.includes(user.role)) {
-        console.log('❌ [ProtectedRoute.js] User role not allowed:', user.role, 'Redirecting to unauthorized');
-        message.error('Bạn không có quyền truy cập');
-        return <Navigate to="/unauthorized" replace />;
-    }
+    if (loading) return null;
+    if (redirect) return redirect;
 
-    console.log('✅ [ProtectedRoute.js] Access granted for user:', user.username);
     return children;
 };
 
