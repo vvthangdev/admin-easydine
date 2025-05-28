@@ -1,4 +1,5 @@
 import { io } from "socket.io-client";
+const API_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8080";
 
 let socket = null;
 
@@ -16,8 +17,8 @@ export const initSocketClient = (setSocket) => {
     throw new Error("Access token not found");
   }
 
-  console.log("[socketClient.js] Initializing new socket connection to http://localhost:8080");
-  socket = io("http://localhost:8080", {
+  console.log(`[socketClient.js] Initializing new socket connection to ${API_URL}`);
+  socket = io(API_URL, {
     reconnection: true,
     reconnectionAttempts: 5,
     reconnectionDelay: 1000,
