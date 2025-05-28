@@ -39,7 +39,7 @@ export default function Sidebar({ onCollapseChange }) {
       icon: <ShoppingBag size={20} />,
     },
     {
-      path: "/admin/menu",
+      path: "/admin/items",
       label: "Quản lý menu",
       icon: <MenuIcon size={20} />,
     },
