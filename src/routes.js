@@ -1,22 +1,22 @@
-import React, { useEffect } from 'react';
-import { Route, Routes, useNavigate, useParams } from 'react-router-dom';
-import Login from './Features/Login/Login';
-import HomePage from './Features/HomePage/HomePage';
-import Overview from './Features/Admin/pages/Overview';
-import Register from './Features/Register/Register';
-import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute';
-import Profile from './Features/Profile/profile';
-import AdminLayout from './Features/Admin/layouts/AdminLayout';
-import BanKhongPhaiLaAdmin from './Features/BanKhongPhaiLaAdmin/BanKhongPhaiLaAdmin';
-import MergeOrderModalViewModel from './Features/TableManagement/TableManagementView';
-import ItemManagements from './Features/ItemManagement/ItemManagements';
-import UserVoucherManagement from './Features/User/UserVoucherManagement';
-import Header from '../src/components/HomePage/Header';
-import OrderManagements from './Features/OrderManagement/OrderManagement';
-import ContactManagement from './Features/Admin/pages/ContactManagement';
-import PaymentSuccess from './Features/OrderFormModal/PaymentSuccess';
-import PaymentFailed from './Features/OrderFormModal/PaymentFailed';
-import MenuDisplay from './Features/Menu/MenuDisplay';
+import React, { useEffect } from "react";
+import { Route, Routes, useNavigate, useParams } from "react-router-dom";
+import Login from "./pages/Login/Login";
+import HomePage from "./pages/HomePage/HomePage";
+import Overview from "./pages/Admin/pages/Overview";
+import Register from "./pages/Register/Register";
+import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
+import Profile from "./pages/Profile/profile";
+import AdminLayout from "./pages/Admin/layouts/AdminLayout";
+import BanKhongPhaiLaAdmin from "./pages/BanKhongPhaiLaAdmin/BanKhongPhaiLaAdmin";
+import MergeOrderModalViewModel from "./pages/TableManagement/TableManagementView";
+import ItemManagements from "./pages/ItemManagement/ItemManagements";
+import UserVoucherManagement from "./pages/User/UserVoucherManagement";
+import Header from "../src/components/HomePage/Header";
+import OrderManagements from "./pages/OrderManagement/OrderManagement";
+import ContactManagement from "./pages/Admin/pages/ContactManagement";
+import PaymentSuccess from "./pages/OrderFormModal/PaymentSuccess";
+import PaymentFailed from "./pages/OrderFormModal/PaymentFailed";
+import MenuDisplay from "./pages/Menu/MenuDisplay";
 
 // Component xử lý redirect và lưu tableId
 const MenuRedirect = () => {
@@ -25,8 +25,8 @@ const MenuRedirect = () => {
 
   useEffect(() => {
     if (tableId) {
-      localStorage.setItem('tableId', tableId);
-      navigate('/menu', { replace: true }); // Sử dụng replace để tránh thêm lịch sử trình duyệt
+      localStorage.setItem("tableId", tableId);
+      navigate("/menu", { replace: true }); // Sử dụng replace để tránh thêm lịch sử trình duyệt
     }
   }, [tableId, navigate]);
 
@@ -35,8 +35,8 @@ const MenuRedirect = () => {
 
 const AppRoutes = () => {
   const navLinks = [
-    { path: '/', label: 'Trang chủ' },
-    { path: '/menu', label: 'Menu' },
+    { path: "/", label: "Trang chủ" },
+    { path: "/menu", label: "Menu" },
   ];
 
   return (
@@ -49,7 +49,8 @@ const AppRoutes = () => {
         <Route path="/unauthorized" element={<BanKhongPhaiLaAdmin />} />
         <Route path="/payment-success" element={<PaymentSuccess />} />
         <Route path="/payment-failed" element={<PaymentFailed />} />
-        <Route path="/menu/:tableId" element={<MenuRedirect />} /> {/* Thay đổi từ /frontend/menu/:tableId */}
+        <Route path="/menu/:tableId" element={<MenuRedirect />} />{" "}
+        {/* Thay đổi từ /frontend/menu/:tableId */}
         <Route path="/menu" element={<MenuDisplay />} />
         <Route
           path="/profile"
@@ -62,7 +63,7 @@ const AppRoutes = () => {
         <Route
           path="/admin"
           element={
-            <ProtectedRoute roles={['ADMIN']}>
+            <ProtectedRoute roles={["ADMIN"]}>
               <AdminLayout />
             </ProtectedRoute>
           }
