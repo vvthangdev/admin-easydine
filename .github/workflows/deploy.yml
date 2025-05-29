@@ -74,5 +74,5 @@ jobs:
 
       - name: Check Frontend Health
         run: |
-          sleep 30
+          sleep 10
           curl -f http://${{ secrets.SERVER_IP }}:3000 || exit 1
