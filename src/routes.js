@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { Route, Routes, useNavigate, useParams } from "react-router-dom";
+import React from "react";
+import { Route, Routes } from "react-router-dom";
 import Login from "./pages/Login/Login";
 import HomePage from "./pages/HomePage/HomePage";
 import Overview from "./pages/Admin/pages/Overview";
@@ -16,27 +16,10 @@ import OrderManagements from "./pages/OrderManagement/OrderManagement";
 import ContactManagement from "./pages/Admin/pages/ContactManagement";
 import PaymentSuccess from "./pages/OrderFormModal/PaymentSuccess";
 import PaymentFailed from "./pages/OrderFormModal/PaymentFailed";
-import MenuDisplay from "./pages/Menu/MenuDisplay";
-
-// Component xử lý redirect và lưu tableId
-const MenuRedirect = () => {
-  const { tableId } = useParams();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (tableId) {
-      localStorage.setItem("tableId", tableId);
-      navigate("/menu", { replace: true }); // Sử dụng replace để tránh thêm lịch sử trình duyệt
-    }
-  }, [tableId, navigate]);
-
-  return null;
-};
 
 const AppRoutes = () => {
   const navLinks = [
     { path: "/", label: "Trang chủ" },
-    { path: "/menu", label: "Menu" },
   ];
 
   return (
@@ -49,9 +32,6 @@ const AppRoutes = () => {
         <Route path="/unauthorized" element={<BanKhongPhaiLaAdmin />} />
         <Route path="/payment-success" element={<PaymentSuccess />} />
         <Route path="/payment-failed" element={<PaymentFailed />} />
-        <Route path="/menu/:tableId" element={<MenuRedirect />} />{" "}
-        {/* Thay đổi từ /frontend/menu/:tableId */}
-        <Route path="/menu" element={<MenuDisplay />} />
         <Route
           path="/profile"
           element={
