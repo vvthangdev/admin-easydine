@@ -13,4 +13,4 @@ services:
 networks:
   admin-easydine:
     name: admin-easydine
-    driver: bridge
+    external: true
