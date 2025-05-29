@@ -1,93 +1,12 @@
-# EasyDine - Installation Guide
+# React + Vite
 
-## Overview
-EasyDine is a restaurant management system with separate admin interface and backend components. This guide will help you set up both components for local development.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## Step 1: Clone the Repository
+Currently, two official plugins are available:
 
-First, download the project source code from GitHub to your local machine. Use the following command to clone both the Admin Web interface and Backend:
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-```bash
-git clone https://github.com/vvthangdev/EasyDine
-```
+## Expanding the ESLint configuration
 
-This command will copy the entire source code into a new directory named "EasyDine" on your machine.
-
-## Step 2: Install and Run Admin Web Interface
-
-Navigate to the Admin Web directory:
-
-```bash
-cd EasyDine/admin-EasyDine
-```
-
-Install the necessary dependencies for the Admin Web project:
-
-```bash
-npm install
-```
-
-After installation is complete, start the Admin Web application:
-
-```bash
-npm start
-```
-
-The Admin Web interface will launch in your default browser at [http://localhost:3000](http://localhost:3000). You can access the system's administration dashboard through this URL.
-
-## Step 3: Install and Run Backend Server
-
-Open a new terminal window and navigate to the Backend directory:
-
-```bash
-cd EasyDine/backend-EasyDine
-```
-
-Install the necessary dependencies for the Backend project:
-
-```bash
-npm install
-```
-
-After installation is complete, start the Backend server in development mode:
-
-```bash
-npm run dev
-```
-
-This command will start the Backend server, making all API endpoints available for the system. By default, the server runs at [http://localhost:8080](http://localhost:8080).
-
-## Demo Screenshots
-![image](https://github.com/user-attachments/assets/5fe15d04-4708-440f-97aa-a6801df82910)
-
-Here are some screenshots showcasing EasyDine's features:
-
-### Admin Dashboard
-![image](https://github.com/user-attachments/assets/eadf5ce3-b9a0-454c-a4a6-b7a4a9569520)
-
-*The main administration dashboard with an overview of restaurant operations*
-
-### Order Management
-![image](https://github.com/user-attachments/assets/ba4775b1-28aa-4745-bc01-380af4920b7b)
-
-*Interface for managing and tracking customer orders*
-
-### Menu Editor
-![image](https://github.com/user-attachments/assets/b8b9785c-3b78-43a6-944f-cfe9b1c64201)
-
-*Tool for creating and updating restaurant menu items*
-
-### Customer Analytics
-![image](https://github.com/user-attachments/assets/dca29050-a7bc-4337-bfdd-cb6c1471f568)
-
-*Visualization of customer data*
-
-## Requirements
-
-- Node.js (v14 or newer recommended)
-- npm (v6 or newer)
-- Git
-
-## Additional Information
-
-For any issues or questions, please open an issue in the GitHub repository or contact the repository maintainer.
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
