@@ -14,8 +14,8 @@ import UserVoucherManagement from "./pages/User/UserVoucherManagement";
 import Header from "../src/components/HomePage/Header";
 import OrderManagements from "./pages/OrderManagement/OrderManagement";
 import ContactManagement from "./pages/Admin/pages/ContactManagement";
-import PaymentSuccess from "./pages/OrderFormModal/PaymentSuccess";
-import PaymentFailed from "./pages/OrderFormModal/PaymentFailed";
+import PaymentSuccess from "./pages/OrderFormModal/Payment/PaymentSuccess";
+import PaymentFailed from "./pages/OrderFormModal/Payment/PaymentFailed";
 
 const AppRoutes = () => {
   const navLinks = [

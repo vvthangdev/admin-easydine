@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { orderAPI } from "../../services/apis/Order";
+import { orderAPI } from "../../../services/apis/Order";
 
 const PaymentModal = ({ visible, onCancel, orderDetails, zIndex }) => {
   const [paymentMethod, setPaymentMethod] = useState("vnpay"); // Mặc định chọn VNPay

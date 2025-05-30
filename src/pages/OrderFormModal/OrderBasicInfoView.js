@@ -19,7 +19,7 @@ import {
   Button,
 } from "@mui/material";
 import OrderBasicInfoViewModel from "./OrderBasicInfoViewModel";
-import PaymentModal from "./PaymentModal";
+import PaymentModal from "./Payment/PaymentModal";
 import CancelItemsModal from "./CancelItemsModal"; // Import modal mới
 import { toast } from "react-toastify";
 
@@ -51,7 +51,9 @@ const OrderBasicInfoView = ({
 
   const activeTab = Object.keys(groupedTables)[0] || "Tầng 1";
   const [currentTab, setCurrentTab] = React.useState(activeTab);
-  const [voucherCode, setVoucherCode] = React.useState(formData.voucherCode || "");
+  const [voucherCode, setVoucherCode] = React.useState(
+    formData.voucherCode || ""
+  );
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [cancelItemsModalOpen, setCancelItemsModalOpen] = useState(false); // Trạng thái modal hủy món
 
@@ -123,7 +125,9 @@ const OrderBasicInfoView = ({
               </Select>
             </FormControl>
 
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 1, p: 1 }}>
+            <Box
+              sx={{ display: "flex", flexDirection: "column", gap: 1, p: 1 }}
+            >
               <Typography variant="subtitle1">Trạng thái</Typography>
               <Typography
                 sx={{
@@ -227,11 +231,11 @@ const OrderBasicInfoView = ({
                               : []
                           }
                           label={`Chọn bàn ở ${area}`}
-                          onChange={(e) => handleTableChange(area, e.target.value)}
+                          onChange={(e) =>
+                            handleTableChange(area, e.target.value)
+                          }
                           renderValue={(selected) =>
-                            selected
-                              .map((key) => key.split("|")[0])
-                              .join(", ")
+                            selected.map((key) => key.split("|")[0]).join(", ")
                           }
                         >
                           {groupedTables[area]
@@ -245,7 +249,9 @@ const OrderBasicInfoView = ({
                                 key={table._id}
                                 value={`${table.table_number}|${table.area}|${table._id}`}
                                 sx={{
-                                  fontWeight: formData.tables.includes(table._id)
+                                  fontWeight: formData.tables.includes(
+                                    table._id
+                                  )
                                     ? "bold"
                                     : "normal",
                                   color: formData.tables.includes(table._id)
@@ -253,8 +259,10 @@ const OrderBasicInfoView = ({
                                     : "inherit",
                                 }}
                               >
-                                Bàn {table.table_number} (Sức chứa: {table.capacity})
-                                {formData.tables.includes(table._id) && " - Đã chọn"}
+                                Bàn {table.table_number} (Sức chứa:{" "}
+                                {table.capacity})
+                                {formData.tables.includes(table._id) &&
+                                  " - Đã chọn"}
                               </MenuItem>
                             ))}
                         </Select>
@@ -271,13 +279,24 @@ const OrderBasicInfoView = ({
 
         <Grid item xs={12} md={6}>
           <Box sx={{ p: 1, mt: { xs: 2, md: 0 } }}>
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 1,
+              }}
+            >
               <Typography variant="subtitle1">Danh sách món ăn</Typography>
               <Button
                 variant="contained"
                 color="error"
                 onClick={handleOpenCancelItemsModal}
-                disabled={!formData.items || formData.items.length === 0 || formData.status === "pending"}
+                disabled={
+                  !formData.items ||
+                  formData.items.length === 0 ||
+                  formData.status === "pending"
+                }
                 sx={{ minWidth: 100 }}
               >
                 Hủy Món
@@ -293,7 +312,9 @@ const OrderBasicInfoView = ({
                 <TableHead>
                   <TableRow>
                     <TableCell sx={{ fontWeight: "bold" }}>Tên món</TableCell>
-                    <TableCell sx={{ fontWeight: "bold" }}>Kích thước</TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>
+                      Kích thước
+                    </TableCell>
                     <TableCell sx={{ fontWeight: "bold" }}>Số lượng</TableCell>
                     <TableCell sx={{ fontWeight: "bold" }}>Giá</TableCell>
                     <TableCell sx={{ fontWeight: "bold" }}>Tổng</TableCell>
@@ -346,7 +367,11 @@ const OrderBasicInfoView = ({
               </Box>
               {formData.voucherCode && formData.discountAmount > 0 && (
                 <Box
-                  sx={{ display: "flex", justifyContent: "space-between", mt: 1 }}
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    mt: 1,
+                  }}
                 >
                   <Typography>Giảm giá ({formData.voucherCode}):</Typography>
                   <Typography fontWeight="bold" color="success.main">
@@ -364,12 +389,16 @@ const OrderBasicInfoView = ({
                   borderColor: "divider",
                 }}
               >
-                <Typography fontWeight="bold">Tổng cộng (Đã bao gồm VAT):</Typography>
+                <Typography fontWeight="bold">
+                  Tổng cộng (Đã bao gồm VAT):
+                </Typography>
                 <Typography fontWeight="bold" color="primary">
                   {total.toLocaleString()} VND
                 </Typography>
               </Box>
-              <Box sx={{ mt: 2, display: "flex", flexDirection: "column", gap: 1 }}>
+              <Box
+                sx={{ mt: 2, display: "flex", flexDirection: "column", gap: 1 }}
+              >
                 <Box sx={{ display: "flex", gap: 1 }}>
                   <TextField
                     label="Mã voucher"

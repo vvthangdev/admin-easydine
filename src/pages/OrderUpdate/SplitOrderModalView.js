@@ -1,9 +1,9 @@
 import React from "react";
-import { Modal, Button, Table, Input } from "antd";
+import { Modal, Button, Table } from "antd";
 import SplitOrderModalViewModel from "./SplitOrderModalViewModel";
 
 const SplitOrderModalView = ({ visible, orderDetails, onCancel, onSuccess, zIndex }) => {
-  const { splitItems, columns, handleQuantityChange, handleSplitOrder } = SplitOrderModalViewModel({
+  const { splitItems, columns, handleSplitOrder } = SplitOrderModalViewModel({
     visible,
     orderDetails,
     onCancel,

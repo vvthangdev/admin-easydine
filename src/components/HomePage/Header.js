@@ -29,12 +29,14 @@ function Header({ logo, navLinks }) {
   };
 
   useEffect(() => {
-    if (user && !profile) {
-      fetchProfile();
-    } else if (!user) {
-      setProfile(null);
+    if(!user) {
+      setProfile(null)
+      return
     }
-  }, [user]);
+    if(!profile) {
+      fetchProfile();
+    }
+  }, [user, profile, fetchProfile]);
 
   const handleLogout = async () => {
     try {
