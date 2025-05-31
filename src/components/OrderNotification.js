@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Box, Paper, Typography, IconButton, Stack, Button } from "@mui/material";
 import { Package, X } from "lucide-react";
-import OrderDetailsModal from "./OrderDetailsModal"; // Import component mới
+import OrderDetailsModal from "./OrderDetailsModal";
 
 export default function OrderNotification({
   _id,
@@ -9,11 +9,11 @@ export default function OrderNotification({
   time,
   status,
   tableDetails,
-  onClose,
+  onClose, // Prop để đóng notification
 }) {
   const [openModal, setOpenModal] = useState(false);
 
-  // Log dữ liệu props được truyền vào
+  // Log dữ liệu props
   console.log("[OrderNotification] Dữ liệu props nhận được:", {
     _id,
     type,
@@ -22,7 +22,6 @@ export default function OrderNotification({
     tableDetails,
   });
 
-  // Chuẩn bị dữ liệu hiển thị để log
   const displayData = {
     _id,
     type,
@@ -35,10 +34,14 @@ export default function OrderNotification({
   };
   console.log("[OrderNotification] Dữ liệu được hiển thị:", displayData);
 
-  // Hàm xử lý khi bấm "Xem Chi Tiết"
   const handleViewDetails = () => {
-    // onClose(); // Đóng notification
     setOpenModal(true); // Mở modal
+  };
+
+  // Hàm đóng modal và notification
+  const handleCloseAll = () => {
+    setOpenModal(false); // Đóng modal
+    onClose(); // Đóng notification
   };
 
   return (
@@ -56,7 +59,6 @@ export default function OrderNotification({
           transition: "all 0.3s ease-in-out",
           "&:hover": {
             boxShadow: "0 6px 18px rgba(0, 0, 0, 0.06)",
-            transform: "translateY(-2px)",
           },
         }}
       >
@@ -122,10 +124,9 @@ export default function OrderNotification({
         </Box>
       </Paper>
 
-      {/* Gọi component OrderDetailsModal */}
       <OrderDetailsModal
         open={openModal}
-        onClose={() => setOpenModal(false)}
+        onClose={handleCloseAll} // Truyền handleCloseAll thay vì chỉ đóng modal
         orderId={_id}
       />
     </>

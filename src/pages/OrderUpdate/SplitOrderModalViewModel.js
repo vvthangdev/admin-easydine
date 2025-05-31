@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { message } from "antd";
+import { message, Input } from "antd";
 import { orderAPI } from "../../services/apis/Order";
 
-const SplitOrderModalViewModel = ({ visible, orderDetails, onCancel, onSuccess, Input }) => {
+const SplitOrderModalViewModel = ({ visible, orderDetails, onCancel, onSuccess }) => {
   const [splitItems, setSplitItems] = useState([]);
 
   useEffect(() => {

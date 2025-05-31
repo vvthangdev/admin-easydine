@@ -15,7 +15,7 @@ import {
   Avatar,
 } from "@mui/material";
 import { X } from "lucide-react";
-import { orderAPI } from "../services/apis/Order"; // Giả sử đây là nơi định nghĩa getOrderInfo
+import { orderAPI } from "../services/apis/Order";
 
 export default function OrderDetailsModal({ open, onClose, orderId }) {
   const [orderDetails, setOrderDetails] = useState(null);
@@ -25,7 +25,7 @@ export default function OrderDetailsModal({ open, onClose, orderId }) {
   useEffect(() => {
     if (open && orderId) {
       const fetchOrderDetails = async () => {
-        console.log(orderId)
+        console.log(orderId);
         setLoading(true);
         try {
           const response = await orderAPI.getOrderInfo({ id: orderId });
@@ -47,7 +47,12 @@ export default function OrderDetailsModal({ open, onClose, orderId }) {
       open={open}
       onClose={onClose}
       aria-labelledby="order-details-modal"
-      sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 10000, // Đảm bảo z-index cao để tránh bị che
+      }}
     >
       <Paper
         sx={{
@@ -213,7 +218,7 @@ export default function OrderDetailsModal({ open, onClose, orderId }) {
 
         <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
           <Button
-            onClick={onClose}
+            onClick={onClose} // Gọi onClose từ props
             variant="contained"
             sx={{
               borderRadius: 20,
