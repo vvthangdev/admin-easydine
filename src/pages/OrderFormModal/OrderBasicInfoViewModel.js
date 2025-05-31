@@ -9,8 +9,6 @@ const OrderBasicInfoViewModel = ({
   setFormData,
   availableTables,
   fetchAvailableTables,
-  isTableAvailable,
-  orderId,
 }) => {
   const [staffList, setStaffList] = useState([]);
 

@@ -26,7 +26,7 @@ function AdminLayout() {
 
           <Box sx={{ bgcolor: 'background.paper', borderTop: '1px solid', borderColor: 'divider', p: 2 }}>
             <Typography variant="body2" color="text.secondary" textAlign="center">
-              © 2024 Restaurant Admin. All rights reserved.
+              © 2025 EasyDine - vvthang.dev. All rights reserved.
             </Typography>
           </Box>
         </Box>

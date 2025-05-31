@@ -21,7 +21,6 @@ import {
   TextField,
 } from "@mui/material"
 import { Search, UserPlus } from 'lucide-react'
-import UserSearch from "../Users/UserSearch"
 import UserSelectModalViewModel from "./UserSelectModalViewModel"
 
 const UserSelectModalView = ({ visible, onOk, onCancel, selectedUsers, setSelectedUsers, setSnackbar }) => {

@@ -2,7 +2,7 @@ import React, { forwardRef } from "react";
 import { Typography, Box } from "@mui/material";
 import moment from "moment";
 
-const InvoiceDetails = forwardRef(({ orderDetails, customerInfo, staffInfo }, ref) => {
+const InvoiceDetails = forwardRef(({ orderDetails, customerInfo, staffInfo, cashierInfo }, ref) => {
   return (
     <Box
       ref={ref}
@@ -62,6 +62,9 @@ const InvoiceDetails = forwardRef(({ orderDetails, customerInfo, staffInfo }, re
             </Typography>
             <Typography variant="body2">
               <strong>Nhân viên phục vụ:</strong> {staffInfo.name}
+            </Typography>
+            <Typography variant="body2">
+              <strong>Nhân viên thu ngân:</strong> {cashierInfo.name}
             </Typography>
             <Typography variant="body2">
               <strong>Mã Voucher:</strong> {orderDetails.order?.voucher_code || "Không có"}

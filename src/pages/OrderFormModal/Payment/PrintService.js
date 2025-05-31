@@ -2,7 +2,7 @@ import { toast } from "react-toastify";
 
 class PrintService {
   // Generate print-ready HTML content
-  static generatePrintHTML(orderDetails, staffInfo) {
+  static generatePrintHTML(orderDetails, staffInfo, cashierInfo) {
     if (!orderDetails) return '';
     
     return `
@@ -172,8 +172,12 @@ class PrintService {
                 <span>1</span>
               </div>
               <div class="info-row">
-                <span>Thu ngân Cashier:</span>
+                <span>Nhân viên phục vụ::</span>
                 <span>${staffInfo.name}</span>
+              </div>
+              <div class="info-row">
+                <span>Thu ngân Cashier:</span>
+                <span>${cashierInfo.name}</span>
               </div>
             </div>
 
@@ -278,13 +282,13 @@ class PrintService {
   }
 
   // Handle print invoice
-  static printInvoice(orderDetails, staffInfo) {
+  static printInvoice(orderDetails, staffInfo, cashierInfo) {
     if (!orderDetails) {
       toast.error("Không có dữ liệu để in!");
       return;
     }
 
-    const printContent = this.generatePrintHTML(orderDetails, staffInfo);
+    const printContent = this.generatePrintHTML(orderDetails, staffInfo, cashierInfo);
     const printWindow = window.open('', '', 'width=800,height=600');
     
     if (printWindow) {

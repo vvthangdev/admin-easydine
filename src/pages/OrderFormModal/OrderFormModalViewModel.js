@@ -106,7 +106,15 @@ const OrderFormModalViewModel = ({
             .utc(data.order?.time || editingOrder.time)
             .local()
             .format("HH:mm"),
-      end_time: "23:59",
+      end_time: data.reservedTables?.[0]
+        ? moment
+            .utc(data.reservedTables[0].end_time)
+            .local()
+            .format("HH:mm")
+        : moment
+            .utc(data.order?.time || editingOrder.time)
+            .local()
+            .format("HH:mm"),
       tables: reservedTables.map((table) => table.table_id),
       items,
       reservedTables,

@@ -15,6 +15,7 @@ const PaymentSuccess = () => {
   const orderId = query.get("order_id");
   const [orderDetails, setOrderDetails] = useState(null);
   const [staffInfo, setStaffInfo] = useState({ name: "N/A" });
+  const [cashierInfo, setCashierInfo] = useState({ name: "N/A" });
   const [customerInfo, setCustomerInfo] = useState({
     name: "N/A",
     phone: "N/A",
@@ -51,6 +52,18 @@ const PaymentSuccess = () => {
       }
     };
 
+    const fetchCashierInfo = async (cashierId) => {
+      try {
+        const response = await userAPI.getUserById({ id: cashierId });
+        setCashierInfo({
+          name: response?.name || "N/A",
+        });
+      } catch (error) {
+        console.error("Error fetching staff information:", error);
+        setStaffInfo({ name: "N/A" });
+      }
+    }
+
     const fetchCustomerInfo = async (customerId) => {
       try {
         const response = await adminAPI.getCustomerDetails(customerId);
@@ -76,10 +89,13 @@ const PaymentSuccess = () => {
     if (orderDetails?.order?.staff_id) {
       fetchStaffInfo(orderDetails.order.staff_id);
     }
+    if (orderDetails?.order?.cashier_id) {
+      fetchCashierInfo(orderDetails.order.cashier_id);
+    }
     if (orderDetails?.order?.customer_id) {
       fetchCustomerInfo(orderDetails.order.customer_id);
     }
-  }, [orderId, orderDetails?.order?.staff_id, orderDetails?.order?.customer_id]);
+  }, [orderId, orderDetails?.order?.staff_id, orderDetails?.order?.customer_id, orderDetails?.order?.cashier_id]);
 
   // Handle print invoice
   const handlePrint = () => {
@@ -88,7 +104,7 @@ const PaymentSuccess = () => {
       return;
     }
 
-    PrintService.printInvoice(orderDetails, staffInfo);
+    PrintService.printInvoice(orderDetails, staffInfo, cashierInfo);
   };
 
   return (
@@ -131,6 +147,7 @@ const PaymentSuccess = () => {
           orderDetails={orderDetails}
           customerInfo={customerInfo}
           staffInfo={staffInfo}
+          cashierInfo={cashierInfo}
         />
       ) : (
         <Typography variant="body2" color="text.secondary" textAlign="center">
