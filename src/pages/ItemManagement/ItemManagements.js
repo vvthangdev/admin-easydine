@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Form, message } from "antd";
 import { itemAPI } from "../../services/apis/Item";
-import minioClient from "../../Server/minioClient.js";
+import minioClient from "../../Server/minioClient";
 import SearchFilterBar from "./SearchFilterBar";
 import ItemTable from "./ItemTable";
 import ItemModal from "./ItemModal";

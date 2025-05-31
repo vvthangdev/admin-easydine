@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   Dialog,
@@ -9,15 +9,15 @@ import {
   Typography,
   Box,
   CircularProgress,
-} from "@mui/material"
-import { Plus, RefreshCw } from 'lucide-react'
-import UserTable from "./UserTable.js"
-import UserFormModalView from "./UserFormModalView.js"
-import UserFormModalViewModel from "./UserFormModalViewModel.js"
-import UserSearch from "./UserSearch.js"
-import UserScreenViewModel from "./UserScreenViewModel.js"
-import minioClient from "../../../Server/minioClient.js"
-import { adminAPI } from "../../../services/apis/Admin.js"
+} from "@mui/material";
+import { Plus, RefreshCw } from "lucide-react";
+import UserTable from "./UserTable";
+import UserFormModalView from "./UserFormModalView";
+import UserFormModalViewModel from "./UserFormModalViewModel";
+import UserSearch from "./UserSearch";
+import UserScreenViewModel from "./UserScreenViewModel";
+import minioClient from "../../../Server/minioClient";
+import { adminAPI } from "../../../services/apis/Admin";
 
 const UserScreenView = ({ setSnackbar }) => {
   const {
@@ -40,60 +40,85 @@ const UserScreenView = ({ setSnackbar }) => {
     setUsers,
     setFilteredUsers,
     fetchUsers,
-  } = UserScreenViewModel({ setSnackbar })
+  } = UserScreenViewModel({ setSnackbar });
 
-  const { form, errors, avatar, handleFieldChange, handleRoleChange, handleUploadChange, handleOk, handleCancel } =
-    UserFormModalViewModel({
-      editingUser,
-      setSnackbar,
-      onSave: async (formData) => {
-        try {
-          let imageUrl = editingUser?.avatar || ""
-          if (formData.avatar) {
-            const timestamp = Date.now()
-            const fileName = `images/${timestamp}_${formData.avatar.name}`
-            const minioStorage = minioClient.storage.from("test01")
-            const { error } = await minioStorage.upload(fileName, formData.avatar)
-            if (error) throw new Error(`Không thể upload file: ${error.message}`)
-            const { data: publicUrlData } = minioStorage.getPublicUrl(fileName)
-            if (!publicUrlData.publicUrl) throw new Error("Không thể lấy URL công khai cho ảnh.")
-            imageUrl = publicUrlData.publicUrl
-          }
-
-          const userData = {
-            id: editingUser?._id,
-            email: formData.email,
-            username: formData.username,
-            name: formData.name,
-            phone: formData.phone,
-            role: formData.role,
-            address: formData.address,
-            avatar: imageUrl,
-            ...(formData.password && { password: formData.password }),
-          }
-
-          if (editingUser) {
-            await adminAPI.updateUser(userData)
-            const updatedUser = { ...editingUser, ...userData, _id: editingUser._id }
-            const updatedUsers = users.map((user) => (user._id === editingUser._id ? updatedUser : user))
-            setUsers(updatedUsers)
-            setFilteredUsers(updatedUsers)
-            setSnackbar({
-              open: true,
-              message: "Cập nhật người dùng thành công",
-              severity: "success",
-            })
-          }
-          setIsModalVisible(false)
-        } catch (error) {
-          throw error
+  const {
+    form,
+    errors,
+    avatar,
+    handleFieldChange,
+    handleRoleChange,
+    handleUploadChange,
+    handleOk,
+    handleCancel,
+  } = UserFormModalViewModel({
+    editingUser,
+    setSnackbar,
+    onSave: async (formData) => {
+      try {
+        let imageUrl = editingUser?.avatar || "";
+        if (formData.avatar) {
+          const timestamp = Date.now();
+          const fileName = `images/${timestamp}_${formData.avatar.name}`;
+          const minioStorage = minioClient.storage.from("test01");
+          const { error } = await minioStorage.upload(
+            fileName,
+            formData.avatar
+          );
+          if (error) throw new Error(`Không thể upload file: ${error.message}`);
+          const { data: publicUrlData } = minioStorage.getPublicUrl(fileName);
+          if (!publicUrlData.publicUrl)
+            throw new Error("Không thể lấy URL công khai cho ảnh.");
+          imageUrl = publicUrlData.publicUrl;
         }
-      },
-    })
+
+        const userData = {
+          id: editingUser?._id,
+          email: formData.email,
+          username: formData.username,
+          name: formData.name,
+          phone: formData.phone,
+          role: formData.role,
+          address: formData.address,
+          avatar: imageUrl,
+          ...(formData.password && { password: formData.password }),
+        };
+
+        if (editingUser) {
+          await adminAPI.updateUser(userData);
+          const updatedUser = {
+            ...editingUser,
+            ...userData,
+            _id: editingUser._id,
+          };
+          const updatedUsers = users.map((user) =>
+            user._id === editingUser._id ? updatedUser : user
+          );
+          setUsers(updatedUsers);
+          setFilteredUsers(updatedUsers);
+          setSnackbar({
+            open: true,
+            message: "Cập nhật người dùng thành công",
+            severity: "success",
+          });
+        }
+        setIsModalVisible(false);
+      } catch (error) {
+        throw error;
+      }
+    },
+  });
 
   return (
     <Box>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 3,
+        }}
+      >
         <Typography
           variant="h6"
           sx={{
@@ -129,8 +154,8 @@ const UserScreenView = ({ setSnackbar }) => {
             variant="contained"
             startIcon={<Plus size={16} />}
             onClick={() => {
-              handleEdit(null)
-              setIsModalVisible(true)
+              handleEdit(null);
+              setIsModalVisible(true);
             }}
             sx={{
               background: "linear-gradient(145deg, #0071e3 0%, #42a5f5 100%)",
@@ -154,7 +179,11 @@ const UserScreenView = ({ setSnackbar }) => {
       </Box>
 
       <Box sx={{ mb: 3 }}>
-        <UserSearch searchTerm={searchTerm} onSearch={handleSearch} onEnter={handleEnter} />
+        <UserSearch
+          searchTerm={searchTerm}
+          onSearch={handleSearch}
+          onEnter={handleEnter}
+        />
       </Box>
 
       {loading ? (
@@ -175,8 +204,8 @@ const UserScreenView = ({ setSnackbar }) => {
         visible={isModalVisible}
         onOk={handleOk}
         onCancel={() => {
-          handleCancel()
-          setIsModalVisible(false)
+          handleCancel();
+          setIsModalVisible(false);
         }}
         form={form}
         editingUser={editingUser}
@@ -204,7 +233,8 @@ const UserScreenView = ({ setSnackbar }) => {
         <DialogTitle
           sx={{
             p: 3,
-            background: "linear-gradient(145deg, rgba(255, 59, 48, 0.05) 0%, rgba(255, 59, 48, 0.1) 100%)",
+            background:
+              "linear-gradient(145deg, rgba(255, 59, 48, 0.05) 0%, rgba(255, 59, 48, 0.1) 100%)",
             color: "#1d1d1f",
             fontWeight: 600,
             fontFamily: '"SF Pro Display", Roboto, sans-serif',
@@ -216,13 +246,16 @@ const UserScreenView = ({ setSnackbar }) => {
         </DialogTitle>
         <DialogContent sx={{ p: 3, mt: 2 }}>
           <Typography variant="body1" sx={{ color: "#1d1d1f" }}>
-            Bạn có chắc chắn muốn xóa người dùng <strong>{userToDelete?.name}</strong> không?
+            Bạn có chắc chắn muốn xóa người dùng{" "}
+            <strong>{userToDelete?.name}</strong> không?
           </Typography>
           <Typography variant="body2" sx={{ color: "#ff3b30", mt: 2 }}>
             Lưu ý: Hành động này không thể hoàn tác.
           </Typography>
         </DialogContent>
-        <DialogActions sx={{ p: 3, borderTop: "1px solid rgba(0, 0, 0, 0.05)" }}>
+        <DialogActions
+          sx={{ p: 3, borderTop: "1px solid rgba(0, 0, 0, 0.05)" }}
+        >
           <Button
             onClick={() => setIsDeleteDialogOpen(false)}
             sx={{
@@ -265,7 +298,7 @@ const UserScreenView = ({ setSnackbar }) => {
         </DialogActions>
       </Dialog>
     </Box>
-  )
-}
+  );
+};
 
-export default UserScreenView
+export default UserScreenView;

@@ -36,9 +36,9 @@ function App() {
       />
       <AppRoutes />
       <Notification />
-      <div style={{ color: user && socketInitialized ? "green" : "red" }}>
+      {/* <div style={{ color: user && socketInitialized ? "green" : "red" }}>
         Notification status: {user ? (socketInitialized ? "Rendered with socket" : "No socket connection") : "User not logged in"}
-      </div>
+      </div> */}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
-import { userAPI } from "../../../services/apis/User.js";
-import { adminAPI } from "../../../services/apis/Admin.js";
-import minioClient from "../../../Server/minioClient.js";
+import { userAPI } from "../../../services/apis/User";
+import { adminAPI } from "../../../services/apis/Admin";
+import minioClient from "../../../Server/minioClient";
 import debounce from "lodash.debounce";
 
 const UserScreenViewModel = ({ setSnackbar }) => {
@@ -40,39 +40,42 @@ const UserScreenViewModel = ({ setSnackbar }) => {
     }
   }, [setSnackbar, searchCache]);
 
-  const searchUsers = useCallback(async (query) => {
-    setLoading(true);
-    try {
-      if (searchCache[query]) {
-        console.log("Using cached result for query:", query);
-        setFilteredUsers(searchCache[query]);
-        setLoading(false);
-        return;
-      }
+  const searchUsers = useCallback(
+    async (query) => {
+      setLoading(true);
+      try {
+        if (searchCache[query]) {
+          console.log("Using cached result for query:", query);
+          setFilteredUsers(searchCache[query]);
+          setLoading(false);
+          return;
+        }
 
-      let data;
-      if (!query.trim()) {
-        const response = await userAPI.getAllUser();
-        data = Array.isArray(response) ? response : [];
-        console.log("Fetched all users (empty query):", data);
-      } else {
-        const response = await userAPI.searchUsers(query);
-        data = Array.isArray(response) ? response : [];
-        console.log("Searched users:", data);
+        let data;
+        if (!query.trim()) {
+          const response = await userAPI.getAllUser();
+          data = Array.isArray(response) ? response : [];
+          console.log("Fetched all users (empty query):", data);
+        } else {
+          const response = await userAPI.searchUsers(query);
+          data = Array.isArray(response) ? response : [];
+          console.log("Searched users:", data);
+        }
+        setFilteredUsers(data);
+        searchCache[query] = data;
+      } catch (error) {
+        setSnackbar({
+          open: true,
+          message: "Lỗi khi tìm kiếm người dùng: " + error.message,
+          severity: "error",
+        });
+        setFilteredUsers([]);
+      } finally {
+        setLoading(false);
       }
-      setFilteredUsers(data);
-      searchCache[query] = data;
-    } catch (error) {
-      setSnackbar({
-        open: true,
-        message: "Lỗi khi tìm kiếm người dùng: " + error.message,
-        severity: "error",
-      });
-      setFilteredUsers([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [setSnackbar, searchCache]);
+    },
+    [setSnackbar, searchCache]
+  );
 
   const debouncedSearch = useCallback(
     debounce((query) => {
@@ -118,7 +121,9 @@ const UserScreenViewModel = ({ setSnackbar }) => {
     if (!userToDelete) return;
     try {
       await adminAPI.deleteUser({ id: userToDelete._id });
-      const updatedUsers = users.filter((user) => user._id !== userToDelete._id);
+      const updatedUsers = users.filter(
+        (user) => user._id !== userToDelete._id
+      );
       setUsers(updatedUsers);
       setFilteredUsers(updatedUsers);
       setSnackbar({
@@ -138,34 +143,37 @@ const UserScreenViewModel = ({ setSnackbar }) => {
     }
   }, [userToDelete, users, setSnackbar]);
 
-  const handleToggleActive = useCallback(async (record) => {
-    try {
-      const apiCall = record.isActive
-        ? adminAPI.deactivateUser
-        : adminAPI.activateUser;
-      await apiCall({ id: record._id });
-      const updatedUsers = users.map((user) =>
-        user._id === record._id ? { ...user, isActive: !user.isActive } : user
-      );
-      setUsers(updatedUsers);
-      setFilteredUsers(updatedUsers);
-      setSnackbar({
-        open: true,
-        message: `${
-          record.isActive ? "Khóa" : "Mở khóa"
-        } người dùng thành công`,
-        severity: "success",
-      });
-    } catch (error) {
-      setSnackbar({
-        open: true,
-        message: `${
-          record.isActive ? "Khóa" : "Mở khóa"
-        } người dùng không thành công: ${error.message}`,
-        severity: "error",
-      });
-    }
-  }, [users, setSnackbar]);
+  const handleToggleActive = useCallback(
+    async (record) => {
+      try {
+        const apiCall = record.isActive
+          ? adminAPI.deactivateUser
+          : adminAPI.activateUser;
+        await apiCall({ id: record._id });
+        const updatedUsers = users.map((user) =>
+          user._id === record._id ? { ...user, isActive: !user.isActive } : user
+        );
+        setUsers(updatedUsers);
+        setFilteredUsers(updatedUsers);
+        setSnackbar({
+          open: true,
+          message: `${
+            record.isActive ? "Khóa" : "Mở khóa"
+          } người dùng thành công`,
+          severity: "success",
+        });
+      } catch (error) {
+        setSnackbar({
+          open: true,
+          message: `${
+            record.isActive ? "Khóa" : "Mở khóa"
+          } người dùng không thành công: ${error.message}`,
+          severity: "error",
+        });
+      }
+    },
+    [users, setSnackbar]
+  );
 
   const handleUploadChange = useCallback(({ fileList }) => {
     setAvatar(fileList);
