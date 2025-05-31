@@ -8,6 +8,8 @@ export const orderAPI = {
 
   updateOrder: (data) => axiosInstance.patch("/orders/update-order", data).then(handleApiResponse),
 
+  payOrder: (data) => axiosInstance.post("/orders/pay-order", data).then(handleApiResponse),
+
   getAllOrdersInfo: () => axiosInstance.get("/orders/all-order-info").then(handleApiResponse),
 
   addItem: (data) => axiosInstance.post("/item/create-item", data).then(handleApiResponse),
