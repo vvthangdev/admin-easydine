@@ -110,35 +110,55 @@ const TableCardViewModel = ({ table, onRelease, tables, onMergeSuccess, onOrderS
   };
 
   const handleCardClick = async () => {
-    if (table.status === "Available") {
-      setIsOrderModalVisible(true);
-      setEditingOrder(null);
-    } else {
-      try {
-        const response = await orderAPI.getOrderInfo({
-          table_id: table.table_id,
-        });
-        if (response) {
-          setEditingOrder({
-            id: response.order.id,
-            type: response.order.type,
-            status: response.order.status,
-            time: response.order.time,
-            customer_id: response.order.customer_id || response.customer_id,
-            reservedTables: response.reservedTables,
-            itemOrders: response.itemOrders,
-          });
-          setIsOrderModalVisible(true);
-        } else {
-          toast.error("Không tìm thấy thông tin đơn hàng");
-        }
-      } catch (error) {
-        console.error("Error fetching order details:", error);
-        toast.error("Không thể tải thông tin đơn hàng");
-      }
-    }
-  };
+  if (table.status === "Available") {
+    console.log("Table status is Available, opening order modal");
+    setIsOrderModalVisible(true);
+    setEditingOrder(null);
+  } else {
+    try {
+      console.log("Fetching order info for table_id:", table.table_id);
+      const response = await orderAPI.getOrderInfo({
+        table_id: table.table_id,
+      });
+      console.log("Processed API response:", JSON.stringify(response, null, 2));
 
+      let orderData;
+      if (Array.isArray(response) && response.length > 0) {
+        // Hàm 2: response là mảng
+        console.log("Response is an array, using first order:", response[0]);
+        orderData = response[0];
+      } else if (response?.order) {
+        // Hàm 1: response là object
+        console.log("Response is an object:", response);
+        orderData = response;
+      } else {
+        console.log("No valid order data found:", response);
+        toast.error("Không tìm thấy thông tin đơn hàng");
+        return;
+      }
+
+      console.log("Order data to be set:", orderData.order);
+      setEditingOrder({
+        id: orderData.order.id,
+        type: orderData.order.type,
+        status: orderData.order.status,
+        time: orderData.order.time,
+        customer_id: orderData.order.customer_id || orderData.customer_id,
+        reservedTables: orderData.reservedTables,
+        itemOrders: orderData.itemOrders,
+      });
+      console.log("Editing order set:", {
+        id: orderData.order.id,
+        type: orderData.order.type,
+        status: orderData.order.status,
+      });
+      setIsOrderModalVisible(true);
+    } catch (error) {
+      console.error("Error fetching order details:", error);
+      toast.error("Không thể tải thông tin đơn hàng");
+    }
+  }
+};
   const handleOrderSubmit = async (orderData) => {
     try {
       if (orderData.id) {

@@ -25,6 +25,7 @@ jobs:
         env:
           CI: false
           REACT_APP_BACKEND_URL: ${{ secrets.REACT_APP_BACKEND_URL }}
+          REACT_APP_QRCODE: ${{ secrets.REACT_APP_QRCODE }}
           REACT_APP_MINIO_API_URL: ${{ secrets.REACT_APP_MINIO_API_URL }}
         run: |
           npm install

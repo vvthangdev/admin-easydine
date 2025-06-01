@@ -10,16 +10,15 @@ import {
   RadioGroup,
   CircularProgress,
 } from "@mui/material";
-import { QRCodeCanvas } from "qrcode.react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { orderAPI } from "../../../services/apis/Order";
+import { QRCode } from "antd";
 
 const PaymentModal = ({ visible, onCancel, orderDetails, zIndex }) => {
   const [paymentMethod, setPaymentMethod] = useState("vnpay");
   const [loading, setLoading] = useState(false);
-  const [qrData, setQrData] = useState(null);
-  const [qrContent, setQrContent] = useState(""); // Lưu nội dung chuyển khoản để hiển thị
+  const [qrContent, setQrContent] = useState("");
 
   // Tính số tiền
   const amount =
@@ -30,26 +29,20 @@ const PaymentModal = ({ visible, onCancel, orderDetails, zIndex }) => {
     ) ||
     0;
 
-  // Tạo nội dung QR khi chọn phương thức chuyển khoản
+  // Tạo nội dung chuyển khoản khi chọn phương thức chuyển khoản
   useEffect(() => {
     if (paymentMethod === "bank_transfer") {
       if (amount <= 0) {
         toast.error("Số tiền đơn hàng không hợp lệ!");
-        setQrData(null);
         setQrContent("");
         return;
       }
-      // Định dạng số tiền: thêm dấu phẩy làm phân cách thập phân
-      const formattedAmount = amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
       // Nội dung chuyển khoản: "thanh toan" + 5 ký tự cuối của order_id
-      const orderId = orderDetails?.order?.id || "00000"; // Dự phòng nếu order_id không tồn tại
-      const content = `thanh toan`;
-      // Tạo text QR theo mẫu
-      const qrContentFull = `00020101021238540010A00000072701240006970436011010169156190208QRIBFTTA53037045406${formattedAmount}5802VN62240820${content}6304CB07`;
-      setQrData(qrContentFull);
-      setQrContent(content); // Lưu nội dung để hiển thị
+      const orderId = orderDetails?.order?.id || "00000";
+      const content = `thanh toan ${orderId}`;
+      setQrContent(content);
     } else {
-      setQrData(null); // Reset QR khi không chọn chuyển khoản
       setQrContent("");
     }
   }, [paymentMethod, amount, orderDetails]);
@@ -107,12 +100,6 @@ const PaymentModal = ({ visible, onCancel, orderDetails, zIndex }) => {
 
         if (response.status === "SUCCESS") {
           if (paymentMethod === "bank_transfer") {
-            // Cập nhật QR với transaction_id từ phản hồi API (nếu có)
-            const formattedAmount = amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-            const content = "thanh toan don hang"
-            const qrContentFull = `00020101021238540010A00000072701240006970436011010169156190208QRIBFTTA53037045406${formattedAmount}5802VN62240820${content}6304CB07`;
-            setQrData(qrContentFull);
-            setQrContent(content);
             toast.success("Yêu cầu thanh toán bằng chuyển khoản đã được ghi nhận!");
           } else {
             toast.success("Thanh toán bằng tiền mặt thành công!");
@@ -129,6 +116,15 @@ const PaymentModal = ({ visible, onCancel, orderDetails, zIndex }) => {
       setLoading(false);
     }
   };
+
+  const QRCode_Link = process.env.REACT_APP_QRCODE
+// https://img.vietqr.io/image/MB-0880102898888-compact2.png
+  // VietQR image URL
+  const vietQrImageUrl = `${QRCode_Link}?amount=${Math.floor(
+    amount
+  )}&addInfo=thanh%20toan%20${encodeURIComponent(
+    orderDetails?.order?.id || "00000"
+  )}&accountName=VU%20VAN%20THANG`;
 
   return (
     <Modal
@@ -181,17 +177,17 @@ const PaymentModal = ({ visible, onCancel, orderDetails, zIndex }) => {
         </FormControl>
 
         {/* Hiển thị mã QR nếu chọn chuyển khoản */}
-        {paymentMethod === "bank_transfer" && qrData && (
+        {paymentMethod === "bank_transfer" && (
           <Box sx={{ mt: 2, textAlign: "center" }}>
             <Typography variant="body2" gutterBottom>
               Quét mã QR để thanh toán:
             </Typography>
-            <QRCodeCanvas value={qrData} size={150} />
+            <img
+              src={vietQrImageUrl}
+              alt="VietQR Code"
+              style={{ width: 150, height: 150 }}
+            />
             <Typography variant="body2" sx={{ mt: 1, whiteSpace: "pre-line" }}>
-              STK: 1016915619
-              <br />
-              Ngân hàng: Vietcombank
-              <br />
               Số tiền: {amount.toLocaleString()} VND
               <br />
               Nội dung: {qrContent || "N/A"}
