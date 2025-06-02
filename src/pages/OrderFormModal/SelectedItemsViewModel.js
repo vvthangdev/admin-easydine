@@ -34,15 +34,13 @@ const SelectedItemsViewModel = ({ selectedItems, setSelectedItems, menuItems }) 
     );
   }, [selectedItems]);
 
-  const vat = useMemo(() => subtotal * 0.1, [subtotal]);
-
-  const total = useMemo(() => subtotal + vat, [subtotal, vat]);
+  // Total is now just the subtotal since VAT is included in item prices
+  const total = subtotal;
 
   return {
     handleRemove,
     handleEditItem,
     subtotal,
-    vat,
     total,
   };
 };

@@ -25,7 +25,6 @@ const SelectedItemsView = ({
     handleRemove,
     handleEditItem,
     subtotal,
-    vat,
     total,
   } = SelectedItemsViewModel({ selectedItems, setSelectedItems, menuItems });
 
@@ -39,7 +38,7 @@ const SelectedItemsView = ({
       e.stopPropagation();
     }
     
-    // Tìm menu item gốc để lấy sizes
+    // Find the original menu item to get sizes
     const originalMenuItem = menuItems.find((m) => m._id === record.id);
     
     const itemData = {
@@ -207,7 +206,7 @@ const SelectedItemsView = ({
         </Table>
       </TableContainer>
       
-      {/* Tổng tiền */}
+      {/* Bill Summary */}
       <Box
         sx={{
           mt: 1,
@@ -227,13 +226,6 @@ const SelectedItemsView = ({
           <Typography variant="body2">Tổng tiền món:</Typography>
           <Typography variant="body2" sx={{ fontWeight: 500 }}>
             {subtotal.toLocaleString()} VND
-          </Typography>
-        </Box>
-        
-        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}>
-          <Typography variant="body2">VAT (10%):</Typography>
-          <Typography variant="body2" sx={{ fontWeight: 500 }}>
-            {vat.toLocaleString()} VND
           </Typography>
         </Box>
         
@@ -259,7 +251,7 @@ const SelectedItemsView = ({
         </Box>
       </Box>
 
-      {/* Modal chỉnh sửa món ăn */}
+      {/* Item Edit Modal */}
       <ItemDetailsModal
         open={itemModalOpen}
         onClose={handleCloseEditModal}
