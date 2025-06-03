@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // Thêm useNavigate
 import {
   Modal,
   Box,
@@ -13,12 +14,12 @@ import {
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { orderAPI } from "../../../services/apis/Order";
-import { QRCode } from "antd";
 
 const PaymentModal = ({ visible, onCancel, orderDetails, zIndex }) => {
   const [paymentMethod, setPaymentMethod] = useState("vnpay");
   const [loading, setLoading] = useState(false);
   const [qrContent, setQrContent] = useState("");
+  const navigate = useNavigate(); // Khởi tạo useNavigate
 
   // Tính số tiền
   const amount =
@@ -38,7 +39,7 @@ const PaymentModal = ({ visible, onCancel, orderDetails, zIndex }) => {
         return;
       }
 
-      // Nội dung chuyển khoản: "thanh toan" + 5 ký tự cuối của order_id
+      // Nội dung chuyển khoản: "thanh toan" + order_id
       const orderId = orderDetails?.order?.id || "00000";
       const content = `thanh toan ${orderId}`;
       setQrContent(content);
@@ -59,18 +60,15 @@ const PaymentModal = ({ visible, onCancel, orderDetails, zIndex }) => {
       const orderInfo = await orderAPI.getOrderInfo({ id: orderDetails.order.id });
       if (orderInfo.order.status !== "confirmed") {
         toast.error("Đơn hàng cần được xác nhận trước khi thanh toán!");
-        setLoading(false);
         return;
       }
       if (orderInfo.order.payment_status === "success") {
         toast.error("Đơn hàng đã được thanh toán!");
-        setLoading(false);
         return;
       }
 
       if (amount <= 0) {
         toast.error("Số tiền đơn hàng không hợp lệ!");
-        setLoading(false);
         return;
       }
 
@@ -91,23 +89,22 @@ const PaymentModal = ({ visible, onCancel, orderDetails, zIndex }) => {
         }
       } else {
         // Xử lý thanh toán tiền mặt hoặc chuyển khoản
-        console.log("Calling payOrder with:", { order_id: orderDetails.order.id, payment_method: paymentMethod });
-        const response = await orderAPI.payOrder({
+        await orderAPI.payOrder({
           order_id: orderDetails.order.id,
           payment_method: paymentMethod,
         });
-        console.log("payOrder response:", response);
 
-        if (response.status === "SUCCESS") {
-          if (paymentMethod === "bank_transfer") {
-            toast.success("Yêu cầu thanh toán bằng chuyển khoản đã được ghi nhận!");
-          } else {
-            toast.success("Thanh toán bằng tiền mặt thành công!");
-            onCancel(); // Đóng modal sau khi thanh toán tiền mặt
-          }
-        } else {
-          throw new Error(response.message || "Lỗi khi xử lý thanh toán!");
-        }
+        // Nếu không có lỗi ném ra, thanh toán thành công
+        toast.success(
+          paymentMethod === "bank_transfer"
+            ? "Yêu cầu thanh toán bằng chuyển khoản đã được ghi nhận!"
+            : "Thanh toán bằng tiền mặt thành công!"
+        );
+
+        // Chuyển hướng đến payment-success
+        navigate(
+          `/payment-success?order_id=${orderDetails.order.id}&message=${encodeURIComponent("Giao dịch thành công")}`
+        );
       }
     } catch (error) {
       console.error("Error processing payment:", error);
@@ -117,10 +114,8 @@ const PaymentModal = ({ visible, onCancel, orderDetails, zIndex }) => {
     }
   };
 
-  const QRCode_Link = process.env.REACT_APP_QRCODE
-// https://img.vietqr.io/image/MB-0880102898888-compact2.png
   // VietQR image URL
-  const vietQrImageUrl = `${QRCode_Link}?amount=${Math.floor(
+  const vietQrImageUrl = `${process.env.REACT_APP_QRCODE}?amount=${Math.floor(
     amount
   )}&addInfo=thanh%20toan%20${encodeURIComponent(
     orderDetails?.order?.id || "00000"
@@ -158,9 +153,7 @@ const PaymentModal = ({ visible, onCancel, orderDetails, zIndex }) => {
         <FormControl component="fieldset" fullWidth>
           <RadioGroup
             value={paymentMethod}
-            onChange={(e) => {
-              setPaymentMethod(e.target.value);
-            }}
+            onChange={(e) => setPaymentMethod(e.target.value)}
           >
             <FormControlLabel value="cash" control={<Radio />} label="Tiền mặt" />
             <FormControlLabel

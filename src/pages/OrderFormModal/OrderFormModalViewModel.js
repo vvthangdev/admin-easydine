@@ -122,6 +122,7 @@ const OrderFormModalViewModel = ({
       totalAmount: data.order?.total_amount || 0,
       discountAmount: data.order?.discount_amount || 0,
       finalAmount: data.order?.final_amount || 0,
+      number_people: data.order?.number_people || 1,
     };
 
     setFormData(newFormData);
@@ -296,6 +297,7 @@ const OrderFormModalViewModel = ({
         totalAmount: formData.totalAmount || 0,
         discountAmount: formData.discountAmount || 0,
         finalAmount: formData.finalAmount || 0,
+        number_people: formData.number_people || 1,
       };
 
       const response = await onSubmit(orderData);

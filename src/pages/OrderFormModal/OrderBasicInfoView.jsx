@@ -20,7 +20,7 @@ import {
 } from "@mui/material";
 import OrderBasicInfoViewModel from "./OrderBasicInfoViewModel";
 import PaymentModal from "./Payment/PaymentModal";
-import CancelItemsModal from "./CancelItemsModal"; // Import modal mới
+import CancelItemsModal from "./CancelItemsModal";
 import { toast } from "react-toastify";
 
 const OrderBasicInfoView = ({
@@ -55,7 +55,7 @@ const OrderBasicInfoView = ({
     formData.voucherCode || ""
   );
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
-  const [cancelItemsModalOpen, setCancelItemsModalOpen] = useState(false); // Trạng thái modal hủy món
+  const [cancelItemsModalOpen, setCancelItemsModalOpen] = useState(false);
 
   React.useEffect(() => {
     setCurrentTab(activeTab);
@@ -86,7 +86,6 @@ const OrderBasicInfoView = ({
   };
 
   const handleCancelItemsSuccess = (remainingItems) => {
-    // Cập nhật danh sách món ăn sau khi hủy thành công
     setFormData((prev) => ({
       ...prev,
       items: remainingItems.map((item) => ({
@@ -194,6 +193,18 @@ const OrderBasicInfoView = ({
               placeholder="HH:mm"
             />
 
+            {/* Thêm TextField cho number_people */}
+            <TextField
+              label="Số người"
+              name="number_people"
+              value={formData.number_people || ""}
+              onChange={handleChange}
+              fullWidth
+              placeholder="Nhập số người"
+              type="number"
+              inputProps={{ min: 1 }}
+            />
+
             <Box sx={{ maxHeight: 200, overflowY: "auto" }}>
               <Typography variant="subtitle1" sx={{ mb: 1 }}>
                 Chọn bàn
@@ -249,9 +260,7 @@ const OrderBasicInfoView = ({
                                 key={table._id}
                                 value={`${table.table_number}|${table.area}|${table._id}`}
                                 sx={{
-                                  fontWeight: formData.tables.includes(
-                                    table._id
-                                  )
+                                  fontWeight: formData.tables.includes(table._id)
                                     ? "bold"
                                     : "normal",
                                   color: formData.tables.includes(table._id)
@@ -259,10 +268,8 @@ const OrderBasicInfoView = ({
                                     : "inherit",
                                 }}
                               >
-                                Bàn {table.table_number} (Sức chứa:{" "}
-                                {table.capacity})
-                                {formData.tables.includes(table._id) &&
-                                  " - Đã chọn"}
+                                Bàn {table.table_number} (Sức chứa: {table.capacity})
+                                {formData.tables.includes(table._id) && " - Đã chọn"}
                               </MenuItem>
                             ))}
                         </Select>
@@ -312,9 +319,7 @@ const OrderBasicInfoView = ({
                 <TableHead>
                   <TableRow>
                     <TableCell sx={{ fontWeight: "bold" }}>Tên món</TableCell>
-                    <TableCell sx={{ fontWeight: "bold" }}>
-                      Kích thước
-                    </TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>Kích thước</TableCell>
                     <TableCell sx={{ fontWeight: "bold" }}>Số lượng</TableCell>
                     <TableCell sx={{ fontWeight: "bold" }}>Giá</TableCell>
                     <TableCell sx={{ fontWeight: "bold" }}>Tổng</TableCell>
