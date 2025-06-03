@@ -76,9 +76,11 @@ const ItemSelectorView = ({
         const table = availableTables.find((t) => t._id === tableId);
         return table && table.area !== area;
       });
+      const newTables = [...otherAreaTableIds, ...selectedTableIds]
       return {
         ...prev,
         tables: [...otherAreaTableIds, ...selectedTableIds],
+        type: newTables.length > 0 ? "reservation" : "takeaway"
       };
     });
   };

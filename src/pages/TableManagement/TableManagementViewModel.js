@@ -219,40 +219,64 @@ const TableManagementViewModel = () => {
 
   // Handle order submit
   const handleOrderSubmit = useCallback(
-    async (orderData) => {
-      setLoading(true);
-      try {
-        await orderAPI.createOrder(orderData);
-        toast.success("Thêm đơn hàng mới thành công");
-        fetchTables();
-        setIsOrderModalVisible(false);
-      } catch (error) {
-        console.error("Error creating order:", error);
-        toast.error("Thêm đơn hàng không thành công");
-      } finally {
-        setLoading(false);
-      }
-    },
-    [fetchTables]
-  );
+  async (orderData) => {
+    setLoading(true);
+    try {
+      // Đảm bảo type là "takeaway" nếu không có bàn
+      const finalOrderData = {
+        ...orderData,
+        type: orderData.tables && orderData.tables.length > 0 ? "reservation" : "takeaway",
+      };
+      await orderAPI.createOrder(finalOrderData);
+      toast.success("Thêm đơn hàng mới thành công");
+      fetchTables();
+      setIsOrderModalVisible(false);
+    } catch (error) {
+      console.error("Error creating order:", error);
+      toast.error("Thêm đơn hàng không thành công");
+    } finally {
+      setLoading(false);
+    }
+  },
+  [fetchTables]
+);
 
   // Order summary
   const orderSummary = useCallback(() => {
-    const orders = {};
-    tables.forEach((table) => {
-      if (table.reservation_id) {
-        if (!orders[table.reservation_id]) {
-          orders[table.reservation_id] = {
-            order_number: table.order_number,
-            tables: [],
-            full_id: table.reservation_id,
-          };
-        }
-        orders[table.reservation_id].tables.push(table.table_number);
+  const orders = {};
+  tables.forEach((table) => {
+    if (table.reservation_id) {
+      if (!orders[table.reservation_id]) {
+        orders[table.reservation_id] = {
+          order_number: table.order_number,
+          tables: [],
+          full_id: table.reservation_id,
+          type: "reservation",
+        };
       }
-    });
-    return Object.values(orders);
-  }, [tables]);
+      orders[table.reservation_id].tables.push(table.table_number);
+    }
+  });
+  // Lấy các đơn hàng takeaway từ orderAPI
+  const fetchTakeawayOrders = async () => {
+    try {
+      const response = await orderAPI.getAllOrders();
+      const takeawayOrders = response.filter((order) => order.type === "takeaway");
+      takeawayOrders.forEach((order) => {
+        orders[order._id] = {
+          order_number: order._id.slice(-4),
+          tables: [],
+          full_id: order._id,
+          type: "takeaway",
+        };
+      });
+    } catch (error) {
+      console.error("Error fetching takeaway orders:", error);
+    }
+  };
+  fetchTakeawayOrders();
+  return Object.values(orders);
+}, [tables]);
 
   // Filter tables by active area
   const filteredTables = activeArea

@@ -131,6 +131,7 @@ const OrderBasicInfoViewModel = ({
       return {
         ...prev,
         tables: newTables,
+        type: newTables.length > 0? "reservation" : "takeaway"
       };
     });
   };

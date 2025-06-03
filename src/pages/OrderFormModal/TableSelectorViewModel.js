@@ -108,6 +108,10 @@ const TableSelectorViewModel = ({ formData, onFormDataChange }) => {
           }),
           ...selectedTableIds,
         ],
+        type: selectedTableIds.length > 0 || formData.tables.filter((tableId) => {
+        const table = allTables.find((t) => t._id === tableId);
+        return table && table.area !== area;
+      }).length > 0 ? "reservation" : "takeaway",
       };
       onFormDataChange(newFormData);
     },

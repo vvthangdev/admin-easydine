@@ -49,7 +49,7 @@ export default function Sidebar({ onCollapseChange }) {
       icon: <Users size={20} />,
     },
     {
-      path: "/admin/contacts",
+      path: "/admin/cancel-items",
       label: "Quản lý liên hệ",
       icon: <MessageSquare size={20} />,
     },

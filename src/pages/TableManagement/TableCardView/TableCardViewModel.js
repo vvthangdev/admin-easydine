@@ -113,7 +113,15 @@ const TableCardViewModel = ({ table, onRelease, tables, onMergeSuccess, onOrderS
   if (table.status === "Available") {
     console.log("Table status is Available, opening order modal");
     setIsOrderModalVisible(true);
-    setEditingOrder(null);
+    setEditingOrder({
+      type: "takeaway", // Mặc định là takeaway khi bàn trống
+      tables: [], // Không có bàn được chọn
+      status: "confirmed",
+      time: moment().toISOString(),
+      customer_id: null,
+      reservedTables: [],
+      itemOrders: [],
+    });
   } else {
     try {
       console.log("Fetching order info for table_id:", table.table_id);
@@ -124,11 +132,9 @@ const TableCardViewModel = ({ table, onRelease, tables, onMergeSuccess, onOrderS
 
       let orderData;
       if (Array.isArray(response) && response.length > 0) {
-        // Hàm 2: response là mảng
         console.log("Response is an array, using first order:", response[0]);
         orderData = response[0];
       } else if (response?.order) {
-        // Hàm 1: response là object
         console.log("Response is an object:", response);
         orderData = response;
       } else {
@@ -160,22 +166,26 @@ const TableCardViewModel = ({ table, onRelease, tables, onMergeSuccess, onOrderS
   }
 };
   const handleOrderSubmit = async (orderData) => {
-    try {
-      if (orderData.id) {
-        await orderAPI.updateOrder(orderData);
-        toast.success("Cập nhật đơn hàng thành công");
-      } else {
-        await orderAPI.createOrder(orderData);
-        toast.success("Thêm đơn hàng mới thành công");
-      }
-      setIsOrderModalVisible(false);
-      setEditingOrder(null);
-      onOrderSuccess();
-    } catch (error) {
-      console.error("Error submitting order:", error);
-      toast.error("Không thể lưu đơn hàng");
+  try {
+    const finalOrderData = {
+      ...orderData,
+      type: orderData.tables && orderData.tables.length > 0 ? "reservation" : "takeaway",
+    };
+    if (orderData.id) {
+      await orderAPI.updateOrder(finalOrderData);
+      toast.success("Cập nhật đơn hàng thành công");
+    } else {
+      await orderAPI.createOrder(finalOrderData);
+      toast.success("Thêm đơn hàng mới thành công");
     }
-  };
+    setIsOrderModalVisible(false);
+    setEditingOrder(null);
+    onOrderSuccess();
+  } catch (error) {
+    console.error("Error submitting order:", error);
+    toast.error("Không thể lưu đơn hàng");
+  }
+};
 
   return {
     isMergeModalVisible,

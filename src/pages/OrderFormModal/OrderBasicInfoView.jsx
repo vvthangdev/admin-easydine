@@ -120,7 +120,7 @@ const OrderBasicInfoView = ({
                 onChange={handleChange}
               >
                 <MenuItem value="reservation">Đặt chỗ</MenuItem>
-                <MenuItem value="ship">Giao hàng</MenuItem>
+                <MenuItem value="takeaway">Mang đi</MenuItem>
               </Select>
             </FormControl>
 

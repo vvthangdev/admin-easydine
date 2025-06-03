@@ -90,7 +90,7 @@ const OrderFormModalViewModel = ({
       })) || [];
 
     const newFormData = {
-      type: data.order?.type || "reservation",
+      type: reservedTables.length > 0 ? "reservation" : "takeaway",
       status: data.order?.status || "pending",
       staff_id: data.order?.staff_id || undefined,
       date: moment
@@ -169,7 +169,7 @@ const OrderFormModalViewModel = ({
       date: now.format("DD/MM/YYYY"),
       start_time: now.format("HH:mm"),
       end_time: "23:59",
-      type: "reservation",
+      type: table ? "reservation" : "takeaway",
       status: "confirmed",
       tables: table ? [table.table_id] : [],
       items: [],
@@ -200,6 +200,13 @@ const OrderFormModalViewModel = ({
       endDateTime.format("YYYY-MM-DDTHH:mm:ss[Z]")
     );
   }, [table, fetchAvailableTables]);
+
+  useEffect(() => {
+  setFormData((prev) => ({
+    ...prev,
+    type: prev.tables && prev.tables.length > 0 ? "reservation" : "takeaway",
+  }));
+}, [formData.tables, setFormData]);
 
   useEffect(() => {
     if (visible) {
@@ -376,7 +383,7 @@ const OrderFormModalViewModel = ({
         setShowItemSelector(false);
         onCancel();
       } else {
-        if (!formData.tables || formData.tables.length === 0) {
+        if (formData.type === "reservation" &&( !formData.tables || formData.tables.length === 0)) {
           toast.error("Vui lòng chọn ít nhất một bàn");
           setLoading(false);
           return;

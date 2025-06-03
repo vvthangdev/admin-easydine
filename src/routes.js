@@ -9,11 +9,11 @@ import Profile from "./pages/Profile/profile";
 import AdminLayout from "./pages/Admin/layouts/AdminLayout";
 import BanKhongPhaiLaAdmin from "./pages/BanKhongPhaiLaAdmin/BanKhongPhaiLaAdmin";
 import MergeOrderModalViewModel from "./pages/TableManagement/TableManagementView";
-import ItemManagements from "./pages/ItemManagement/ItemManagements";
+import ItemManagements from "./pages/ItemManagement/ItemManagementsView";
 import UserVoucherManagement from "./pages/User/UserVoucherManagement";
 import Header from "../src/components/HomePage/Header";
-import OrderManagements from "./pages/OrderManagement/OrderManagement";
-import ContactManagement from "./pages/Admin/pages/ContactManagement";
+import OrderManagement from "./pages/OrderManagement/OrderManagementsView";
+import CancelItemManagement from "./pages/Admin/pages/CancelItemManagement";
 import PaymentSuccess from "./pages/OrderFormModal/Payment/PaymentSuccess";
 import PaymentFailed from "./pages/OrderFormModal/Payment/PaymentFailed";
 
@@ -52,10 +52,10 @@ const AppRoutes = () => {
           <Route path="overview" element={<Overview />} />
           <Route path="tables" element={<MergeOrderModalViewModel />} />
           <Route path="items" element={<ItemManagements />} />
-          <Route path="orders" element={<OrderManagements />} />
+          <Route path="orders" element={<OrderManagement />} />
           <Route path="users" element={<UserVoucherManagement />} />
-          <Route path="contacts" element={<ContactManagement />} />
-          <Route path="payment" element={<ContactManagement />} />
+          <Route path="cancel-items" element={<CancelItemManagement />} />
+          {/* <Route path="payment" element={<CancelItemManagement />} /> */}
         </Route>
       </Routes>
     </>

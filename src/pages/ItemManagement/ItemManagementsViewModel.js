@@ -1,22 +1,15 @@
-import React, { useEffect, useState } from "react";
-import { Form, message } from "antd";
+import { useEffect, useState } from "react";
+import { message } from "antd";
 import { itemAPI } from "../../services/apis/Item";
 import minioClient from "../../Server/minioClient";
-import SearchFilterBar from "./SearchFilterBar";
-import ItemTable from "./ItemTable";
-import ItemModal from "./ItemModal";
 
-export default function ItemManagements() {
+export const ItemManagementViewModel = () => {
   const [menuItems, setMenuItems] = useState([]);
   const [categories, setCategories] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isCategoryModalVisible, setIsCategoryModalVisible] = useState(false);
-  const [isDeleteConfirmModalVisible, setIsDeleteConfirmModalVisible] =
-    useState(false);
-  const [isDeleteCategoryModalVisible, setIsDeleteCategoryModalVisible] =
-    useState(false);
-  const [form] = Form.useForm();
-  const [categoryForm] = Form.useForm();
+  const [isDeleteConfirmModalVisible, setIsDeleteConfirmModalVisible] = useState(false);
+  const [isDeleteCategoryModalVisible, setIsDeleteCategoryModalVisible] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [loading, setLoading] = useState(false);
   const [fileList, setFileList] = useState([]);
@@ -56,7 +49,6 @@ export default function ItemManagements() {
         fetchMenuItems(filterCategory);
       } else {
         const response = await itemAPI.searchItem({ name });
-        // Fix: Set menuItems directly to response (array of items)
         setMenuItems(Array.isArray(response) ? response : []);
       }
     } catch (error) {
@@ -69,22 +61,25 @@ export default function ItemManagements() {
 
   const handleAdd = () => {
     setEditingItem(null);
-    form.resetFields();
     setFileList([]);
     setIsModalVisible(true);
   };
 
-  const handleEdit = (record) => {
+  const handleEdit = (record, form) => {
     setEditingItem(record);
+    setFileList(
+      record.image
+        ? [{ uid: "-1", name: record.image, status: "done", url: record.image }]
+        : []
+    );
+    // Điền toàn bộ thông tin món ăn vào form
     form.setFieldsValue({
-      ...record,
-      categories: record.categories?.map((cat) => cat._id),
+      name: record.name || "",
+      price: record.price || 0,
       description: record.description || "",
+      categories: record.categories?.map((cat) => cat._id) || [],
       sizes: record.sizes || [],
     });
-    setFileList([
-      { uid: "-1", name: record.image, status: "done", url: record.image },
-    ]);
     setIsModalVisible(true);
   };
 
@@ -106,9 +101,8 @@ export default function ItemManagements() {
     }
   };
 
-  const handleModalOk = async () => {
+  const handleModalOk = async (formValues) => {
     try {
-      const values = await form.validateFields();
       let imageUrl = editingItem?.image || "";
       if (fileList?.length > 0 && fileList?.[0].originFileObj) {
         const file = fileList[0].originFileObj;
@@ -123,7 +117,7 @@ export default function ItemManagements() {
         imageUrl = data.publicUrl;
       }
 
-      const requestData = { ...values, image: imageUrl };
+      const requestData = { ...formValues, image: imageUrl };
       if (editingItem) {
         const response = await itemAPI.updateItem({
           ...requestData,
@@ -135,32 +129,30 @@ export default function ItemManagements() {
           )
         );
         message.success("Cập nhật món ăn thành công");
+        await fetchMenuItems(filterCategory);
       } else {
         const newItem = await itemAPI.addItem(requestData);
         setMenuItems([...menuItems, newItem]);
         message.success("Thêm món ăn mới thành công");
       }
       setIsModalVisible(false);
-      form.resetFields();
       setFileList([]);
+      setEditingItem(null);
     } catch (error) {
       message.error("Có lỗi xảy ra. Vui lòng thử lại.");
     }
   };
 
   const handleAddCategory = () => {
-    categoryForm.resetFields();
     setIsCategoryModalVisible(true);
   };
 
-  const handleCategoryModalOk = async () => {
+  const handleCategoryModalOk = async (formValues) => {
     try {
-      const values = await categoryForm.validateFields();
-      const newCategory = await itemAPI.createCategory(values);
+      const newCategory = await itemAPI.createCategory(formValues);
       setCategories([...categories, newCategory]);
       message.success("Tạo danh mục thành công");
       setIsCategoryModalVisible(false);
-      categoryForm.resetFields();
     } catch (error) {
       message.error("Tạo danh mục không thành công");
     }
@@ -197,62 +189,33 @@ export default function ItemManagements() {
     fetchCategories();
   }, []);
 
-  return (
-    <div className="p-6 bg-gray-100 min-h-screen flex flex-col">
-      <SearchFilterBar
-        categories={categories}
-        onSearch={handleSearchByName}
-        onFilter={handleFilterByCategory}
-        onAddItem={handleAdd}
-        onAddCategory={handleAddCategory}
-      />
-      <ItemTable
-        menuItems={menuItems}
-        categories={categories}
-        loading={loading}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        onDeleteCategory={handleDeleteCategory}
-      />
-      <ItemModal
-        type="item"
-        visible={isModalVisible}
-        editingItem={editingItem}
-        categories={categories}
-        onOk={handleModalOk}
-        onCancel={() => {
-          setIsModalVisible(false);
-          form.resetFields();
-          setFileList([]);
-        }}
-        form={form}
-        fileList={fileList}
-        setFileList={setFileList}
-      />
-      <ItemModal
-        type="category"
-        visible={isCategoryModalVisible}
-        onOk={handleCategoryModalOk}
-        onCancel={() => {
-          setIsCategoryModalVisible(false);
-          categoryForm.resetFields();
-        }}
-        form={categoryForm}
-      />
-      <ItemModal
-        type="deleteItem"
-        visible={isDeleteConfirmModalVisible}
-        selectedItem={selectedItem}
-        onOk={handleConfirmDelete}
-        onCancel={() => setIsDeleteConfirmModalVisible(false)}
-      />
-      <ItemModal
-        type="deleteCategory"
-        visible={isDeleteCategoryModalVisible}
-        selectedItem={selectedCategory}
-        onOk={handleConfirmDeleteCategory}
-        onCancel={() => setIsDeleteCategoryModalVisible(false)}
-      />
-    </div>
-  );
-}
+  return {
+    menuItems,
+    categories,
+    isModalVisible,
+    isCategoryModalVisible,
+    isDeleteConfirmModalVisible,
+    isDeleteCategoryModalVisible,
+    editingItem,
+    loading,
+    fileList,
+    selectedItem,
+    selectedCategory,
+    setIsModalVisible,
+    setIsCategoryModalVisible,
+    setIsDeleteConfirmModalVisible,
+    setIsDeleteCategoryModalVisible,
+    setFileList,
+    handleSearchByName,
+    handleAdd,
+    handleEdit,
+    handleDelete,
+    handleConfirmDelete,
+    handleModalOk,
+    handleAddCategory,
+    handleCategoryModalOk,
+    handleDeleteCategory,
+    handleConfirmDeleteCategory,
+    handleFilterByCategory,
+  };
+};
