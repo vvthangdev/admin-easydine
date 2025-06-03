@@ -2,6 +2,9 @@ import axiosInstance from "../../config/axios.config";
 import { handleApiResponse } from "./handleApiResponse";
 
 export const adminAPI = {
+
+  createUserByAdmin: (data) =>
+    axiosInstance.post("/admin/create-user", data).then(handleApiResponse),
   // Cập nhật người dùng (nhận id hoặc username trong body)
   updateUser: (data) =>
     axiosInstance.patch("/admin/update", data).then(handleApiResponse),

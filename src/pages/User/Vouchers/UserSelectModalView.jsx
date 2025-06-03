@@ -22,6 +22,18 @@ import {
 } from "@mui/material"
 import { Search, UserPlus } from 'lucide-react'
 import UserSelectModalViewModel from "./UserSelectModalViewModel"
+import {
+  dialogStyles,
+  buttonStyles,
+  tableStyles,
+  inputStyles,
+  checkboxStyles,
+  progressStyles,
+  typography,
+  colors,
+  avatarStyles,
+  
+} from "../../../styles/index" // Import styles từ index.js
 
 const UserSelectModalView = ({ visible, onOk, onCancel, selectedUsers, setSelectedUsers, setSnackbar }) => {
   const { filteredUsers, loading, inputValue, handleSearch, handleEnterSearch, handleSelectUser } =
@@ -45,33 +57,13 @@ const UserSelectModalView = ({ visible, onOk, onCancel, selectedUsers, setSelect
       onClose={onCancel}
       maxWidth="sm"
       fullWidth
-      PaperProps={{
-        sx: {
-          borderRadius: 4,
-          boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
-          background: "linear-gradient(145deg, #ffffff 0%, #f8f8fa 100%)",
-          overflow: "hidden",
-        },
-      }}
+      PaperProps={{ sx: dialogStyles.paper }} // Sử dụng dialogStyles.paper
     >
-      <DialogTitle
-        sx={{
-          p: 3,
-          background: "linear-gradient(145deg, rgba(0, 113, 227, 0.05) 0%, rgba(0, 113, 227, 0.1) 100%)",
-          color: "#1d1d1f",
-          fontWeight: 600,
-          fontFamily: '"SF Pro Display", Roboto, sans-serif',
-          borderBottom: "1px solid rgba(0, 0, 0, 0.05)",
-          fontSize: "1.1rem",
-          display: "flex",
-          alignItems: "center",
-          gap: 1.5,
-        }}
-      >
-        <UserPlus size={20} color="#0071e3" />
+      <DialogTitle sx={dialogStyles.title}>
+        <UserPlus size={20} color={colors.primary.main} />
         Chọn người dùng
       </DialogTitle>
-      <DialogContent sx={{ p: 3 }}>
+      <DialogContent sx={dialogStyles.content}>
         <TextField
           placeholder="Tìm kiếm theo tên, số điện thoại hoặc ID"
           value={inputValue}
@@ -84,30 +76,11 @@ const UserSelectModalView = ({ visible, onOk, onCancel, selectedUsers, setSelect
           fullWidth
           size="small"
           autoComplete="off"
-          sx={{
-            mb: 2,
-            "& .MuiOutlinedInput-root": {
-              borderRadius: 2,
-              height: 40,
-              "&:hover .MuiOutlinedInput-notchedOutline": {
-                borderColor: "#0071e3",
-              },
-              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                borderColor: "#0071e3",
-                borderWidth: 2,
-              },
-              "& .MuiInputBase-input": {
-                fontSize: "0.875rem",
-              },
-            },
-            "& .MuiInputLabel-root.Mui-focused": {
-              color: "#0071e3",
-            },
-          }}
+          sx={inputStyles.textField} // Sử dụng inputStyles.textField
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <Search size={18} color="#0071e3" />
+                <Search size={18} color={colors.primary.main} />
               </InputAdornment>
             ),
           }}
@@ -115,31 +88,23 @@ const UserSelectModalView = ({ visible, onOk, onCancel, selectedUsers, setSelect
 
         {loading ? (
           <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-            <CircularProgress sx={{ color: "#0071e3" }} />
+            <CircularProgress sx={progressStyles.primary} /> {/* Sử dụng progressStyles.primary */}
           </Box>
         ) : (
           <TableContainer
             component={Paper}
-            sx={{
-              maxHeight: 400,
-              boxShadow: "none",
-              border: "1px solid rgba(0, 0, 0, 0.05)",
-              borderRadius: 3,
-              overflow: "hidden",
-            }}
+            sx={tableStyles.container} // Sử dụng tableStyles.container
           >
             <Table stickyHeader sx={{ tableLayout: "fixed" }}>
-              <TableHead>
-                <TableRow sx={{ backgroundColor: "rgba(0, 113, 227, 0.05)" }}>
+              <TableHead sx={tableStyles.head}> {/* Sử dụng tableStyles.head */}
+                <TableRow>
                   {columns.map((column) => (
                     <TableCell
                       key={column.id}
                       sx={{
+                        ...tableStyles.cell, // Sử dụng tableStyles.cell
                         width: column.width,
-                        fontWeight: 600,
-                        color: "#1d1d1f",
-                        py: 1.5,
-                        fontSize: "0.75rem",
+                        fontWeight: 600, // Giữ fontWeight vì tableStyles.cell không có
                       }}
                     >
                       {column.label}
@@ -152,37 +117,18 @@ const UserSelectModalView = ({ visible, onOk, onCancel, selectedUsers, setSelect
                   filteredUsers.map((user) => (
                     <TableRow
                       key={user._id}
-                      sx={{
-                        "&:hover": { backgroundColor: "rgba(0, 113, 227, 0.05)" },
-                        transition: "background-color 0.2s",
-                      }}
+                      sx={tableStyles.row} // Sử dụng tableStyles.row
                     >
-                      <TableCell sx={{ fontSize: "0.75rem", py: 1 }}>
+                      <TableCell sx={tableStyles.cell}>
                         <Checkbox
                           checked={selectedUsers.includes(user._id)}
                           onChange={() => handleSelectUser(user._id)}
                           size="small"
-                          sx={{
-                            color: "#0071e3",
-                            "&.Mui-checked": {
-                              color: "#0071e3",
-                            },
-                          }}
+                          sx={checkboxStyles.default} // Sử dụng checkboxStyles.default
                         />
                       </TableCell>
-                      <TableCell sx={{ fontSize: "0.75rem", py: 1 }}>
-                        <Box
-                          sx={{
-                            width: 24,
-                            height: 24,
-                            borderRadius: "50%",
-                            overflow: "hidden",
-                            background: "#f5f5f7",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                          }}
-                        >
+                      <TableCell sx={tableStyles.cell}>
+                        <Box sx={avatarStyles.userAvatar}> {/* Sử dụng avatarStyles.userAvatar */}
                           <img
                             src={user.avatar || "/placeholder.svg?height=24&width=24"}
                             alt={user.name}
@@ -197,22 +143,19 @@ const UserSelectModalView = ({ visible, onOk, onCancel, selectedUsers, setSelect
                           />
                         </Box>
                       </TableCell>
-                      <TableCell sx={{ fontSize: "0.75rem", py: 1, fontWeight: 500, color: "#1d1d1f" }}>
+                      <TableCell sx={{ ...tableStyles.cell, fontWeight: 500 }}>
                         {user.name}
                       </TableCell>
-                      <TableCell sx={{ fontSize: "0.75rem", py: 1, color: "#86868b" }}>{user.username}</TableCell>
+                      <TableCell sx={{ ...tableStyles.cell, color: colors.neutral[400] }}>
+                        {user.username}
+                      </TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
                     <TableCell
                       colSpan={4}
-                      sx={{
-                        textAlign: "center",
-                        py: 4,
-                        color: "#86868b",
-                        fontSize: "0.875rem",
-                      }}
+                      sx={tableStyles.empty} // Sử dụng tableStyles.empty
                     >
                       {loading ? "Đang tải..." : "Không có dữ liệu"}
                     </TableCell>
@@ -224,47 +167,22 @@ const UserSelectModalView = ({ visible, onOk, onCancel, selectedUsers, setSelect
         )}
 
         <Box sx={{ mt: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <Typography variant="body2" sx={{ color: "#86868b" }}>
+          <Typography variant="body2" sx={{ color: colors.neutral[400], ...typography.body2 }}>
             Đã chọn {selectedUsers.length} người dùng
           </Typography>
         </Box>
       </DialogContent>
-      <DialogActions sx={{ p: 3, borderTop: "1px solid rgba(0, 0, 0, 0.05)" }}>
+      <DialogActions sx={dialogStyles.actions}>
         <Button
           onClick={onCancel}
-          sx={{
-            borderColor: "#86868b",
-            color: "#86868b",
-            borderRadius: 28,
-            px: 3,
-            textTransform: "none",
-            fontWeight: 500,
-            "&:hover": {
-              borderColor: "#1d1d1f",
-              color: "#1d1d1f",
-              background: "rgba(0, 0, 0, 0.05)",
-            },
-          }}
+          sx={buttonStyles.outlined} // Sử dụng buttonStyles.outlined
           variant="outlined"
         >
           Hủy
         </Button>
         <Button
           onClick={onOk}
-          sx={{
-            background: "linear-gradient(145deg, #0071e3 0%, #42a5f5 100%)",
-            color: "#ffffff",
-            borderRadius: 28,
-            px: 3,
-            boxShadow: "0 4px 12px rgba(0, 113, 227, 0.2)",
-            textTransform: "none",
-            fontWeight: 500,
-            "&:hover": {
-              background: "linear-gradient(145deg, #0071e3 0%, #42a5f5 100%)",
-              boxShadow: "0 6px 16px rgba(0, 113, 227, 0.3)",
-            },
-            transition: "all 0.3s ease",
-          }}
+          sx={buttonStyles.primary} // Sử dụng buttonStyles.primary
           variant="contained"
         >
           Xác nhận

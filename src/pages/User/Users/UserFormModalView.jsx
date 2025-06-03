@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   Dialog,
@@ -14,10 +14,11 @@ import {
   Box,
   Typography,
   FormHelperText,
-} from "@mui/material"
-import { Upload, Button as AntButton } from "antd"
-import { UploadOutlined } from "@ant-design/icons"
-import { User, Mail, AtSign, Phone, Home, Shield, Lock } from 'lucide-react'
+} from "@mui/material";
+import { Upload, Button as AntButton } from "antd";
+import { UploadOutlined } from "@ant-design/icons";
+import { User, Mail, AtSign, Phone, Home, Shield, Lock } from "lucide-react";
+import { dialogStyles, inputStyles, buttonStyles, typography, colors, boxStyles } from "../../../styles"; // Import styles từ index.js
 
 const UserFormModalView = ({
   visible,
@@ -32,38 +33,15 @@ const UserFormModalView = ({
   errors,
 }) => {
   return (
-    <Dialog
-      open={visible}
-      onClose={onCancel}
-      PaperProps={{
-        sx: {
-          borderRadius: 4,
-          boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
-          background: "linear-gradient(145deg, #ffffff 0%, #f8f8fa 100%)",
-          overflow: "hidden",
-          maxWidth: 500,
-          width: "100%",
-        },
-      }}
-    >
-      <DialogTitle
-        sx={{
-          p: 3,
-          background: "linear-gradient(145deg, rgba(0, 113, 227, 0.05) 0%, rgba(0, 113, 227, 0.1) 100%)",
-          color: "#1d1d1f",
-          fontWeight: 600,
-          fontFamily: '"SF Pro Display", Roboto, sans-serif',
-          borderBottom: "1px solid rgba(0, 0, 0, 0.05)",
-          fontSize: "1.1rem",
-        }}
-      >
+    <Dialog open={visible} onClose={onCancel} PaperProps={{ sx: dialogStyles.paper }}> {/* Sử dụng dialogStyles.paper */}
+      <DialogTitle sx={dialogStyles.title}> {/* Sử dụng dialogStyles.title */}
         {editingUser ? "Sửa thông tin người dùng" : "Thêm người dùng mới"}
       </DialogTitle>
-      <DialogContent sx={{ p: 3, mt: 2 }}>
+      <DialogContent sx={dialogStyles.content}> {/* Sử dụng dialogStyles.content */}
         <Box sx={{ mb: 3 }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-            <User size={20} color="#0071e3" />
-            <Typography variant="subtitle1" sx={{ color: "#1d1d1f", fontWeight: 500 }}>
+          <Box sx={{ ...boxStyles.buttonGroup, alignItems: "center", mb: 2, gap: 2 }}> {/* Sử dụng boxStyles.buttonGroup */}
+            <User size={20} color={colors.primary.main} />
+            <Typography variant="subtitle1" sx={{ color: colors.neutral[800], ...typography.subtitle1 }}>
               Thông tin cá nhân
             </Typography>
           </Box>
@@ -79,24 +57,9 @@ const UserFormModalView = ({
             size="small"
             error={!!errors.name}
             helperText={errors.name || ""}
-            sx={{
-              mb: 2,
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 2,
-                "&:hover .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#0071e3",
-                },
-                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#0071e3",
-                  borderWidth: 2,
-                },
-              },
-              "& .MuiInputLabel-root.Mui-focused": {
-                color: "#0071e3",
-              },
-            }}
+            sx={inputStyles.textField} // Sử dụng inputStyles.textField
             InputProps={{
-              startAdornment: <User size={16} color="#0071e3" style={{ marginRight: 8 }} />,
+              startAdornment: <User size={16} color={colors.primary.main} style={{ marginRight: 8 }} />,
             }}
           />
 
@@ -112,24 +75,9 @@ const UserFormModalView = ({
             size="small"
             error={!!errors.email}
             helperText={errors.email || ""}
-            sx={{
-              mb: 2,
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 2,
-                "&:hover .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#0071e3",
-                },
-                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#0071e3",
-                  borderWidth: 2,
-                },
-              },
-              "& .MuiInputLabel-root.Mui-focused": {
-                color: "#0071e3",
-              },
-            }}
+            sx={inputStyles.textField} // Sử dụng inputStyles.textField
             InputProps={{
-              startAdornment: <Mail size={16} color="#0071e3" style={{ marginRight: 8 }} />,
+              startAdornment: <Mail size={16} color={colors.primary.main} style={{ marginRight: 8 }} />,
             }}
           />
 
@@ -144,32 +92,17 @@ const UserFormModalView = ({
             size="small"
             error={!!errors.username}
             helperText={errors.username || ""}
-            sx={{
-              mb: 2,
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 2,
-                "&:hover .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#0071e3",
-                },
-                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#0071e3",
-                  borderWidth: 2,
-                },
-              },
-              "& .MuiInputLabel-root.Mui-focused": {
-                color: "#0071e3",
-              },
-            }}
+            sx={inputStyles.textField} // Sử dụng inputStyles.textField
             InputProps={{
-              startAdornment: <AtSign size={16} color="#0071e3" style={{ marginRight: 8 }} />,
+              startAdornment: <AtSign size={16} color={colors.primary.main} style={{ marginRight: 8 }} />,
             }}
           />
         </Box>
 
         <Box sx={{ mb: 3 }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-            <Phone size={20} color="#0071e3" />
-            <Typography variant="subtitle1" sx={{ color: "#1d1d1f", fontWeight: 500 }}>
+          <Box sx={{ ...boxStyles.buttonGroup, alignItems: "center", mb: 2, gap: 2 }}> {/* Sử dụng boxStyles.buttonGroup */}
+            <Phone size={20} color={colors.primary.main} />
+            <Typography variant="subtitle1" sx={{ color: colors.neutral[800], ...typography.subtitle1 }}>
               Thông tin liên hệ
             </Typography>
           </Box>
@@ -184,24 +117,9 @@ const UserFormModalView = ({
             size="small"
             error={!!errors.phone}
             helperText={errors.phone || ""}
-            sx={{
-              mb: 2,
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 2,
-                "&:hover .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#0071e3",
-                },
-                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#0071e3",
-                  borderWidth: 2,
-                },
-              },
-              "& .MuiInputLabel-root.Mui-focused": {
-                color: "#0071e3",
-              },
-            }}
+            sx={inputStyles.textField} // Sử dụng inputStyles.textField
             InputProps={{
-              startAdornment: <Phone size={16} color="#0071e3" style={{ marginRight: 8 }} />,
+              startAdornment: <Phone size={16} color={colors.primary.main} style={{ marginRight: 8 }} />,
             }}
           />
 
@@ -213,65 +131,28 @@ const UserFormModalView = ({
             onChange={handleFieldChange}
             margin="dense"
             size="small"
-            sx={{
-              mb: 2,
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 2,
-                "&:hover .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#0071e3",
-                },
-                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#0071e3",
-                  borderWidth: 2,
-                },
-              },
-              "& .MuiInputLabel-root.Mui-focused": {
-                color: "#0071e3",
-              },
-            }}
+            sx={inputStyles.textField} // Sử dụng inputStyles.textField
             InputProps={{
-              startAdornment: <Home size={16} color="#0071e3" style={{ marginRight: 8 }} />,
+              startAdornment: <Home size={16} color={colors.primary.main} style={{ marginRight: 8 }} />,
             }}
           />
         </Box>
 
         <Box sx={{ mb: 3 }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-            <Shield size={20} color="#0071e3" />
-            <Typography variant="subtitle1" sx={{ color: "#1d1d1f", fontWeight: 500 }}>
+          <Box sx={{ ...boxStyles.buttonGroup, alignItems: "center", mb: 2, gap: 2 }}> {/* Sử dụng boxStyles.buttonGroup */}
+            <Shield size={20} color={colors.primary.main} />
+            <Typography variant="subtitle1" sx={{ color: colors.neutral[800], ...typography.subtitle1 }}>
               Quyền hạn và bảo mật
             </Typography>
           </Box>
 
-          <FormControl
-            fullWidth
-            margin="dense"
-            size="small"
-            required
-            error={!!errors.role}
-            sx={{
-              mb: 2,
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 2,
-                "&:hover .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#0071e3",
-                },
-                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#0071e3",
-                  borderWidth: 2,
-                },
-              },
-              "& .MuiInputLabel-root.Mui-focused": {
-                color: "#0071e3",
-              },
-            }}
-          >
+          <FormControl fullWidth margin="dense" size="small" required error={!!errors.role} sx={inputStyles.select}> {/* Sử dụng inputStyles.select */}
             <InputLabel>Vai trò</InputLabel>
             <Select
               name="role"
               value={form.role || ""}
               onChange={handleRoleChange}
-              startAdornment={<Shield size={16} color="#0071e3" style={{ marginRight: 8, marginLeft: -4 }} />}
+              startAdornment={<Shield size={16} color={colors.primary.main} style={{ marginRight: 8, marginLeft: -4 }} />}
               label="Vai trò"
             >
               <MenuItem value="CUSTOMER">Khách hàng</MenuItem>
@@ -282,7 +163,7 @@ const UserFormModalView = ({
           </FormControl>
 
           <Box sx={{ mb: 2 }}>
-            <Typography variant="body2" sx={{ mb: 1, color: "#1d1d1f" }}>
+            <Typography variant="body2" sx={{ mb: 1, color: colors.neutral[800], ...typography.body2 }}>
               Ảnh đại diện
             </Typography>
             <Upload
@@ -297,8 +178,8 @@ const UserFormModalView = ({
                 style={{
                   height: 36,
                   borderRadius: 8,
-                  borderColor: "#0071e3",
-                  color: "#0071e3",
+                  borderColor: colors.primary.main, // Sử dụng colors.primary.main
+                  color: colors.primary.main, // Sử dụng colors.primary.main
                 }}
               >
                 Tải lên ảnh đại diện
@@ -318,70 +199,23 @@ const UserFormModalView = ({
             size="small"
             error={!!errors.password}
             helperText={errors.password || ""}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 2,
-                "&:hover .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#0071e3",
-                },
-                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#0071e3",
-                  borderWidth: 2,
-                },
-              },
-              "& .MuiInputLabel-root.Mui-focused": {
-                color: "#0071e3",
-              },
-            }}
+            sx={inputStyles.textField}
             InputProps={{
-              startAdornment: <Lock size={16} color="#0071e3" style={{ marginRight: 8 }} />,
+              startAdornment: <Lock size={16} color={colors.primary.main} style={{ marginRight: 8 }} />,
             }}
           />
         </Box>
       </DialogContent>
-      <DialogActions sx={{ p: 3, borderTop: "1px solid rgba(0, 0, 0, 0.05)" }}>
-        <Button
-          onClick={onCancel}
-          sx={{
-            borderColor: "#86868b",
-            color: "#86868b",
-            borderRadius: 28,
-            px: 3,
-            textTransform: "none",
-            fontWeight: 500,
-            "&:hover": {
-              borderColor: "#1d1d1f",
-              color: "#1d1d1f",
-              background: "rgba(0, 0, 0, 0.05)",
-            },
-          }}
-          variant="outlined"
-        >
+      <DialogActions sx={dialogStyles.actions}>
+        <Button onClick={onCancel} sx={buttonStyles.outlined} variant="outlined"> 
           Hủy
         </Button>
-        <Button
-          onClick={onOk}
-          sx={{
-            background: "linear-gradient(145deg, #0071e3 0%, #42a5f5 100%)",
-            color: "#ffffff",
-            borderRadius: 28,
-            px: 3,
-            boxShadow: "0 4px 12px rgba(0, 113, 227, 0.2)",
-            textTransform: "none",
-            fontWeight: 500,
-            "&:hover": {
-              background: "linear-gradient(145deg, #0071e3 0%, #42a5f5 100%)",
-              boxShadow: "0 6px 16px rgba(0, 113, 227, 0.3)",
-            },
-            transition: "all 0.3s ease",
-          }}
-          variant="contained"
-        >
+        <Button onClick={onOk} sx={buttonStyles.primary} variant="contained"> 
           {editingUser ? "Cập nhật" : "Thêm mới"}
         </Button>
       </DialogActions>
     </Dialog>
-  )
-}
+  );
+};
 
-export default UserFormModalView
+export default UserFormModalView;

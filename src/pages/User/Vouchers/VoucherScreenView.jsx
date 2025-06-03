@@ -1,4 +1,3 @@
-// VoucherScreenView.jsx
 "use client";
 
 import {
@@ -15,6 +14,15 @@ import { Plus, RefreshCw, AlertTriangle } from "lucide-react";
 import VoucherFormModalView from "./VoucherFormModalView";
 import VoucherTable from "./VoucherTable";
 import VoucherScreenViewModel from "./VoucherScreenViewModel";
+import {
+  dialogStyles,
+  buttonStyles,
+  progressStyles,
+  typography,
+  colors,
+  boxStyles,
+  textStyles,
+} from "../../../styles"; // Import styles từ index.js
 
 const VoucherScreenView = ({ selectedUsers, setSelectedUsers, setSnackbar }) => {
   const {
@@ -39,35 +47,16 @@ const VoucherScreenView = ({ selectedUsers, setSelectedUsers, setSnackbar }) => 
 
   return (
     <Box>
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3 }}>
-        <Typography
-          variant="h6"
-          sx={{
-            color: "#1d1d1f",
-            fontWeight: 600,
-            fontFamily: '"SF Pro Display", Roboto, sans-serif',
-          }}
-        >
+      <Box sx={boxStyles.header}> {/* Sử dụng boxStyles.header */}
+        <Typography variant="h6" sx={{ color: colors.neutral[800], ...typography.h6 }}>
           Quản lý Voucher
         </Typography>
-        <Box sx={{ display: "flex", gap: 2 }}>
+        <Box sx={boxStyles.buttonGroup}> {/* Sử dụng boxStyles.buttonGroup */}
           <Button
             variant="outlined"
             startIcon={<RefreshCw size={16} />}
             onClick={() => window.location.reload()}
-            sx={{
-              borderColor: "#0071e3",
-              color: "#0071e3",
-              borderRadius: 28,
-              px: 3,
-              textTransform: "none",
-              fontWeight: 500,
-              "&:hover": {
-                borderColor: "#0071e3",
-                background: "rgba(0, 113, 227, 0.05)",
-              },
-              transition: "all 0.2s ease",
-            }}
+            sx={buttonStyles.outlinedPrimary} // Sử dụng buttonStyles.outlinedPrimary
           >
             Làm mới
           </Button>
@@ -75,21 +64,7 @@ const VoucherScreenView = ({ selectedUsers, setSelectedUsers, setSnackbar }) => 
             variant="contained"
             startIcon={<Plus size={16} />}
             onClick={handleAdd}
-            sx={{
-              background: "linear-gradient(145deg, #0071e3 0%, #42a5f5 100%)",
-              color: "#ffffff",
-              borderRadius: 28,
-              px: 3,
-              boxShadow: "0 4px 12px rgba(0, 113, 227, 0.2)",
-              textTransform: "none",
-              fontWeight: 500,
-              "&:hover": {
-                background: "linear-gradient(145deg, #0071e3 0%, #42a5f5 100%)",
-                boxShadow: "0 6px 16px rgba(0, 113, 227, 0.3)",
-                transform: "translateY(-2px)",
-              },
-              transition: "all 0.3s ease",
-            }}
+            sx={buttonStyles.primary} // Sử dụng buttonStyles.primary
           >
             Thêm voucher
           </Button>
@@ -98,103 +73,56 @@ const VoucherScreenView = ({ selectedUsers, setSelectedUsers, setSnackbar }) => 
 
       {loading ? (
         <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-          <CircularProgress sx={{ color: "#0071e3" }} />
+          <CircularProgress sx={progressStyles.primary} /> {/* Sử dụng progressStyles.primary */}
         </Box>
       ) : (
         <VoucherTable vouchers={vouchers} loading={loading} onEdit={handleEdit} onDelete={confirmDelete} />
       )}
 
       <VoucherFormModalView
-  visible={isModalVisible}
-  onOk={handleModalOk}
-  onCancel={handleModalCancel}
-  form={{
-    ...form,
-    setFieldsValue: (values) => setForm({ ...form, ...values }),
-    touched: formTouched,
-  }}
-  editingVoucher={editingVoucher}
-  selectedUsers={selectedUsers}
-  setSelectedUsers={setSelectedUsers}
-  setSnackbar={setSnackbar}
-  allUsers={allUsers}
-/>
+        visible={isModalVisible}
+        onOk={handleModalOk}
+        onCancel={handleModalCancel}
+        form={{
+          ...form,
+          setFieldsValue: (values) => setForm({ ...form, ...values }),
+          touched: formTouched,
+        }}
+        editingVoucher={editingVoucher}
+        selectedUsers={selectedUsers}
+        setSelectedUsers={setSelectedUsers}
+        setSnackbar={setSnackbar}
+        allUsers={allUsers}
+      />
 
       <Dialog
         open={isDeleteDialogOpen}
         onClose={cancelDelete}
-        PaperProps={{
-          sx: {
-            borderRadius: 4,
-            boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
-            background: "linear-gradient(145deg, #ffffff 0%, #f8f8fa 100%)",
-            overflow: "hidden",
-            maxWidth: 400,
-            width: "100%",
-          },
-        }}
+        PaperProps={{ sx: dialogStyles.paper }} // Sử dụng dialogStyles.paper
       >
-        <DialogTitle
-          sx={{
-            p: 3,
-            background: "linear-gradient(145deg, rgba(255, 59, 48, 0.05) 0%, rgba(255, 59, 48, 0.1) 100%)",
-            color: "#1d1d1f",
-            fontWeight: 600,
-            fontFamily: '"SF Pro Display", Roboto, sans-serif',
-            borderBottom: "1px solid rgba(0, 0, 0, 0.05)",
-            fontSize: "1.1rem",
-            display: "flex",
-            alignItems: "center",
-            gap: 1.5,
-          }}
-        >
-          <AlertTriangle size={20} color="#ff3b30" />
+        <DialogTitle sx={dialogStyles.titleError}> {/* Sử dụng dialogStyles.titleError */}
+          <AlertTriangle size={20} color={colors.error.main} />
           Xác nhận xóa Voucher
         </DialogTitle>
-        <DialogContent sx={{ p: 3, mt: 2 }}>
-          <Typography variant="body1" sx={{ color: "#1d1d1f" }}>
+        <DialogContent sx={dialogStyles.content}>
+          <Typography variant="body1" sx={{ color: colors.neutral[800], ...typography.body1 }}>
             Bạn có chắc chắn muốn xóa voucher <strong>{voucherToDelete?.code}</strong> không?
           </Typography>
-          <Typography variant="body2" sx={{ color: "#ff3b30", mt: 2 }}>
+          <Typography variant="body2" sx={textStyles.error}> {/* Sử dụng textStyles.error */}
             Lưu ý: Hành động này không thể hoàn tác.
           </Typography>
         </DialogContent>
-        <DialogActions sx={{ p: 3, borderTop: "1px solid rgba(0, 0, 0, 0.05)" }}>
+        <DialogActions sx={dialogStyles.actions}>
           <Button
             onClick={cancelDelete}
-            sx={{
-              borderColor: "#86868b",
-              color: "#86868b",
-              borderRadius: 28,
-              px: 3,
-              textTransform: "none",
-              fontWeight: 500,
-              "&:hover": {
-                borderColor: "#1d1d1f",
-                color: "#1d1d1f",
-                background: "rgba(0, 0, 0, 0.05)",
-              },
-            }}
+            sx={buttonStyles.outlined} // Sử dụng buttonStyles.outlined
             variant="outlined"
           >
             Hủy
           </Button>
           <Button
             onClick={executeDelete}
-            sx={{
-              background: "linear-gradient(145deg, #ff3b30 0%, #ff9500 100%)",
-              color: "#ffffff",
-              borderRadius: 28,
-              px: 3,
-              boxShadow: "0 4px 12px rgba(255, 59, 48, 0.2)",
-              textTransform: "none",
-              fontWeight: 500,
-              "&:hover": {
-                background: "linear-gradient(145deg, #ff3b30 0%, #ff9500 100%)",
-                boxShadow: "0 6px 16px rgba(255, 59, 48, 0.3)",
-              },
-              transition: "all 0.3s ease",
-            }}
+            sx={buttonStyles.danger} // Sử dụng buttonStyles.danger
             variant="contained"
           >
             Xóa

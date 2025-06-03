@@ -1,10 +1,11 @@
-// UserVoucherManagementView.jsx (đã được tách trước đó)
 "use client";
 
 import { Box, Tabs, Tab, Snackbar, Alert } from "@mui/material";
 import UserScreen from "./Users/UserScreenView";
 import VoucherScreenView from "./Vouchers/VoucherScreenView";
 import UserVoucherManagementViewModel from "./UserVoucherManagementViewModel";
+
+import { boxStyles, typography, colors, shadows } from "../../styles/index";
 
 const UserVoucherManagementView = () => {
   const {
@@ -19,9 +20,7 @@ const UserVoucherManagementView = () => {
   return (
     <Box
       sx={{
-        p: 4,
-        background: "linear-gradient(145deg, #f5f5f7 0%, #ffffff 100%)",
-        minHeight: "100vh",
+        ...boxStyles.pageContainer, // Sử dụng style container chung
         position: "relative",
         "&:before": {
           content: '""',
@@ -30,7 +29,8 @@ const UserVoucherManagementView = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          background: "radial-gradient(circle at top left, rgba(0, 122, 255, 0.05), transparent 70%)",
+          background:
+            "radial-gradient(circle at top left, rgba(0, 122, 255, 0.05), transparent 70%)",
           zIndex: 0,
         },
       }}
@@ -42,15 +42,15 @@ const UserVoucherManagementView = () => {
           sx={{
             mb: 3,
             "& .MuiTabs-indicator": {
-              backgroundColor: "#0071e3",
+              backgroundColor: colors.primary.main,
             },
             "& .MuiTab-root": {
               textTransform: "none",
               fontWeight: 500,
-              color: "#86868b",
-              fontSize: "0.9rem",
+              color: colors.neutral[400],
+              fontSize: typography.body2.fontSize,
               "&.Mui-selected": {
-                color: "#0071e3",
+                color: colors.primary.main,
                 fontWeight: 600,
               },
             },
@@ -62,10 +62,8 @@ const UserVoucherManagementView = () => {
 
         <Box
           sx={{
+            ...boxStyles.card, // Dùng style card chung
             borderRadius: 4,
-            background: "linear-gradient(145deg, #ffffff 0%, #f8f8fa 100%)",
-            boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
-            border: "1px solid rgba(0, 0, 0, 0.05)",
             p: 3,
           }}
         >
@@ -97,16 +95,16 @@ const UserVoucherManagementView = () => {
           onClose={() => setSnackbar({ ...snackbar, open: false })}
           sx={{
             borderRadius: 2,
-            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+            boxShadow: shadows.medium,
             "& .MuiAlert-icon": {
               color:
                 snackbar.severity === "success"
-                  ? "#34c759"
+                  ? colors.success.main
                   : snackbar.severity === "error"
-                    ? "#ff3b30"
-                    : snackbar.severity === "warning"
-                      ? "#ff9500"
-                      : "#0071e3",
+                  ? colors.error.main
+                  : snackbar.severity === "warning"
+                  ? colors.warning.main
+                  : colors.primary.main,
             },
           }}
         >

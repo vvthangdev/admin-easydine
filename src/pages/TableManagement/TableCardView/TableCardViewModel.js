@@ -113,15 +113,7 @@ const TableCardViewModel = ({ table, onRelease, tables, onMergeSuccess, onOrderS
   if (table.status === "Available") {
     console.log("Table status is Available, opening order modal");
     setIsOrderModalVisible(true);
-    setEditingOrder({
-      type: "takeaway", // Mặc định là takeaway khi bàn trống
-      tables: [], // Không có bàn được chọn
-      status: "confirmed",
-      time: moment().toISOString(),
-      customer_id: null,
-      reservedTables: [],
-      itemOrders: [],
-    });
+    setEditingOrder(null);
   } else {
     try {
       console.log("Fetching order info for table_id:", table.table_id);

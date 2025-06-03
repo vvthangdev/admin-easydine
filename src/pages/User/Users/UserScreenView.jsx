@@ -16,8 +16,15 @@ import UserFormModalView from "./UserFormModalView";
 import UserFormModalViewModel from "./UserFormModalViewModel";
 import UserSearch from "./UserSearch";
 import UserScreenViewModel from "./UserScreenViewModel";
-import minioClient from "../../../Server/minioClient";
-import { adminAPI } from "../../../services/apis/Admin";
+import {
+  dialogStyles,
+  buttonStyles,
+  progressStyles,
+  typography,
+  colors,
+  boxStyles,
+  textStyles,
+} from "../../../styles"; // Import styles từ index.js
 
 const UserScreenView = ({ setSnackbar }) => {
   const {
@@ -54,99 +61,41 @@ const UserScreenView = ({ setSnackbar }) => {
   } = UserFormModalViewModel({
     editingUser,
     setSnackbar,
-    onSave: async (formData) => {
-      try {
-        let imageUrl = editingUser?.avatar || "";
-        if (formData.avatar) {
-          const timestamp = Date.now();
-          const fileName = `images/${timestamp}_${formData.avatar.name}`;
-          const minioStorage = minioClient.storage.from("test01");
-          const { error } = await minioStorage.upload(
-            fileName,
-            formData.avatar
-          );
-          if (error) throw new Error(`Không thể upload file: ${error.message}`);
-          const { data: publicUrlData } = minioStorage.getPublicUrl(fileName);
-          if (!publicUrlData.publicUrl)
-            throw new Error("Không thể lấy URL công khai cho ảnh.");
-          imageUrl = publicUrlData.publicUrl;
-        }
+  });
 
-        const userData = {
-          id: editingUser?._id,
-          email: formData.email,
-          username: formData.username,
-          name: formData.name,
-          phone: formData.phone,
-          role: formData.role,
-          address: formData.address,
-          avatar: imageUrl,
-          ...(formData.password && { password: formData.password }),
-        };
-
+  const handleModalOk = async () => {
+    try {
+      const updatedUser = await handleOk();
+      if (updatedUser) {
         if (editingUser) {
-          await adminAPI.updateUser(userData);
-          const updatedUser = {
-            ...editingUser,
-            ...userData,
-            _id: editingUser._id,
-          };
           const updatedUsers = users.map((user) =>
-            user._id === editingUser._id ? updatedUser : user
+            user._id === editingUser._id ? { ...user, ...updatedUser } : user
           );
           setUsers(updatedUsers);
           setFilteredUsers(updatedUsers);
-          setSnackbar({
-            open: true,
-            message: "Cập nhật người dùng thành công",
-            severity: "success",
-          });
+        } else {
+          setUsers([...users, updatedUser]);
+          setFilteredUsers([...filteredUsers, updatedUser]);
         }
         setIsModalVisible(false);
-      } catch (error) {
-        throw error;
       }
-    },
-  });
+    } catch (error) {
+      // Lỗi đã được xử lý trong UserFormModalViewModel, không cần làm gì thêm
+    }
+  };
 
   return (
     <Box>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 3,
-        }}
-      >
-        <Typography
-          variant="h6"
-          sx={{
-            color: "#1d1d1f",
-            fontWeight: 600,
-            fontFamily: '"SF Pro Display", Roboto, sans-serif',
-          }}
-        >
+      <Box sx={boxStyles.header}> {/* Sử dụng boxStyles.header */}
+        <Typography variant="h6" sx={{ color: colors.neutral[800], ...typography.h6 }}>
           Danh sách người dùng
         </Typography>
-        <Box sx={{ display: "flex", gap: 2 }}>
+        <Box sx={boxStyles.buttonGroup}> {/* Sử dụng boxStyles.buttonGroup */}
           <Button
             variant="outlined"
             startIcon={<RefreshCw size={16} />}
             onClick={fetchUsers}
-            sx={{
-              borderColor: "#0071e3",
-              color: "#0071e3",
-              borderRadius: 28,
-              px: 3,
-              textTransform: "none",
-              fontWeight: 500,
-              "&:hover": {
-                borderColor: "#0071e3",
-                background: "rgba(0, 113, 227, 0.05)",
-              },
-              transition: "all 0.2s ease",
-            }}
+            sx={buttonStyles.outlinedPrimary} // Sử dụng buttonStyles.outlinedPrimary
           >
             Làm mới
           </Button>
@@ -157,21 +106,7 @@ const UserScreenView = ({ setSnackbar }) => {
               handleEdit(null);
               setIsModalVisible(true);
             }}
-            sx={{
-              background: "linear-gradient(145deg, #0071e3 0%, #42a5f5 100%)",
-              color: "#ffffff",
-              borderRadius: 28,
-              px: 3,
-              boxShadow: "0 4px 12px rgba(0, 113, 227, 0.2)",
-              textTransform: "none",
-              fontWeight: 500,
-              "&:hover": {
-                background: "linear-gradient(145deg, #0071e3 0%, #42a5f5 100%)",
-                boxShadow: "0 6px 16px rgba(0, 113, 227, 0.3)",
-                transform: "translateY(-2px)",
-              },
-              transition: "all 0.3s ease",
-            }}
+            sx={buttonStyles.primary} // Sử dụng buttonStyles.primary
           >
             Thêm người dùng
           </Button>
@@ -179,16 +114,12 @@ const UserScreenView = ({ setSnackbar }) => {
       </Box>
 
       <Box sx={{ mb: 3 }}>
-        <UserSearch
-          searchTerm={searchTerm}
-          onSearch={handleSearch}
-          onEnter={handleEnter}
-        />
+        <UserSearch searchTerm={searchTerm} onSearch={handleSearch} onEnter={handleEnter} />
       </Box>
 
       {loading ? (
         <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-          <CircularProgress sx={{ color: "#0071e3" }} />
+          <CircularProgress sx={progressStyles.primary} /> {/* Sử dụng progressStyles.primary */}
         </Box>
       ) : (
         <UserTable
@@ -202,7 +133,7 @@ const UserScreenView = ({ setSnackbar }) => {
 
       <UserFormModalView
         visible={isModalVisible}
-        onOk={handleOk}
+        onOk={handleModalOk}
         onCancel={() => {
           handleCancel();
           setIsModalVisible(false);
@@ -219,78 +150,30 @@ const UserScreenView = ({ setSnackbar }) => {
       <Dialog
         open={isDeleteDialogOpen}
         onClose={() => setIsDeleteDialogOpen(false)}
-        PaperProps={{
-          sx: {
-            borderRadius: 4,
-            boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
-            background: "linear-gradient(145deg, #ffffff 0%, #f8f8fa 100%)",
-            overflow: "hidden",
-            maxWidth: 400,
-            width: "100%",
-          },
-        }}
+        PaperProps={{ sx: dialogStyles.paper }} // Sử dụng dialogStyles.paper
       >
-        <DialogTitle
-          sx={{
-            p: 3,
-            background:
-              "linear-gradient(145deg, rgba(255, 59, 48, 0.05) 0%, rgba(255, 59, 48, 0.1) 100%)",
-            color: "#1d1d1f",
-            fontWeight: 600,
-            fontFamily: '"SF Pro Display", Roboto, sans-serif',
-            borderBottom: "1px solid rgba(0, 0, 0, 0.05)",
-            fontSize: "1.1rem",
-          }}
-        >
+        <DialogTitle sx={dialogStyles.titleError}> {/* Sử dụng dialogStyles.titleError */}
           Xác nhận xóa người dùng
         </DialogTitle>
-        <DialogContent sx={{ p: 3, mt: 2 }}>
-          <Typography variant="body1" sx={{ color: "#1d1d1f" }}>
-            Bạn có chắc chắn muốn xóa người dùng{" "}
-            <strong>{userToDelete?.name}</strong> không?
+        <DialogContent sx={dialogStyles.content}> {/* Sử dụng dialogStyles.content */}
+          <Typography variant="body1" sx={{ color: colors.neutral[800], ...typography.body1 }}>
+            Bạn có chắc chắn muốn xóa người dùng <strong>{userToDelete?.name}</strong> không?
           </Typography>
-          <Typography variant="body2" sx={{ color: "#ff3b30", mt: 2 }}>
+          <Typography variant="body2" sx={textStyles.error}> {/* Sử dụng textStyles.error */}
             Lưu ý: Hành động này không thể hoàn tác.
           </Typography>
         </DialogContent>
-        <DialogActions
-          sx={{ p: 3, borderTop: "1px solid rgba(0, 0, 0, 0.05)" }}
-        >
+        <DialogActions sx={dialogStyles.actions}> {/* Sử dụng dialogStyles.actions */}
           <Button
             onClick={() => setIsDeleteDialogOpen(false)}
-            sx={{
-              borderColor: "#86868b",
-              color: "#86868b",
-              borderRadius: 28,
-              px: 3,
-              textTransform: "none",
-              fontWeight: 500,
-              "&:hover": {
-                borderColor: "#1d1d1f",
-                color: "#1d1d1f",
-                background: "rgba(0, 0, 0, 0.05)",
-              },
-            }}
+            sx={buttonStyles.outlined} // Sử dụng buttonStyles.outlined
             variant="outlined"
           >
             Hủy
           </Button>
           <Button
             onClick={confirmDelete}
-            sx={{
-              background: "linear-gradient(145deg, #ff3b30 0%, #ff9500 100%)",
-              color: "#ffffff",
-              borderRadius: 28,
-              px: 3,
-              boxShadow: "0 4px 12px rgba(255, 59, 48, 0.2)",
-              textTransform: "none",
-              fontWeight: 500,
-              "&:hover": {
-                background: "linear-gradient(145deg, #ff3b30 0%, #ff9500 100%)",
-                boxShadow: "0 6px 16px rgba(255, 59, 48, 0.3)",
-              },
-              transition: "all 0.3s ease",
-            }}
+            sx={buttonStyles.danger} // Sử dụng buttonStyles.danger
             variant="contained"
           >
             Xóa

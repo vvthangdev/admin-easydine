@@ -1,4 +1,3 @@
-// VoucherFormModalView.jsx
 "use client";
 
 import {
@@ -35,6 +34,16 @@ import viLocale from "date-fns/locale/vi";
 import { Ticket, Calendar, Percent, DollarSign, Users, UserPlus, Trash2 } from "lucide-react";
 import UserSelectModalView from "./UserSelectModalView";
 import VoucherFormModalViewModel from "./VoucherFormModalViewModel";
+import {
+  dialogStyles,
+  buttonStyles,
+  tableStyles,
+  inputStyles,
+  switchStyles,
+  progressStyles,
+  typography,
+  colors,
+} from "../../../styles"; // Import styles từ index.js
 
 const VoucherFormModalView = ({
   visible,
@@ -61,7 +70,7 @@ const VoucherFormModalView = ({
     selectedUsers,
     setSelectedUsers,
     setSnackbar,
-    onCancel
+    onCancel,
   });
 
   const userColumns = [
@@ -77,37 +86,17 @@ const VoucherFormModalView = ({
         onClose={handleCancelWithConfirmation}
         maxWidth="sm"
         fullWidth
-        PaperProps={{
-          sx: {
-            borderRadius: 4,
-            boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
-            background: "linear-gradient(145deg, #ffffff 0%, #f8f8fa 100%)",
-            overflow: "hidden",
-          },
-        }}
+        PaperProps={{ sx: dialogStyles.paper }} // Sử dụng dialogStyles.paper
       >
-        <DialogTitle
-          sx={{
-            p: 3,
-            background: "linear-gradient(145deg, rgba(0, 113, 227, 0.05) 0%, rgba(0, 113, 227, 0.1) 100%)",
-            color: "#1d1d1f",
-            fontWeight: 600,
-            fontFamily: '"SF Pro Display", Roboto, sans-serif',
-            borderBottom: "1px solid rgba(0, 0, 0, 0.05)",
-            fontSize: "1.1rem",
-            display: "flex",
-            alignItems: "center",
-            gap: 1.5,
-          }}
-        >
-          <Ticket size={20} color="#0071e3" />
+        <DialogTitle sx={dialogStyles.title}>
+          <Ticket size={20} color={colors.primary.main} />
           {editingVoucher ? "Sửa Voucher" : "Thêm Voucher"}
         </DialogTitle>
-        <DialogContent sx={{ p: 3, mt: 2 }}>
+        <DialogContent sx={dialogStyles.content}>
           <Box sx={{ mb: 3 }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-              <Ticket size={20} color="#0071e3" />
-              <Typography variant="subtitle1" sx={{ color: "#1d1d1f", fontWeight: 500 }}>
+              <Ticket size={20} color={colors.primary.main} />
+              <Typography variant="subtitle1" sx={{ color: colors.neutral[800], ...typography.subtitle1 }}>
                 Thông tin Voucher
               </Typography>
             </Box>
@@ -123,24 +112,9 @@ const VoucherFormModalView = ({
               size="small"
               error={!!form.touched?.code}
               helperText={form.touched?.code || ""}
-              sx={{
-                mb: 2,
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: 2,
-                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#0071e3",
-                  },
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#0071e3",
-                    borderWidth: 2,
-                  },
-                },
-                "& .MuiInputLabel-root.Mui-focused": {
-                  color: "#0071e3",
-                },
-              }}
+              sx={inputStyles.textField} // Sử dụng inputStyles.textField
               InputProps={{
-                startAdornment: <Ticket size={16} color="#0071e3" style={{ marginRight: 8 }} />,
+                startAdornment: <Ticket size={16} color={colors.primary.main} style={{ marginRight: 8 }} />,
               }}
             />
 
@@ -156,24 +130,9 @@ const VoucherFormModalView = ({
               size="small"
               error={!!form.touched?.discount}
               helperText={form.touched?.discount || ""}
-              sx={{
-                mb: 2,
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: 2,
-                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#0071e3",
-                  },
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#0071e3",
-                    borderWidth: 2,
-                  },
-                },
-                "& .MuiInputLabel-root.Mui-focused": {
-                  color: "#0071e3",
-                },
-              }}
+              sx={inputStyles.textField} // Sử dụng inputStyles.textField
               InputProps={{
-                startAdornment: <Percent size={16} color="#0071e3" style={{ marginRight: 8 }} />,
+                startAdornment: <Percent size={16} color={colors.primary.main} style={{ marginRight: 8 }} />,
               }}
             />
 
@@ -183,29 +142,16 @@ const VoucherFormModalView = ({
               size="small"
               required
               error={!!form.touched?.discountType}
-              sx={{
-                mb: 2,
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: 2,
-                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#0071e3",
-                  },
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#0071e3",
-                    borderWidth: 2,
-                  },
-                },
-                "& .MuiInputLabel-root.Mui-focused": {
-                  color: "#0071e3",
-                },
-              }}
+              sx={inputStyles.select} // Sử dụng inputStyles.select
             >
               <InputLabel>Loại giảm giá</InputLabel>
               <Select
                 name="discountType"
                 value={form.discountType || ""}
                 onChange={(e) => handleFieldChange("discountType", e.target.value)}
-                startAdornment={<Percent size={16} color="#0071e3" style={{ marginRight: 8, marginLeft: -4 }} />}
+                startAdornment={
+                  <Percent size={16} color={colors.primary.main} style={{ marginRight: 8, marginLeft: -4 }} />
+                }
               >
                 <MenuItem value="percentage">Phần trăm</MenuItem>
                 <MenuItem value="fixed">Cố định</MenuItem>
@@ -224,32 +170,17 @@ const VoucherFormModalView = ({
               size="small"
               error={!!form.touched?.minOrderValue}
               helperText={form.touched?.minOrderValue || ""}
-              sx={{
-                mb: 2,
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: 2,
-                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#0071e3",
-                  },
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#0071e3",
-                    borderWidth: 2,
-                  },
-                },
-                "& .MuiInputLabel-root.Mui-focused": {
-                  color: "#0071e3",
-                },
-              }}
+              sx={inputStyles.textField} // Sử dụng inputStyles.textField
               InputProps={{
-                startAdornment: <DollarSign size={16} color="#0071e3" style={{ marginRight: 8 }} />,
+                startAdornment: <DollarSign size={16} color={colors.primary.main} style={{ marginRight: 8 }} />,
               }}
             />
           </Box>
 
           <Box sx={{ mb: 3 }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-              <Calendar size={20} color="#0071e3" />
-              <Typography variant="subtitle1" sx={{ color: "#1d1d1f", fontWeight: 500 }}>
+              <Calendar size={20} color={colors.primary.main} />
+              <Typography variant="subtitle1" sx={{ color: colors.neutral[800], ...typography.subtitle1 }}>
                 Thời gian hiệu lực
               </Typography>
             </Box>
@@ -266,24 +197,9 @@ const VoucherFormModalView = ({
                     size: "small",
                     error: !!form.touched?.startDate,
                     helperText: form.touched?.startDate || "",
-                    sx: {
-                      mb: 2,
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: 2,
-                        "&:hover .MuiOutlinedInput-notchedOutline": {
-                          borderColor: "#0071e3",
-                        },
-                        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                          borderColor: "#0071e3",
-                          borderWidth: 2,
-                        },
-                      },
-                      "& .MuiInputLabel-root.Mui-focused": {
-                        color: "#0071e3",
-                      },
-                    },
+                    sx: inputStyles.datePicker, // Sử dụng inputStyles.datePicker
                     InputProps: {
-                      startAdornment: <Calendar size={16} color="#0071e3" style={{ marginRight: 8 }} />,
+                      startAdornment: <Calendar size={16} color={colors.primary.main} style={{ marginRight: 8 }} />,
                     },
                   },
                 }}
@@ -299,24 +215,9 @@ const VoucherFormModalView = ({
                     size: "small",
                     error: !!form.touched?.endDate,
                     helperText: form.touched?.endDate || "",
-                    sx: {
-                      mb: 2,
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: 2,
-                        "&:hover .MuiOutlinedInput-notchedOutline": {
-                          borderColor: "#0071e3",
-                        },
-                        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                          borderColor: "#0071e3",
-                          borderWidth: 2,
-                        },
-                      },
-                      "& .MuiInputLabel-root.Mui-focused": {
-                        color: "#0071e3",
-                      },
-                    },
+                    sx: inputStyles.datePicker, // Sử dụng inputStyles.datePicker
                     InputProps: {
-                      startAdornment: <Calendar size={16} color="#0071e3" style={{ marginRight: 8 }} />,
+                      startAdornment: <Calendar size={16} color={colors.primary.main} style={{ marginRight: 8 }} />,
                     },
                   },
                 }}
@@ -326,8 +227,8 @@ const VoucherFormModalView = ({
 
           <Box sx={{ mb: 3 }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-              <Users size={20} color="#0071e3" />
-              <Typography variant="subtitle1" sx={{ color: "#1d1d1f", fontWeight: 500 }}>
+              <Users size={20} color={colors.primary.main} />
+              <Typography variant="subtitle1" sx={{ color: colors.neutral[800], ...typography.subtitle1 }}>
                 Cài đặt sử dụng
               </Typography>
             </Box>
@@ -337,17 +238,7 @@ const VoucherFormModalView = ({
                 <Switch
                   checked={form.isActive || false}
                   onChange={(e) => handleFieldChange("isActive", e.target.checked)}
-                  sx={{
-                    "& .MuiSwitch-switchBase.Mui-checked": {
-                      color: "#0071e3",
-                      "&:hover": {
-                        backgroundColor: "rgba(0, 113, 227, 0.08)",
-                      },
-                    },
-                    "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
-                      backgroundColor: "#0071e3",
-                    },
-                  }}
+                  sx={switchStyles.default} // Sử dụng switchStyles.default
                 />
               }
               label="Kích hoạt"
@@ -365,24 +256,9 @@ const VoucherFormModalView = ({
               size="small"
               error={!!form.touched?.usageLimit}
               helperText={form.touched?.usageLimit || "Để trống nếu không giới hạn"}
-              sx={{
-                mb: 2,
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: 2,
-                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#0071e3",
-                  },
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#0071e3",
-                    borderWidth: 2,
-                  },
-                },
-                "& .MuiInputLabel-root.Mui-focused": {
-                  color: "#0071e3",
-                },
-              }}
+              sx={inputStyles.textField} // Sử dụng inputStyles.textField
               InputProps={{
-                startAdornment: <Users size={16} color="#0071e3" style={{ marginRight: 8 }} />,
+                startAdornment: <Users size={16} color={colors.primary.main} style={{ marginRight: 8 }} />,
               }}
             />
 
@@ -396,15 +272,9 @@ const VoucherFormModalView = ({
                 disabled
                 margin="dense"
                 size="small"
-                sx={{
-                  mb: 2,
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: 2,
-                    backgroundColor: "rgba(0, 0, 0, 0.03)",
-                  },
-                }}
+                sx={inputStyles.disabled} // Sử dụng inputStyles.disabled
                 InputProps={{
-                  startAdornment: <Users size={16} color="#86868b" style={{ marginRight: 8 }} />,
+                  startAdornment: <Users size={16} color={colors.neutral[400]} style={{ marginRight: 8 }} />,
                 }}
               />
             )}
@@ -413,8 +283,8 @@ const VoucherFormModalView = ({
           <Box sx={{ mb: 3 }}>
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                <UserPlus size={20} color="#0071e3" />
-                <Typography variant="subtitle1" sx={{ color: "#1d1d1f", fontWeight: 500 }}>
+                <UserPlus size={20} color={colors.primary.main} />
+                <Typography variant="subtitle1" sx={{ color: colors.neutral[800], ...typography.subtitle1 }}>
                   Người dùng áp dụng
                 </Typography>
               </Box>
@@ -423,25 +293,7 @@ const VoucherFormModalView = ({
                 startIcon={<UserPlus size={16} />}
                 onClick={() => setUserSelectModalOpen(true)}
                 disabled={loading}
-                sx={{
-                  borderColor: "#0071e3",
-                  color: "#0071e3",
-                  borderRadius: 28,
-                  px: 2,
-                  py: 0.5,
-                  textTransform: "none",
-                  fontWeight: 500,
-                  fontSize: "0.75rem",
-                  "&:hover": {
-                    borderColor: "#0071e3",
-                    background: "rgba(0, 113, 227, 0.05)",
-                  },
-                  "&:disabled": {
-                    borderColor: "#86868b",
-                    color: "#86868b",
-                    cursor: "not-allowed",
-                  },
-                }}
+                sx={buttonStyles.outlinedPrimary} // Sử dụng buttonStyles.outlinedPrimary
               >
                 Thêm người dùng
               </Button>
@@ -449,45 +301,18 @@ const VoucherFormModalView = ({
 
             <TableContainer
               component={Paper}
-              sx={{
-                maxHeight: 280,
-                minHeight: 120,
-                boxShadow: "none",
-                border: "1px solid rgba(0, 0, 0, 0.05)",
-                borderRadius: 3,
-                overflow: "auto",
-                "&::-webkit-scrollbar": {
-                  width: "6px",
-                },
-                "&::-webkit-scrollbar-track": {
-                  background: "rgba(0, 0, 0, 0.05)",
-                  borderRadius: "3px",
-                },
-                "&::-webkit-scrollbar-thumb": {
-                  background: "rgba(0, 113, 227, 0.3)",
-                  borderRadius: "3px",
-                  "&:hover": {
-                    background: "rgba(0, 113, 227, 0.5)",
-                  },
-                },
-              }}
+              sx={{ ...tableStyles.container, minHeight: 120 }} // Sử dụng tableStyles.container, thêm minHeight
             >
               <Table stickyHeader sx={{ tableLayout: "fixed" }}>
-                <TableHead>
-                  <TableRow sx={{ backgroundColor: "rgba(0, 113, 227, 0.05)" }}>
+                <TableHead sx={tableStyles.head}> {/* Sử dụng tableStyles.head */}
+                  <TableRow>
                     {userColumns.map((column) => (
                       <TableCell
                         key={column.id}
                         sx={{
+                          ...tableStyles.cell, // Sử dụng tableStyles.cell
                           width: column.width,
-                          fontWeight: 600,
-                          color: "#1d1d1f",
-                          py: 1,
-                          fontSize: "0.75rem",
-                          position: "sticky",
-                          top: 0,
-                          backgroundColor: "rgba(0, 113, 227, 0.05)",
-                          zIndex: 1,
+                          fontWeight: 600, // Giữ fontWeight cho header
                         }}
                       >
                         {column.label}
@@ -499,7 +324,7 @@ const VoucherFormModalView = ({
                   {loading ? (
                     <TableRow>
                       <TableCell colSpan={3} sx={{ textAlign: "center", py: 4 }}>
-                        <CircularProgress size={24} sx={{ color: "#0071e3" }} />
+                        <CircularProgress size={24} sx={progressStyles.primary} /> {/* Sử dụng progressStyles.primary */}
                       </TableCell>
                     </TableRow>
                   ) : selectedUsers.length > 0 ? (
@@ -509,17 +334,12 @@ const VoucherFormModalView = ({
                         return user ? (
                           <TableRow
                             key={userId}
-                            sx={{
-                              "&:hover": { backgroundColor: "rgba(0, 113, 227, 0.05)" },
-                              transition: "background-color 0.2s",
-                            }}
+                            sx={tableStyles.row} // Sử dụng tableStyles.row
                           >
                             <TableCell
                               sx={{
-                                fontSize: "0.75rem",
-                                py: 1.5,
-                                fontWeight: 500,
-                                color: "#1d1d1f",
+                                ...tableStyles.cell, // Sử dụng tableStyles.cell
+                                fontWeight: 500, // Giữ fontWeight
                                 overflow: "hidden",
                                 textOverflow: "ellipsis",
                                 whiteSpace: "nowrap",
@@ -529,9 +349,8 @@ const VoucherFormModalView = ({
                             </TableCell>
                             <TableCell
                               sx={{
-                                fontSize: "0.75rem",
-                                py: 1.5,
-                                color: "#86868b",
+                                ...tableStyles.cell, // Sử dụng tableStyles.cell
+                                color: colors.neutral[400], // Giữ màu username
                                 overflow: "hidden",
                                 textOverflow: "ellipsis",
                                 whiteSpace: "nowrap",
@@ -539,22 +358,13 @@ const VoucherFormModalView = ({
                             >
                               {user.username}
                             </TableCell>
-                            <TableCell sx={{ fontSize: "0.75rem", py: 1.5 }}>
+                            <TableCell sx={tableStyles.cell}>
                               <Tooltip title="Xóa">
                                 <IconButton
                                   size="small"
                                   onClick={() => handleRemoveUser(userId)}
                                   disabled={loading}
-                                  sx={{
-                                    color: "#ff3b30",
-                                    "&:hover": {
-                                      backgroundColor: "rgba(255, 59, 48, 0.1)",
-                                    },
-                                    "&:disabled": {
-                                      color: "#86868b",
-                                      cursor: "not-allowed",
-                                    },
-                                  }}
+                                  sx={buttonStyles.dangerIconButton} // Sử dụng buttonStyles.dangerIconButton
                                 >
                                   <Trash2 size={16} />
                                 </IconButton>
@@ -568,12 +378,7 @@ const VoucherFormModalView = ({
                     <TableRow>
                       <TableCell
                         colSpan={3}
-                        sx={{
-                          textAlign: "center",
-                          py: 4,
-                          color: "#86868b",
-                          fontSize: "0.875rem",
-                        }}
+                        sx={tableStyles.empty} // Sử dụng tableStyles.empty
                       >
                         {selectedUsers.length === 0
                           ? "Voucher áp dụng cho tất cả người dùng"
@@ -584,35 +389,21 @@ const VoucherFormModalView = ({
                 </TableBody>
               </Table>
             </TableContainer>
-            <Typography variant="caption" sx={{ color: "#86868b", mt: 1, display: "block" }}>
+            <Typography
+              variant="caption"
+              sx={{ color: colors.neutral[400], mt: 1, display: "block", ...typography.caption }}
+            >
               {selectedUsers.length === 0
                 ? "Không chọn người dùng nào sẽ áp dụng voucher cho tất cả người dùng"
                 : `Đã chọn ${selectedUsers.length} người dùng`}
             </Typography>
           </Box>
         </DialogContent>
-        <DialogActions sx={{ p: 3, borderTop: "1px solid rgba(0, 0, 0, 0.05)" }}>
+        <DialogActions sx={dialogStyles.actions}>
           <Button
             onClick={handleCancelWithConfirmation}
             disabled={loading}
-            sx={{
-              borderColor: "#86868b",
-              color: "#86868b",
-              borderRadius: 28,
-              px: 3,
-              textTransform: "none",
-              fontWeight: 500,
-              "&:hover": {
-                borderColor: "#1d1d1f",
-                color: "#1d1d1f",
-                background: "rgba(0, 0, 0, 0.05)",
-              },
-              "&:disabled": {
-                borderColor: "#86868b",
-                color: "#86868b",
-                cursor: "not-allowed",
-              },
-            }}
+            sx={buttonStyles.outlined} // Sử dụng buttonStyles.outlined
             variant="outlined"
           >
             Hủy
@@ -620,28 +411,10 @@ const VoucherFormModalView = ({
           <Button
             onClick={onOk}
             disabled={loading}
-            sx={{
-              background: "linear-gradient(145deg, #0071e3 0%, #42a5f5 100%)",
-              color: "#ffffff",
-              borderRadius: 28,
-              px: 3,
-              boxShadow: "0 4px 12px rgba(0, 113, 227, 0.2)",
-              textTransform: "none",
-              fontWeight: 500,
-              "&:hover": {
-                background: "linear-gradient(145deg, #0071e3 0%, #42a5f5 100%)",
-                boxShadow: "0 6px 16px rgba(0, 113, 227, 0.3)",
-              },
-              "&:disabled": {
-                background: "rgba(0, 113, 227, 0.3)",
-                color: "#ffffff",
-                cursor: "not-allowed",
-              },
-              transition: "all 0.3s ease",
-            }}
+            sx={buttonStyles.primary} // Sử dụng buttonStyles.primary
             variant="contained"
           >
-            {loading ? <CircularProgress size={20} sx={{ color: "#ffffff" }} /> : editingVoucher ? "Cập nhật" : "Thêm mới"}
+            {loading ? <CircularProgress size={20} sx={progressStyles.white} /> : editingVoucher ? "Cập nhật" : "Thêm mới"}
           </Button>
         </DialogActions>
       </Dialog>

@@ -108,8 +108,9 @@ const OrderBasicInfoView = ({
       <Typography variant="h6" sx={{ mb: 2, p: 1 }}>
         Thông tin đơn hàng
       </Typography>
-      <Grid container spacing={2}>
-        <Grid item xs={12} md={6}>
+      <Grid container spacing={1}>
+        {/* Cột Form bên trái - Thu nhỏ xuống */}
+        <Grid item xs={12} md={7} sx={{ width: "30%", padding: 0.5 }}>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2, p: 1 }}>
             <FormControl fullWidth>
               <InputLabel>Loại đơn hàng</InputLabel>
@@ -120,7 +121,7 @@ const OrderBasicInfoView = ({
                 onChange={handleChange}
               >
                 <MenuItem value="reservation">Đặt chỗ</MenuItem>
-                <MenuItem value="takeaway">Mang đi</MenuItem>
+                <MenuItem value="ship">Giao hàng</MenuItem>
               </Select>
             </FormControl>
 
@@ -284,7 +285,8 @@ const OrderBasicInfoView = ({
           </Box>
         </Grid>
 
-        <Grid item xs={12} md={6}>
+        {/* Cột Danh sách món ăn bên phải - Mở rộng ra */}
+        <Grid item xs={10} md={4} sx={{ width: "60%", padding: 0.5 }}>
           <Box sx={{ p: 1, mt: { xs: 2, md: 0 } }}>
             <Box
               sx={{
