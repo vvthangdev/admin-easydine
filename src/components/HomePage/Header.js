@@ -9,7 +9,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import colors from '../../theme/colors';
 
 function Header({ logo, navLinks }) {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, logout } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -29,26 +29,24 @@ function Header({ logo, navLinks }) {
   };
 
   useEffect(() => {
-    if(!user) {
-      setProfile(null)
-      return
+    if (!user) {
+      setProfile(null);
+      return;
     }
-    if(!profile) {
+    if (!profile) {
       fetchProfile();
     }
-  }, [user, profile, fetchProfile]);
-
-  const handleLogout = async () => {
-    try {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('user');
-      setIsDropdownOpen(false);
-      window.location.reload();
-    } catch (error) {
-      message.error('Có lỗi xảy ra khi đăng xuất. Vui lòng thử lại.');
-    }
-  };
+  }, [user, profile]);
+// ...
+const handleLogout = async () => {
+  try {
+    await logout(); // Gọi logout từ AuthContext
+    setIsDropdownOpen(false);
+    window.location.reload();
+  } catch (error) {
+    message.error('Có lỗi xảy ra khi đăng xuất. Vui lòng thử lại.');
+  }
+};
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -113,10 +111,10 @@ function Header({ logo, navLinks }) {
           </Typography>
         ) : (
           <>
-            {user?.role === 'ADMIN' && (
+            {user && (
               <Button
                 component={Link}
-                to="/admin"
+                to="/overview"
                 sx={{
                   color: colors.goldLuxe,
                   textTransform: 'none',
@@ -124,7 +122,7 @@ function Header({ logo, navLinks }) {
                   '&:hover': { color: colors.rubyWine },
                 }}
               >
-                Admin
+                Dashboard
               </Button>
             )}
             {user ? (

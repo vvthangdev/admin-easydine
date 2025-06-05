@@ -22,52 +22,62 @@ export default function Sidebar({ onCollapseChange }) {
     onCollapseChange(isCollapsed)
   }, [isCollapsed, onCollapseChange])
 
+  // Danh sách menu items
   const menuItems = [
     {
-      path: "/admin",
+      path: "/overview",
       label: "Tổng quan",
       icon: <LayoutDashboard size={20} />,
+      roles: ["ADMIN", "STAFF"],
     },
     {
-      path: "/admin/tables",
+      path: "/tables",
       label: "Quản lý bàn",
       icon: <Table size={20} />,
+      roles: ["ADMIN", "STAFF"],
     },
     {
-      path: "/admin/orders",
+      path: "/orders",
       label: "Đơn hàng",
       icon: <ShoppingBag size={20} />,
+      roles: ["ADMIN", "STAFF"],
     },
     {
-      path: "/admin/items",
+      path: "/items",
       label: "Quản lý menu",
       icon: <MenuIcon size={20} />,
+      roles: ["ADMIN", "STAFF"],
     },
     {
-      path: "/admin/users",
+      path: "/users",
       label: "Quản lý người dùng",
       icon: <Users size={20} />,
+      roles: ["ADMIN"],
     },
     {
-      path: "/admin/cancel-items",
+      path: "/cancel-items",
       label: "Quản lý liên hệ",
       icon: <MessageSquare size={20} />,
+      roles: ["ADMIN"],
     },
   ]
+
+  // Lọc menu items dựa trên vai trò người dùng
+  const filteredMenuItems = user ? menuItems.filter(item => item.roles.includes(user.role)) : []
 
   return (
     <Box
       sx={{
         width: isCollapsed ? "72px" : "256px",
-        height: "calc(100vh - 64px)", // Adjust for fixed header
+        height: "calc(100vh - 64px)",
         background: "linear-gradient(180deg, #ffffff 0%, #f5f5f7 100%)",
         color: "#1d1d1f",
         transition: "width 0.3s ease-in-out",
         borderRight: "1px solid rgba(0, 0, 0, 0.05)",
         boxShadow: "0 4px 20px rgba(0, 0, 0, 0.05)",
-        position: "fixed", // Ensure sidebar stays fixed
-        top: "64px", // Align below header
-        overflow: "hidden", // Prevent content overflow
+        position: "fixed",
+        top: "64px",
+        overflow: "hidden",
         zIndex: 10,
       }}
     >
@@ -80,11 +90,11 @@ export default function Sidebar({ onCollapseChange }) {
           borderBottom: "1px solid rgba(0, 0, 0, 0.05)",
         }}
       >
-        {!isCollapsed && (
+        {!isCollapsed && user && (
           <Box sx={{ display: "flex", alignItems: "center", gap: 2, flexShrink: 0 }}>
             <Avatar
               src={user?.avatar || "/Assets/Header/avtprivate.jpg"}
-              alt="Admin"
+              alt="User"
               sx={{
                 width: 40,
                 height: 40,
@@ -116,7 +126,7 @@ export default function Sidebar({ onCollapseChange }) {
                   textOverflow: "ellipsis",
                 }}
               >
-                Administrator
+                {user?.role === "ADMIN" ? "Administrator" : "Staff"}
               </Typography>
             </Box>
           </Box>
@@ -141,7 +151,7 @@ export default function Sidebar({ onCollapseChange }) {
       </Box>
 
       <Box sx={{ mt: 2, px: 1, overflowY: "auto" }}>
-        {menuItems.map((item, index) => (
+        {filteredMenuItems.map((item, index) => (
           <Link key={index} to={item.path} style={{ textDecoration: "none" }}>
             <Box
               sx={{

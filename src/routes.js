@@ -18,9 +18,7 @@ import PaymentSuccess from "./pages/OrderFormModal/Payment/PaymentSuccess";
 import PaymentFailed from "./pages/OrderFormModal/Payment/PaymentFailed";
 
 const AppRoutes = () => {
-  const navLinks = [
-    { path: "/", label: "Trang chủ" },
-  ];
+  const navLinks = [{ path: "/", label: "Trang chủ" }];
 
   return (
     <>
@@ -41,22 +39,65 @@ const AppRoutes = () => {
           }
         />
         <Route
-          path="/admin"
+          path="/overview"
           element={
-            <ProtectedRoute roles={["ADMIN"]}>
-              <AdminLayout />
+            <ProtectedRoute roles={["ADMIN", "STAFF"]}>
+              <AdminLayout>
+                <Overview />
+              </AdminLayout>
             </ProtectedRoute>
           }
-        >
-          <Route index element={<Overview />} />
-          <Route path="overview" element={<Overview />} />
-          <Route path="tables" element={<MergeOrderModalViewModel />} />
-          <Route path="items" element={<ItemManagements />} />
-          <Route path="orders" element={<OrderManagement />} />
-          <Route path="users" element={<UserVoucherManagement />} />
-          <Route path="cancel-items" element={<CancelItemManagement />} />
-          {/* <Route path="payment" element={<CancelItemManagement />} /> */}
-        </Route>
+        />
+        <Route
+          path="/tables"
+          element={
+            <ProtectedRoute roles={["ADMIN", "STAFF"]}>
+              <AdminLayout>
+                <MergeOrderModalViewModel />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/orders"
+          element={
+            <ProtectedRoute roles={["ADMIN", "STAFF"]}>
+              <AdminLayout>
+                <OrderManagement />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/items"
+          element={
+            <ProtectedRoute roles={["ADMIN", "STAFF"]}>
+              <AdminLayout>
+                <ItemManagements />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/users"
+          element={
+            <ProtectedRoute roles={["ADMIN"]}>
+              <AdminLayout>
+                <UserVoucherManagement />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/cancel-items"
+          element={
+            <ProtectedRoute roles={["ADMIN"]}>
+              <AdminLayout>
+                <CancelItemManagement />
+              </AdminLayout>
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </>
   );

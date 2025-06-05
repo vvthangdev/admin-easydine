@@ -1,66 +1,70 @@
 import { io } from "socket.io-client";
+import axiosInstance from "../config/axios.config"; // Import axiosInstance để refresh token
+
 const API_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8080";
 
 let socket = null;
 
 export const initSocketClient = (setSocket) => {
   if (socket && socket.connected) {
-    console.log("[socketClient.js] Socket already initialized and connected:", socket.id);
     setSocket(socket);
     return socket;
   }
 
-  const token = localStorage.getItem("accessToken"); // Lấy token từ localStorage
-  console.log("[socketClient.js] Access token:", token);
+  const token = localStorage.getItem("accessToken");
   if (!token) {
-    console.error("[socketClient.js] No access token found!");
-    throw new Error("Access token not found");
+    throw new Error("Không tìm thấy access token");
   }
 
-  console.log(`[socketClient.js] Initializing new socket connection to ${API_URL}`);
   socket = io(API_URL, {
     reconnection: true,
     reconnectionAttempts: 5,
     reconnectionDelay: 1000,
     transports: ["websocket", "polling"],
-    auth: {
-      token, // Gửi token trong handshake
-    },
+    auth: { token },
   });
 
   socket.on("connect", () => {
-    console.log("[socketClient.js] Connected to socket server:", socket.id);
     setSocket(socket);
   });
 
-  socket.on("connect_error", (error) => {
-    console.error("[socketClient.js] Socket connection error:", error.message);
+  socket.on("connect_error", async (error) => {
     if (error.message === "Invalid token") {
-      console.log("[socketClient.js] Invalid token, removing accessToken and redirecting to login");
-      localStorage.removeItem("accessToken");
-      window.location.href = "/login";
+      try {
+        const refreshToken = localStorage.getItem("refreshToken");
+        if (!refreshToken) throw new Error("Không tìm thấy refresh token");
+
+        const response = await axiosInstance.post("/users/refresh-token", { refreshToken });
+        const newAccessToken = response.data?.accessToken?.replace(/^Bearer\s+/, "");
+       
+
+        localStorage.setItem("accessToken", newAccessToken);
+        socket.auth.token = newAccessToken;
+        socket.connect();
+      } catch (err) {
+        localStorage.clear();
+        setSocket(null);
+        socket = null;
+        window.location.href = "/login";
+      }
+    } else {
+      setSocket(null);
+      socket = null;
     }
-    socket = null;
-    setSocket(null);
   });
 
   socket.on("disconnect", () => {
-    console.log("[socketClient.js] Disconnected from socket server");
-    socket = null;
     setSocket(null);
+    socket = null;
   });
 
   socket.on("error", (error) => {
-    console.error("[socketClient.js] Server error:", error.message);
     if (error.message === "Invalid token") {
-      console.log("[socketClient.js] Invalid token, removing accessToken and redirecting to login");
-      localStorage.removeItem("accessToken");
+      localStorage.clear();
+      setSocket(null);
+      socket = null;
       window.location.href = "/login";
     }
-  });
-
-  socket.onAny((event, ...args) => {
-    console.log(`[socketClient.js] Received event: ${event}, Payload:`, args);
   });
 
   return socket;
@@ -68,32 +72,27 @@ export const initSocketClient = (setSocket) => {
 
 export const getSocket = () => {
   if (!socket || !socket.connected) {
-    console.error("[socketClient.js] Socket not initialized or not connected!");
-    throw new Error("Socket chưa được khởi tạo hoặc đã ngắt kết nối!");
+    throw new Error("Socket chưa được khởi tạo hoặc đã ngắt kết nối");
   }
   return socket;
 };
 
 export const sendDataClient = (data) => {
   const socket = getSocket();
-  console.log("[socketClient.js] Sending sendDataClient:", data);
   socket.emit("sendDataClient", data);
 };
 
 export const sendAdmin = (data) => {
   const socket = getSocket();
-  console.log("[socketClient.js] Sending admin:", data);
   socket.emit("admin", data);
 };
 
 export const sendAdminTest = (data) => {
   const socket = getSocket();
-  console.log("[socketClient.js] Sending admintest:", data);
   socket.emit("admintest", data);
 };
 
 export const sendNewOrder = (data) => {
   const socket = getSocket();
-  console.log("[socketClient.js] Sending newOrder:", data);
   socket.emit("newOrder", data);
 };

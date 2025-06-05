@@ -12,13 +12,6 @@ const ProtectedRoute = ({ children, roles }) => {
     useEffect(() => {
         if (loading) return;
 
-        if (!token || typeof token !== 'string' || token.trim() === '') {
-            message.error('Vui lòng đăng nhập');
-            localStorage.clear();
-            setRedirect(<Navigate to="/login" state={{ from: location }} replace />);
-            return;
-        }
-
         if (!user) {
             message.error('Vui lòng đăng nhập');
             localStorage.clear();
@@ -28,14 +21,17 @@ const ProtectedRoute = ({ children, roles }) => {
 
         if (roles && !roles.includes(user.role)) {
             message.error('Bạn không có quyền truy cập');
-            setRedirect(<Navigate to="/unauthorized" replace />);
+            setRedirect(<Navigate to="/" replace />);
             return;
         }
     }, [loading, token, user, roles, location]);
 
-    if (loading) return null;
-    if (redirect) return redirect;
-
+    if (loading) {
+        return <div>Đang tải...</div>;
+    }
+    if (redirect) {
+        return redirect;
+    }
     return children;
 };
 

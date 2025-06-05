@@ -1,6 +1,9 @@
-import { createContext, useState, useContext, useEffect } from "react";
+import { createContext, useState, useContext, useEffect, useCallback } from "react";
 import { message } from "antd";
 import { initSocketClient, getSocket } from "../utils/socketClient";
+import axios from "axios";
+
+const API_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:3000";
 
 const AuthContext = createContext({});
 
@@ -10,161 +13,149 @@ export const AuthProvider = ({ children }) => {
   const [socketInitialized, setSocketInitialized] = useState(false);
   const [socket, setSocket] = useState(null);
 
-  useEffect(() => {
-    console.log("[AuthContext.js] Initializing auth");
-    const initializeAuth = async () => {
-      const userData = localStorage.getItem("user");
-      const accessToken = localStorage.getItem("accessToken");
-
-      console.log("[AuthContext.js] userData:", userData ? userData : "missing");
-      console.log("[AuthContext.js] accessToken:", accessToken ? accessToken.slice(0, 10) + "..." : "missing");
-
-      if (userData && accessToken) {
-        try {
-          const parsedUser = JSON.parse(userData);
-          const normalizedUser = {
-            _id: parsedUser.id || parsedUser._id,
-            username: parsedUser.username,
-            role: parsedUser.role,
-            name: parsedUser.name,
-            email: parsedUser.email,
-            phone: parsedUser.phone,
-            address: parsedUser.address,
-            avatar: parsedUser.avatar,
-          };
-          setUser(normalizedUser);
-
-          if (normalizedUser._id && !socket?.connected) {
-            console.log("[AuthContext.js] Initializing socket for user:", normalizedUser.username);
-            const socketInstance = initSocketClient(setSocket);
-
-            socketInstance.on("connect", () => {
-              console.log("[AuthContext.js] Socket connected:", socketInstance.id);
-              setSocketInitialized(true);
-            });
-
-            socketInstance.on("connect_error", (error) => {
-              console.error("[AuthContext.js] Socket connect error:", error.message);
-              setSocketInitialized(false);
-              setSocket(null);
-            });
-
-            socketInstance.on("disconnect", () => {
-              console.log("[AuthContext.js] Socket disconnected");
-              setSocketInitialized(false);
-              setSocket(null);
-            });
-          }
-        } catch (error) {
-          console.error("[AuthContext.js] Error initializing auth:", error.message);
-          localStorage.clear();
-          setUser(null);
-          setSocketInitialized(false);
-          message.error("Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.");
-        }
-      } else {
-        console.log("[AuthContext.js] No user or accessToken in localStorage");
-        setUser(null);
-        setSocketInitialized(false);
-      }
-      console.log("[AuthContext.js] Auth initialization complete");
-      setLoading(false);
-    };
-
-    initializeAuth();
-
-    return () => {
-      try {
-        const socket = getSocket();
-        if (socket) {
-          console.log("[AuthContext.js] Disconnecting socket on unmount");
-          socket.disconnect();
-          setSocketInitialized(false);
-          setSocket(null);
-        }
-      } catch (error) {
-        console.log("[AuthContext.js] No socket to disconnect");
-      }
+  const validateUserData = useCallback((userData) => {
+    console.log("[Auth] Validating user data:", userData);
+    if (!userData?.username || !userData?.role || !["ADMIN", "STAFF"].includes(userData.role)) {
+      throw new Error("Invalid user data or role");
+    }
+    return {
+      _id: userData.id || userData._id,
+      username: userData.username,
+      role: userData.role,
+      name: userData.name || "",
+      email: userData.email || "",
+      phone: userData.phone || "",
+      address: userData.address || "",
+      avatar: userData.avatar || "",
     };
   }, []);
 
-  const login = (data) => {
-    try {
-      const userData = data.userData || data;
-      if (!userData.username) {
-        throw new Error("Thiếu username trong dữ liệu đăng nhập");
-      }
+  const initSocket = useCallback((userId) => {
+    if (!userId) return;
+    console.log("[Socket] Initializing socket for userId:", userId);
+    const socketInstance = initSocketClient(setSocket);
+    socketInstance.on("connect", () => {
+      console.log("[Socket] Connected");
+      setSocketInitialized(true);
+    });
+    socketInstance.on("connect_error", (err) => {
+      console.error("[Socket] Connect error:", err);
+      setSocketInitialized(false);
+      setSocket(null);
+    });
+    socketInstance.on("disconnect", () => {
+      console.log("[Socket] Disconnected");
+      setSocketInitialized(false);
+      setSocket(null);
+    });
+  }, []);
 
-      const cleanAccessToken = data.accessToken.replace(/^Bearer\s+/, "");
-      const cleanRefreshToken = data.refreshToken.replace(/^Bearer\s+/, "");
+  const refreshAccessToken = useCallback(async (refreshToken) => {
+    console.log("[Auth] Refreshing token with refreshToken:", refreshToken);
+    const { data } = await axios.post(`${API_URL}/users/refresh-token`, { refreshToken });
+    const accessToken = data.data.accessToken?.replace(/^Bearer\s+/, "");
+    console.log("[Auth] New accessToken received:", accessToken);
+    if (!accessToken) throw new Error("No access token");
+    localStorage.setItem("accessToken", accessToken);
+    return accessToken;
+  }, []);
 
-      const normalizedUser = {
-        _id: userData.id || userData._id,
-        username: userData.username,
-        role: userData.role,
-        name: userData.name,
-        email: userData.email,
-        phone: userData.phone,
-        address: userData.address,
-        avatar: userData.avatar,
-      };
+  useEffect(() => {
+    const initAuth = async () => {
+      console.log("[Auth] Initializing authentication...");
+      try {
+        const userData = localStorage.getItem("user");
+        const accessToken = localStorage.getItem("accessToken");
+        const refreshToken = localStorage.getItem("refreshToken");
 
-      console.log("[AuthContext.js] Storing user and tokens in localStorage");
-      localStorage.setItem("accessToken", cleanAccessToken);
-      localStorage.setItem("refreshToken", cleanRefreshToken);
-      localStorage.setItem("user", JSON.stringify(normalizedUser));
+        console.log("[Auth] LocalStorage userData:", userData);
+        console.log("[Auth] accessToken:", accessToken);
+        console.log("[Auth] refreshToken:", refreshToken);
 
-      console.log("[AuthContext.js] Setting user:", normalizedUser);
-      setUser(normalizedUser);
-
-      if (normalizedUser._id) {
-        console.log("[AuthContext.js] Initializing socket on login for user:", normalizedUser.username);
-        const socketInstance = initSocketClient((socket) => {
-          setSocket(socket);
-          setSocketInitialized(socket?.connected || false);
-        });
-
-        socketInstance.on("connect", () => {
-          console.log("[AuthContext.js] Socket connected on login:", socketInstance.id);
-          setSocketInitialized(true);
-        });
-
-        socketInstance.on("connect_error", (error) => {
-          console.error("[AuthContext.js] Socket connect error on login:", error.message);
+        if (!userData || (!accessToken && !refreshToken)) {
+          console.log("[Auth] No valid session found.");
+          setUser(null);
           setSocketInitialized(false);
-          setSocket(null);
-        });
+          return;
+        }
 
-        socketInstance.on("disconnect", () => {
-          console.log("[AuthContext.js] Socket disconnected on login");
-          setSocketInitialized(false);
-          setSocket(null);
-        });
+        const parsedUser = JSON.parse(userData);
+        const normalizedUser = validateUserData(parsedUser);
+
+        if (!accessToken && refreshToken) {
+          await refreshAccessToken(refreshToken);
+        }
+
+        setUser(normalizedUser);
+
+        if (normalizedUser._id && !socket?.connected) {
+          initSocket(normalizedUser._id);
+        }
+      } catch (error) {
+        console.error("[Auth] Error initializing authentication:", error);
+        localStorage.clear();
+        setUser(null);
+        setSocketInitialized(false);
+        message.error("Phiên đăng nhập hết hạn, vui lòng đăng nhập lại");
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("[AuthContext.js] Login error:", error.message);
-      message.error("Đăng nhập thất bại do lỗi dữ liệu!");
-      throw error;
-    }
-  };
+    };
 
-  const logout = () => {
-    console.log("[AuthContext.js] Logging out");
+    initAuth();
+
+    return () => {
+      const socket = getSocket();
+      if (socket) {
+        console.log("[Auth] Cleaning up socket on unmount");
+        socket.disconnect();
+        setSocketInitialized(false);
+        setSocket(null);
+      }
+    };
+  }, [validateUserData, initSocket, refreshAccessToken]);
+
+  const login = useCallback(
+    async (data) => {
+      try {
+        console.log("[Auth] Logging in with data:", data);
+        const userData = data.userData || data;
+        const normalizedUser = validateUserData(userData);
+
+        const accessToken = data.accessToken?.replace(/^Bearer\s+/, "");
+        const refreshToken = data.refreshToken?.replace(/^Bearer\s+/, "");
+
+        if (!accessToken || !refreshToken) throw new Error("Missing tokens");
+
+        localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("refreshToken", refreshToken);
+        localStorage.setItem("user", JSON.stringify(normalizedUser));
+
+        setUser(normalizedUser);
+        initSocket(normalizedUser._id);
+        message.success("Đăng nhập thành công");
+      } catch (error) {
+        console.error("[Auth] Login failed:", error);
+        message.error("Đăng nhập thất bại");
+        throw error;
+      }
+    },
+    [validateUserData, initSocket]
+  );
+
+  const logout = useCallback(() => {
+    console.log("[Auth] Logging out");
     localStorage.clear();
     setUser(null);
     setSocketInitialized(false);
-    try {
-      const socket = getSocket();
-      if (socket) {
-        console.log("[AuthContext.js] Disconnecting socket on logout");
-        socket.disconnect();
-        setSocket(null);
-      }
-    } catch (error) {
-      console.log("[AuthContext.js] No socket to disconnect on logout");
+    const socket = getSocket();
+    if (socket) {
+      console.log("[Auth] Disconnecting socket...");
+      socket.disconnect();
     }
+    setSocket(null);
     message.success("Đăng xuất thành công");
-  };
+  }, []);
 
   return (
     <AuthContext.Provider
@@ -175,4 +166,8 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) throw new Error("useAuth must be used within AuthProvider");
+  return context;
+};

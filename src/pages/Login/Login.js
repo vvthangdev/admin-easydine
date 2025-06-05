@@ -43,12 +43,7 @@ export default function Login() {
           userData: parsedUserData,
         });
         message.success('Đăng nhập Google thành công!');
-        // Use role from parsed userData for navigation
-        if (parsedUserData.role === 'ADMIN') {
-          navigate('/admin');
-        } else {
-          navigate('/');
-        }
+        navigate('/overview');
         window.history.replaceState({}, document.title, '/login');
       } catch (err) {
         message.error('Lỗi xử lý dữ liệu Google login!');
@@ -72,12 +67,7 @@ export default function Login() {
       };
       login(cleanResponse);
       message.success('Đăng nhập thành công!');
-      // Use role from response for navigation
-      if (cleanResponse.role === 'ADMIN') {
-        navigate('/admin');
-      } else {
-        navigate('/');
-      }
+      navigate('/overview');
     } catch (error) {
       const errorMessage = error.message || 'Đăng nhập thất bại!';
       console.log(errorMessage);
