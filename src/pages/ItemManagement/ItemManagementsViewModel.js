@@ -16,6 +16,15 @@ export const ItemManagementViewModel = () => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [filterCategory, setFilterCategory] = useState(null);
+  
+  // Thêm state cho form data
+  const [formData, setFormData] = useState({
+    name: "",
+    price: 0,
+    description: "",
+    categories: [],
+    sizes: []
+  });
 
   const fetchMenuItems = async (categoryId = null) => {
     setLoading(true);
@@ -59,21 +68,33 @@ export const ItemManagementViewModel = () => {
     }
   };
 
+  // Reset form data
+  const resetFormData = () => {
+    setFormData({
+      name: "",
+      price: 0,
+      description: "",
+      categories: [],
+      sizes: []
+    });
+  };
+
   const handleAdd = () => {
     setEditingItem(null);
+    resetFormData(); // Reset form data khi thêm mới
     setFileList([]);
     setIsModalVisible(true);
   };
 
-  const handleEdit = (record, form) => {
+  const handleEdit = (record) => {
     setEditingItem(record);
     setFileList(
       record.image
         ? [{ uid: "-1", name: record.image, status: "done", url: record.image }]
         : []
     );
-    // Điền toàn bộ thông tin món ăn vào form
-    form.setFieldsValue({
+    // Điền toàn bộ thông tin món ăn vào formData
+    setFormData({
       name: record.name || "",
       price: record.price || 0,
       description: record.description || "",
@@ -138,12 +159,14 @@ export const ItemManagementViewModel = () => {
       setIsModalVisible(false);
       setFileList([]);
       setEditingItem(null);
+      resetFormData(); // Reset form sau khi hoàn thành
     } catch (error) {
       message.error("Có lỗi xảy ra. Vui lòng thử lại.");
     }
   };
 
   const handleAddCategory = () => {
+    resetFormData(); // Reset form data cho category
     setIsCategoryModalVisible(true);
   };
 
@@ -153,6 +176,7 @@ export const ItemManagementViewModel = () => {
       setCategories([...categories, newCategory]);
       message.success("Tạo danh mục thành công");
       setIsCategoryModalVisible(false);
+      resetFormData(); // Reset form sau khi hoàn thành
     } catch (error) {
       message.error("Tạo danh mục không thành công");
     }
@@ -184,6 +208,19 @@ export const ItemManagementViewModel = () => {
     fetchMenuItems(categoryId === "all" ? null : categoryId);
   };
 
+  // Handle modal cancel
+  const handleModalCancel = () => {
+    setIsModalVisible(false);
+    resetFormData();
+    setFileList([]);
+    setEditingItem(null);
+  };
+
+  const handleCategoryModalCancel = () => {
+    setIsCategoryModalVisible(false);
+    resetFormData();
+  };
+
   useEffect(() => {
     fetchMenuItems();
     fetchCategories();
@@ -201,6 +238,8 @@ export const ItemManagementViewModel = () => {
     fileList,
     selectedItem,
     selectedCategory,
+    formData, // Thêm formData vào return
+    setFormData, // Thêm setFormData vào return
     setIsModalVisible,
     setIsCategoryModalVisible,
     setIsDeleteConfirmModalVisible,
@@ -217,5 +256,7 @@ export const ItemManagementViewModel = () => {
     handleDeleteCategory,
     handleConfirmDeleteCategory,
     handleFilterByCategory,
+    handleModalCancel, // Thêm handler cancel
+    handleCategoryModalCancel, // Thêm handler cancel cho category
   };
 };

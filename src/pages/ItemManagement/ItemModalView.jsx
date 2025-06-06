@@ -36,7 +36,8 @@ const ItemModalView = ({
   selectedItem,
   onOk,
   onCancel,
-  form,
+  formData, // Thay đổi từ form thành formData
+  setFormData, // Thêm setter cho formData
   fileList,
   setFileList,
 }) => {
@@ -65,6 +66,31 @@ const ItemModalView = ({
     return ""
   }
 
+  // Helper function để update form data
+  const updateField = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
+
+  // Helper function để update sizes
+  const updateSize = (index, field, value) => {
+    const newSizes = [...(formData.sizes || [])]
+    newSizes[index] = { ...newSizes[index], [field]: value }
+    updateField('sizes', newSizes)
+  }
+
+  const addSize = () => {
+    const newSizes = [...(formData.sizes || []), { name: "", price: 0 }]
+    updateField('sizes', newSizes)
+  }
+
+  const removeSize = (index) => {
+    const newSizes = formData.sizes?.filter((_, i) => i !== index) || []
+    updateField('sizes', newSizes)
+  }
+
   return (
     <Dialog
       open={visible}
@@ -88,8 +114,8 @@ const ItemModalView = ({
               fullWidth
               label="Tên món"
               name="name"
-              value={form.name || ""}
-              onChange={(e) => form.setFieldsValue({ name: e.target.value })}
+              value={formData.name || ""}
+              onChange={(e) => updateField('name', e.target.value)}
               required
               margin="dense"
               style={inputStyles.textField}
@@ -99,8 +125,8 @@ const ItemModalView = ({
               label="Giá"
               name="price"
               type="number"
-              value={form.price || ""}
-              onChange={(e) => form.setFieldsValue({ price: Number.parseFloat(e.target.value) || 0 })}
+              value={formData.price || ""}
+              onChange={(e) => updateField('price', Number.parseFloat(e.target.value) || 0)}
               required
               margin="dense"
               style={inputStyles.textField}
@@ -112,8 +138,8 @@ const ItemModalView = ({
               fullWidth
               label="Mô tả"
               name="description"
-              value={form.description || ""}
-              onChange={(e) => form.setFieldsValue({ description: e.target.value })}
+              value={formData.description || ""}
+              onChange={(e) => updateField('description', e.target.value)}
               multiline
               rows={3}
               margin="dense"
@@ -130,8 +156,8 @@ const ItemModalView = ({
                 <InputLabel>Chọn danh mục</InputLabel>
                 <Select
                   multiple
-                  value={form.categories || []}
-                  onChange={(e) => form.setFieldsValue({ categories: e.target.value })}
+                  value={formData.categories || []}
+                  onChange={(e) => updateField('categories', e.target.value)}
                   label="Chọn danh mục"
                   renderValue={(selected) => (
                     <Box style={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
@@ -166,16 +192,12 @@ const ItemModalView = ({
                 <DollarSign size={20} color="#0071e3" />
                 <Typography style={textStyles.blackBold}>Kích cỡ (tùy chọn)</Typography>
               </Box>
-              {form.sizes?.map((size, index) => (
+              {formData.sizes?.map((size, index) => (
                 <Box key={index} style={boxStyles.sizeContainer}>
                   <TextField
                     label="Tên kích cỡ"
                     value={size.name || ""}
-                    onChange={(e) => {
-                      const newSizes = [...(form.sizes || [])]
-                      newSizes[index] = { ...newSizes[index], name: e.target.value }
-                      form.setFieldsValue({ sizes: newSizes })
-                    }}
+                    onChange={(e) => updateSize(index, 'name', e.target.value)}
                     size="small"
                     style={{ ...inputStyles.textField, flex: 1 }}
                   />
@@ -183,19 +205,12 @@ const ItemModalView = ({
                     label="Giá"
                     type="number"
                     value={size.price || ""}
-                    onChange={(e) => {
-                      const newSizes = [...(form.sizes || [])]
-                      newSizes[index] = { ...newSizes[index], price: Number.parseFloat(e.target.value) || 0 }
-                      form.setFieldsValue({ sizes: newSizes })
-                    }}
+                    onChange={(e) => updateSize(index, 'price', Number.parseFloat(e.target.value) || 0)}
                     size="small"
                     style={{ ...inputStyles.textField, flex: 1 }}
                   />
                   <IconButton
-                    onClick={() => {
-                      const newSizes = form.sizes?.filter((_, i) => i !== index) || []
-                      form.setFieldsValue({ sizes: newSizes })
-                    }}
+                    onClick={() => removeSize(index)}
                     style={buttonStyles.dangerIconButton}
                   >
                     <Minus size={16} />
@@ -205,10 +220,7 @@ const ItemModalView = ({
               <Button
                 variant="outlined"
                 startIcon={<Plus size={16} />}
-                onClick={() => {
-                  const newSizes = [...(form.sizes || []), { name: "", price: 0 }]
-                  form.setFieldsValue({ sizes: newSizes })
-                }}
+                onClick={addSize}
                 style={buttonStyles.outlinedPrimary}
               >
                 Thêm kích cỡ
@@ -249,8 +261,8 @@ const ItemModalView = ({
               fullWidth
               label="Tên danh mục"
               name="name"
-              value={form.name || ""}
-              onChange={(e) => form.setFieldsValue({ name: e.target.value })}
+              value={formData.name || ""}
+              onChange={(e) => updateField('name', e.target.value)}
               required
               margin="dense"
               style={inputStyles.textField}
@@ -259,8 +271,8 @@ const ItemModalView = ({
               fullWidth
               label="Mô tả"
               name="description"
-              value={form.description || ""}
-              onChange={(e) => form.setFieldsValue({ description: e.target.value })}
+              value={formData.description || ""}
+              onChange={(e) => updateField('description', e.target.value)}
               margin="dense"
               style={inputStyles.textField}
             />
@@ -285,7 +297,7 @@ const ItemModalView = ({
           Hủy
         </Button>
         <Button
-          onClick={onOk}
+          onClick={() => onOk(formData)}
           style={type.includes("delete") ? buttonStyles.danger : buttonStyles.primary}
           variant="contained"
         >

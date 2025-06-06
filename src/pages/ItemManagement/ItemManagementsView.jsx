@@ -1,7 +1,3 @@
-"use client"
-
-import { useState } from "react"
-import { Form } from "antd"
 import { Box } from "@mui/material"
 import SearchFilterBar from "./SearchFilterBar"
 import ItemTable from "./ItemTable"
@@ -9,8 +5,6 @@ import ItemModal from "./ItemModalView"
 import { ItemManagementViewModel } from "./ItemManagementsViewModel"
 
 export default function ItemManagement() {
-  const [form] = Form.useForm()
-  const [categoryForm] = Form.useForm()
 
   const {
     menuItems,
@@ -24,8 +18,8 @@ export default function ItemManagement() {
     fileList,
     selectedItem,
     selectedCategory,
-    setIsModalVisible,
-    setIsCategoryModalVisible,
+    formData, // Thêm formData
+    setFormData, // Thêm setFormData
     setIsDeleteConfirmModalVisible,
     setIsDeleteCategoryModalVisible,
     setFileList,
@@ -40,6 +34,8 @@ export default function ItemManagement() {
     handleDeleteCategory,
     handleConfirmDeleteCategory,
     handleFilterByCategory,
+    handleModalCancel, // Thêm handler cancel
+    handleCategoryModalCancel, // Thêm handler cancel cho category
   } = ItemManagementViewModel()
 
   return (
@@ -84,39 +80,37 @@ export default function ItemManagement() {
             menuItems={menuItems}
             categories={categories}
             loading={loading}
-            onEdit={(record) => handleEdit(record, form)}
+            onEdit={handleEdit} // Bỏ form parameter
             onDelete={handleDelete}
             onDeleteCategory={handleDeleteCategory}
           />
         </Box>
 
+        {/* Modal cho thêm/sửa món ăn */}
         <ItemModal
           type="item"
           visible={isModalVisible}
           editingItem={editingItem}
           categories={categories}
-          onOk={() => form.validateFields().then(handleModalOk)}
-          onCancel={() => {
-            setIsModalVisible(false)
-            form.resetFields()
-            setFileList([])
-          }}
-          form={form}
+          onOk={handleModalOk}
+          onCancel={handleModalCancel}
+          formData={formData} // Thay form bằng formData
+          setFormData={setFormData} // Thêm setFormData
           fileList={fileList}
           setFileList={setFileList}
         />
 
+        {/* Modal cho thêm danh mục */}
         <ItemModal
           type="category"
           visible={isCategoryModalVisible}
-          onOk={() => categoryForm.validateFields().then(handleCategoryModalOk)}
-          onCancel={() => {
-            setIsCategoryModalVisible(false)
-            categoryForm.resetFields()
-          }}
-          form={categoryForm}
+          onOk={handleCategoryModalOk}
+          onCancel={handleCategoryModalCancel}
+          formData={formData} // Thay form bằng formData
+          setFormData={setFormData} // Thêm setFormData
         />
 
+        {/* Modal xác nhận xóa món ăn */}
         <ItemModal
           type="deleteItem"
           visible={isDeleteConfirmModalVisible}
@@ -125,6 +119,7 @@ export default function ItemManagement() {
           onCancel={() => setIsDeleteConfirmModalVisible(false)}
         />
 
+        {/* Modal xác nhận xóa danh mục */}
         <ItemModal
           type="deleteCategory"
           visible={isDeleteCategoryModalVisible}
