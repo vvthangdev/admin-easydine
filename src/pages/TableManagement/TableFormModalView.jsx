@@ -6,13 +6,10 @@ import {
   DialogActions,
   Button,
   TextField,
-  MenuItem,
-  Select,
-  InputLabel,
-  FormControl,
   Typography,
   CircularProgress,
   Box,
+  Autocomplete,
 } from "@mui/material";
 import { Controller } from "react-hook-form";
 import TableFormModalViewModel from "./TableFormModalViewModel";
@@ -91,27 +88,33 @@ const TableFormModalView = ({ open, onClose, onSubmitSuccess, editingTable }) =>
             <Controller
               name="area"
               control={control}
-              rules={{ required: "Vui lòng chọn khu vực!" }}
-              render={({ field }) => (
-                <FormControl fullWidth margin="normal" error={!!errors.area}>
-                  <InputLabel>Khu vực (Tầng)</InputLabel>
-                  <Select
-                    {...field}
-                    label="Khu vực (Tầng)"
-                    disabled={areas.length === 0}
-                  >
-                    {areas.map((area) => (
-                      <MenuItem key={area} value={area}>
-                        {area}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                  {errors.area && (
-                    <Typography color="error" variant="caption">
-                      {errors.area.message}
-                    </Typography>
+              rules={{ required: "Vui lòng chọn hoặc nhập khu vực!" }}
+              render={({ field: { onChange, value, ...field } }) => (
+                <Autocomplete
+                  {...field}
+                  value={value || ""}
+                  onChange={(event, newValue) => {
+                    onChange(newValue || "");
+                  }}
+                  inputValue={value || ""}
+                  onInputChange={(event, newInputValue) => {
+                    onChange(newInputValue);
+                  }}
+                  options={areas}
+                  freeSolo
+                  fullWidth
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Khu vực (Tầng)"
+                      margin="normal"
+                      error={!!errors.area}
+                      helperText={errors.area?.message}
+                      placeholder="Chọn hoặc nhập khu vực"
+                    />
                   )}
-                </FormControl>
+                  disabled={loading}
+                />
               )}
             />
             <DialogActions>
