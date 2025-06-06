@@ -16,7 +16,8 @@ const UserSearch = ({ searchTerm, onSearch, onEnter }) => {
   }}
   fullWidth
   size="small"
-  autoComplete="new-password" // Changed from "off" to "new-password"
+  autoComplete="off"
+  name="user-search-unique" // Add a unique name
   sx={{
     "& .MuiOutlinedInput-root": {
       borderRadius: 2,
