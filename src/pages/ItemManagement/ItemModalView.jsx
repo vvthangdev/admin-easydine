@@ -36,10 +36,10 @@ const ItemModalView = ({
   selectedItem,
   onOk,
   onCancel,
-  formData, // Thay đổi từ form thành formData
-  setFormData, // Thêm setter cho formData
-  fileList,
-  setFileList,
+  formData = {}, // Thêm default value để tránh undefined
+  setFormData = () => {}, // Thêm default function
+  fileList = [],
+  setFileList = () => {},
 }) => {
   const getTitle = () => {
     switch (type) {
@@ -66,29 +66,37 @@ const ItemModalView = ({
     return ""
   }
 
-  // Helper function để update form data
+  // Helper function để update form data (với null check)
   const updateField = (field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }))
+    if (setFormData) {
+      setFormData(prev => ({
+        ...prev,
+        [field]: value
+      }))
+    }
   }
 
-  // Helper function để update sizes
+  // Helper function để update sizes (với null check)
   const updateSize = (index, field, value) => {
-    const newSizes = [...(formData.sizes || [])]
-    newSizes[index] = { ...newSizes[index], [field]: value }
-    updateField('sizes', newSizes)
+    if (setFormData && formData) {
+      const newSizes = [...(formData.sizes || [])]
+      newSizes[index] = { ...newSizes[index], [field]: value }
+      updateField('sizes', newSizes)
+    }
   }
 
   const addSize = () => {
-    const newSizes = [...(formData.sizes || []), { name: "", price: 0 }]
-    updateField('sizes', newSizes)
+    if (setFormData && formData) {
+      const newSizes = [...(formData.sizes || []), { name: "", price: 0 }]
+      updateField('sizes', newSizes)
+    }
   }
 
   const removeSize = (index) => {
-    const newSizes = formData.sizes?.filter((_, i) => i !== index) || []
-    updateField('sizes', newSizes)
+    if (setFormData && formData) {
+      const newSizes = formData.sizes?.filter((_, i) => i !== index) || []
+      updateField('sizes', newSizes)
+    }
   }
 
   return (
@@ -161,8 +169,8 @@ const ItemModalView = ({
                   label="Chọn danh mục"
                   renderValue={(selected) => (
                     <Box style={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                      {selected.map((value) => {
-                        const category = categories.find((cat) => cat._id === value)
+                      {(selected || []).map((value) => {
+                        const category = (categories || []).find((cat) => cat._id === value)
                         return (
                           <Chip
                             key={value}
@@ -175,7 +183,7 @@ const ItemModalView = ({
                     </Box>
                   )}
                 >
-                  {categories
+                  {(categories || [])
                     .filter((cat) => cat && cat._id)
                     .map((cat) => (
                       <MenuItem key={cat._id} value={cat._id}>
