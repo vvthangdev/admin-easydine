@@ -64,7 +64,7 @@ const OrderTable = ({
     switch (type) {
       case "reservation":
         return "Đặt bàn";
-      case "ship":
+      case "takeaway":
         return "Giao hàng";
       default:
         return type;

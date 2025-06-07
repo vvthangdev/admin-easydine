@@ -1,23 +1,23 @@
 import axiosInstance from "../../config/axios.config";
 
-export const shipAPI = {
-    //getAllShipOrders: () => {
-    //    return axiosInstance.get('/ship');
-    //},
+export const takeawayAPI = {
+  //getAllTakeawayOrders: () => {
+  //    return axiosInstance.get('/takeaway');
+  //},
 
-    createShipOrder: (data) => {
-        return axiosInstance.post('/ship/create', data);
-    },
+  createTakeawayOrder: (data) => {
+    return axiosInstance.post("/takeaway/create", data);
+  },
 
-    updateShipOrder: (data) => {
-        return axiosInstance.patch('/ship/update', data);
-    },
+  updateTakeawayOrder: (data) => {
+    return axiosInstance.patch("/takeaway/update", data);
+  },
 
-    //deleteShipOrder: (data) => {
-    //    return axiosInstance.delete('/ship/delete', { data });
-    //},
+  //deleteTakeawayOrder: (data) => {
+  //    return axiosInstance.delete('/takeaway/delete', { data });
+  //},
 
-    //searchShipOrder: (criteria) => {
-    //    return axiosInstance.get('/ship/search', { params: criteria });
-    //}
+  //searchTakeawayOrder: (criteria) => {
+  //    return axiosInstance.get('/takeaway/search', { params: criteria });
+  //}
 };

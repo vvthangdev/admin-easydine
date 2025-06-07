@@ -121,7 +121,7 @@ const OrderBasicInfoView = ({
                 onChange={handleChange}
               >
                 <MenuItem value="reservation">Đặt chỗ</MenuItem>
-                <MenuItem value="ship">Giao hàng</MenuItem>
+                <MenuItem value="takeaway">Giao hàng</MenuItem>
               </Select>
             </FormControl>
 
@@ -261,7 +261,9 @@ const OrderBasicInfoView = ({
                                 key={table._id}
                                 value={`${table.table_number}|${table.area}|${table._id}`}
                                 sx={{
-                                  fontWeight: formData.tables.includes(table._id)
+                                  fontWeight: formData.tables.includes(
+                                    table._id
+                                  )
                                     ? "bold"
                                     : "normal",
                                   color: formData.tables.includes(table._id)
@@ -269,8 +271,10 @@ const OrderBasicInfoView = ({
                                     : "inherit",
                                 }}
                               >
-                                Bàn {table.table_number} (Sức chứa: {table.capacity})
-                                {formData.tables.includes(table._id) && " - Đã chọn"}
+                                Bàn {table.table_number} (Sức chứa:{" "}
+                                {table.capacity})
+                                {formData.tables.includes(table._id) &&
+                                  " - Đã chọn"}
                               </MenuItem>
                             ))}
                         </Select>
@@ -321,7 +325,9 @@ const OrderBasicInfoView = ({
                 <TableHead>
                   <TableRow>
                     <TableCell sx={{ fontWeight: "bold" }}>Tên món</TableCell>
-                    <TableCell sx={{ fontWeight: "bold" }}>Kích thước</TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>
+                      Kích thước
+                    </TableCell>
                     <TableCell sx={{ fontWeight: "bold" }}>Số lượng</TableCell>
                     <TableCell sx={{ fontWeight: "bold" }}>Giá</TableCell>
                     <TableCell sx={{ fontWeight: "bold" }}>Tổng</TableCell>

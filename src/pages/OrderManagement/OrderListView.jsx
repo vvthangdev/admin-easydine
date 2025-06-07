@@ -7,7 +7,8 @@ import {
   Button,
   Tabs,
   Tab,
-  Snackbar, Alert,
+  Snackbar,
+  Alert,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -24,7 +25,7 @@ import OrderTable from "./OrderTable";
 import { message } from "antd";
 
 const OrderListView = ({ selectedCustomer, onClearFilter }) => {
-  const [orders, setOrders] = useState({ ship: [], reservation: [] });
+  const [orders, setOrders] = useState({ takeaway: [], reservation: [] });
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingOrder, setEditingOrder] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -94,11 +95,11 @@ const OrderListView = ({ selectedCustomer, onClearFilter }) => {
         reservation: sortedOrders.filter(
           (order) => order.type === "reservation"
         ),
-        ship: sortedOrders.filter((order) => order.type === "ship"),
+        takeaway: sortedOrders.filter((order) => order.type === "takeaway"),
       });
     } catch (error) {
       message.error("Lỗi khi tải danh sách đơn hàng");
-      setOrders({ ship: [], reservation: [] });
+      setOrders({ takeaway: [], reservation: [] });
     } finally {
       setLoading(false);
     }
@@ -117,7 +118,7 @@ const OrderListView = ({ selectedCustomer, onClearFilter }) => {
     try {
       const currentOrder =
         orders.reservation.find((o) => o.id === orderId) ||
-        orders.ship.find((o) => o.id === orderId);
+        orders.takeaway.find((o) => o.id === orderId);
 
       if (!currentOrder) {
         try {
@@ -382,7 +383,7 @@ const OrderListView = ({ selectedCustomer, onClearFilter }) => {
             icon={<Package size={16} />}
             iconPosition="start"
             label="Đơn hàng giao hàng"
-            value="ship"
+            value="takeaway"
             sx={{ px: 3 }}
           />
         </Tabs>
@@ -520,21 +521,20 @@ const OrderListView = ({ selectedCustomer, onClearFilter }) => {
         </DialogActions>
       </Dialog>
       <Snackbar
-  open={snackbarOpen}
-  autoHideDuration={3000}
-  onClose={handleCloseSnackbar}
-  anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
->
-  <Alert
-    onClose={handleCloseSnackbar}
-    severity="success"
-    sx={{ width: "100%", borderRadius: 2 }}
-  >
-    Đã sao chép mã đơn hàng!
-  </Alert>
-</Snackbar>
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity="success"
+          sx={{ width: "100%", borderRadius: 2 }}
+        >
+          Đã sao chép mã đơn hàng!
+        </Alert>
+      </Snackbar>
     </Box>
-    
   );
 };
 
