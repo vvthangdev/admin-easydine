@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Box, Typography, Button, Avatar, Menu, MenuItem, IconButton } from '@mui/material';
 import { ExpandMore } from '@mui/icons-material';
@@ -15,18 +15,18 @@ function Header({ logo, navLinks }) {
   const [loading, setLoading] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
 
-  const fetchProfile = async () => {
-    if (profile) return;
-    setLoading(true);
-    try {
-      const response = await userAPI.getUserInfo();
-      setProfile(response);
-    } catch (error) {
-      message.error('Lỗi khi tải thông tin hồ sơ');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const fetchProfile = useCallback(async () => {
+  if (profile) return;
+  setLoading(true);
+  try {
+    const response = await userAPI.getUserInfo();
+    setProfile(response);
+  } catch (error) {
+    message.error('Lỗi khi tải thông tin hồ sơ');
+  } finally {
+    setLoading(false);
+  }
+}, [profile]);
 
   useEffect(() => {
     if (!user) {
@@ -36,7 +36,7 @@ function Header({ logo, navLinks }) {
     if (!profile) {
       fetchProfile();
     }
-  }, [user, profile]);
+  }, [user, profile, fetchProfile]);
 // ...
 const handleLogout = async () => {
   try {
@@ -147,7 +147,7 @@ const handleLogout = async () => {
                       fontWeight: 500,
                     }}
                   >
-                    {user.username}
+                    {user.name}
                   </Typography>
                   <ExpandMore
                     sx={{

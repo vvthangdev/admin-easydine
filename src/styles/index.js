@@ -15,4 +15,5 @@ export {
   switchStyles,
   checkboxStyles,
   boxStyles,
+  loginStyles,
 } from './components';

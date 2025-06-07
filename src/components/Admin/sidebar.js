@@ -115,7 +115,7 @@ export default function Sidebar({ onCollapseChange }) {
                   textOverflow: "ellipsis",
                 }}
               >
-                {user?.username}
+                {user?.name}
               </Typography>
               <Typography
                 variant="caption"

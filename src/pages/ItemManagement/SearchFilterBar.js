@@ -15,6 +15,7 @@ import {
 import { Search, Plus, Tag } from 'lucide-react'
 import { useMemo } from "react"
 import { debounce } from "lodash"
+import { textStyles, inputStyles, buttonStyles, boxStyles } from '../../styles/index'
 
 const SearchFilterBar = ({ categories, onSearch, onFilter, onAddItem, onAddCategory }) => {
   const debouncedSearch = useMemo(() => debounce((value) => onSearch(value), 300), [onSearch])
@@ -33,14 +34,12 @@ const SearchFilterBar = ({ categories, onSearch, onFilter, onAddItem, onAddCateg
   }
 
   return (
-    <Box sx={{ mb: 4 }}>
+    <Box sx={boxStyles.section}>
       <Typography
         variant="h4"
         sx={{
-          color: "#1d1d1f",
-          fontWeight: 700,
-          fontFamily: '"SF Pro Display", Roboto, sans-serif',
-          mb: 3,
+          ...textStyles.blackBold,
+          fontSize: '1.5rem', // Điều chỉnh để giống h4
         }}
       >
         Quản lý menu món ăn
@@ -52,21 +51,7 @@ const SearchFilterBar = ({ categories, onSearch, onFilter, onAddItem, onAddCateg
             placeholder="Tìm món theo tên"
             onChange={handleSearchChange}
             size="small"
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 2,
-                "&:hover .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#0071e3",
-                },
-                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#0071e3",
-                  borderWidth: 2,
-                },
-              },
-              "& .MuiInputLabel-root.Mui-focused": {
-                color: "#0071e3",
-              },
-            }}
+            sx={inputStyles.textField}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -77,25 +62,7 @@ const SearchFilterBar = ({ categories, onSearch, onFilter, onAddItem, onAddCateg
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <FormControl
-            fullWidth
-            size="small"
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 2,
-                "&:hover .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#0071e3",
-                },
-                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#0071e3",
-                  borderWidth: 2,
-                },
-              },
-              "& .MuiInputLabel-root.Mui-focused": {
-                color: "#0071e3",
-              },
-            }}
-          >
+          <FormControl fullWidth size="small" sx={inputStyles.select}>
             <InputLabel>Lọc theo danh mục</InputLabel>
             <Select
               label="Lọc theo danh mục"
@@ -119,24 +86,15 @@ const SearchFilterBar = ({ categories, onSearch, onFilter, onAddItem, onAddCateg
           </FormControl>
         </Grid>
         <Grid item xs={12} sm={12} md={6}>
-          <Box sx={{ display: "flex", gap: 2, justifyContent: { xs: "flex-start", md: "flex-end" } }}>
+          <Box sx={{
+            ...boxStyles.buttonGroup,
+            justifyContent: { xs: 'flex-start', md: 'flex-end' },
+          }}>
             <Button
               variant="outlined"
               startIcon={<Tag size={18} />}
               onClick={onAddCategory}
-              sx={{
-                borderColor: "#0071e3",
-                color: "#0071e3",
-                borderRadius: 28,
-                px: 3,
-                textTransform: "none",
-                fontWeight: 500,
-                "&:hover": {
-                  borderColor: "#0071e3",
-                  background: "rgba(0, 113, 227, 0.05)",
-                },
-                transition: "all 0.2s ease",
-              }}
+              sx={buttonStyles.outlinedPrimary}
             >
               Thêm danh mục
             </Button>
@@ -144,21 +102,7 @@ const SearchFilterBar = ({ categories, onSearch, onFilter, onAddItem, onAddCateg
               variant="contained"
               startIcon={<Plus size={18} />}
               onClick={onAddItem}
-              sx={{
-                background: "linear-gradient(145deg, #0071e3 0%, #42a5f5 100%)",
-                color: "#ffffff",
-                borderRadius: 28,
-                px: 3,
-                boxShadow: "0 4px 12px rgba(0, 113, 227, 0.2)",
-                textTransform: "none",
-                fontWeight: 500,
-                "&:hover": {
-                  background: "linear-gradient(145deg, #0071e3 0%, #42a5f5 100%)",
-                  boxShadow: "0 6px 16px rgba(0, 113, 227, 0.3)",
-                  transform: "translateY(-2px)",
-                },
-                transition: "all 0.3s ease",
-              }}
+              sx={buttonStyles.primary}
             >
               Thêm món ăn mới
             </Button>

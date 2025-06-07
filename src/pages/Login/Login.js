@@ -1,3 +1,5 @@
+"use client"
+
 import { Form, Input, Button, Card, Checkbox, message } from 'antd';
 import {
   LockOutlined,
@@ -10,6 +12,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { Box, Typography, Button as MuiButton } from '@mui/material';
+import * as styles from '../../styles';
+import LogoImage from '../../assets/images/logo2.png';
 
 export default function Login() {
   const [form] = Form.useForm();
@@ -17,7 +21,7 @@ export default function Login() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useAuth();
+  const { login, user } = useAuth();
 
   useEffect(() => {
     const query = new URLSearchParams(location.search);
@@ -53,6 +57,12 @@ export default function Login() {
     }
   }, [location, login, navigate]);
 
+  useEffect(() => {
+  if (user) {
+    navigate('/overview');
+  }
+}, [user, navigate]);
+
   const handleSubmit = async (values) => {
     const { email, password } = values;
     const requestData = { email, password };
@@ -84,129 +94,62 @@ export default function Login() {
   };
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        position: 'relative',
-        background: 'linear-gradient(to bottom right, #fff7e6, #fefcbf)',
-        overflow: 'hidden',
-      }}
-    >
+    <Box sx={{
+      ...styles.boxStyles.section,
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: styles.gradients.dialog,
+    }}>
+      {/* Home Button */}
       <Box sx={{ position: 'absolute', top: 16, left: 16, zIndex: 10 }}>
         <MuiButton
           variant="outlined"
           startIcon={<HomeOutlined />}
           onClick={() => navigate('/')}
-          sx={{
-            width: 48,
-            height: 48,
-            borderRadius: '50%',
-            bgcolor: 'rgba(255, 255, 255, 0.8)',
-            borderColor: '#f59e0b',
-            color: '#f59e0b',
-            '&:hover': { bgcolor: '#fff3bf', borderColor: '#d97706' },
-            transition: 'all 0.3s',
-          }}
+          sx={styles.buttonStyles.iconButton}
         />
       </Box>
 
-      <Box
-        sx={{
-          position: 'absolute',
-          top: -100,
-          right: -100,
-          width: 320,
-          height: 320,
-          borderRadius: '50%',
-          bgcolor: '#f59e0b',
-          opacity: 0.2,
-          filter: 'blur(40px)',
-        }}
-      />
-      <Box
-        sx={{
-          position: 'absolute',
-          bottom: -100,
-          left: -100,
-          width: 320,
-          height: 320,
-          borderRadius: '50%',
-          bgcolor: '#facc15',
-          opacity: 0.2,
-          filter: 'blur(40px)',
-        }}
-      />
-
       <Box sx={{ maxWidth: 400, width: '100%', mx: 2, position: 'relative' }}>
-        <Box
-          sx={{
-            position: 'absolute',
-            inset: -4,
-            background: 'linear-gradient(to right, #f59e0b, #facc15)',
-            borderRadius: 2,
-            opacity: 0.5,
-            filter: 'blur(10px)',
-            zIndex: -1,
-          }}
-        />
-
-        <Card
-          style={{
-            padding: 32,
-            background: 'rgba(255, 255, 255, 0.9)',
-            backdropFilter: 'blur(10px)',
-            borderRadius: 8,
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-            position: 'relative',
-          }}
-        >
-          <Box
-            sx={{
-              position: 'absolute',
-              top: -64,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              width: 128,
-              height: 128,
-              borderRadius: '50%',
-              bgcolor: 'white',
-              p: 0.5,
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-            }}
-          >
-            <Box
-              sx={{
-                width: '100%',
-                height: '100%',
-                borderRadius: '50%',
-                background: 'linear-gradient(to right, #f59e0b, #facc15)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Typography variant="h2" color="white">
-                🍽️
-              </Typography>
+        <Card style={styles.cardStyles.login}>
+          {/* Logo Circle */}
+          <Box sx={{
+            ...styles.loginStyles.logoContainer,
+            top: -64, // Nhô nửa ngoài Card
+            zIndex: 2,
+          }}>
+            <Box sx={styles.loginStyles.logoInner}>
+              <img
+                src={LogoImage}
+                alt="Logo"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain',
+                  borderRadius: '50%',
+                }}
+                onError={() => console.error('Failed to load logo2.png')} // Debug lỗi tải ảnh
+              />
             </Box>
           </Box>
 
-          <Box sx={{ textAlign: 'center', mt: 8, mb: 4 }}>
-            <Typography variant="h5" fontWeight="bold" color="text.primary" gutterBottom>
+          {/* Title and Subtitle */}
+          <Box sx={{ textAlign: 'center', mt: 10, mb: 4 }}>
+            <Typography variant="h5" sx={styles.textStyles.blackBold}>
               Chào mừng!
             </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
-              <Box sx={{ width: 48, height: 1, bgcolor: '#f59e0b' }} />
-              <Typography variant="body2" color="text.secondary" fontStyle="italic">
+            <Box sx={styles.boxStyles.buttonGroup}>
+              <Box sx={styles.loginStyles.dividerLine} />
+              <Typography variant="body2" sx={styles.textStyles.grayLight} fontStyle="italic">
                 Trải nghiệm ẩm thực tuyệt vời
               </Typography>
-              <Box sx={{ width: 48, height: 1, bgcolor: '#f59e0b' }} />
+              <Box sx={styles.loginStyles.dividerLine} />
             </Box>
           </Box>
 
+          {/* Form */}
           <Form
             form={form}
             name="login"
@@ -222,14 +165,10 @@ export default function Login() {
               ]}
             >
               <Input
-                prefix={<MailOutlined style={{ color: '#f59e0b' }} />}
+                prefix={<MailOutlined style={{ color: styles.colors.primary.main }} />}
                 placeholder="Email"
                 size="large"
-                style={{
-                  height: 48,
-                  background: 'rgba(255, 255, 255, 0.8)',
-                  borderColor: '#d4a017',
-                }}
+                style={styles.loginStyles.input}
               />
             </Form.Item>
 
@@ -241,25 +180,21 @@ export default function Login() {
               ]}
             >
               <Input.Password
-                prefix={<LockOutlined style={{ color: '#f59e0b' }} />}
+                prefix={<LockOutlined style={{ color: styles.colors.primary.main }} />}
                 placeholder="Mật khẩu"
                 size="large"
-                style={{
-                  height: 48,
-                  background: 'rgba(255, 255, 255, 0.8)',
-                  borderColor: '#d4a017',
-                }}
+                style={styles.loginStyles.input}
               />
             </Form.Item>
 
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Box sx={styles.boxStyles.header}>
               <Form.Item name="remember" valuePropName="checked" noStyle>
-                <Checkbox style={{ color: '#f59e0b' }}>Ghi nhớ tôi</Checkbox>
+                <Checkbox style={styles.checkboxStyles.default}>Ghi nhớ tôi</Checkbox>
               </Form.Item>
               <MuiButton
                 component={Link}
                 to="/forgot-password"
-                sx={{ color: '#f59e0b', '&:hover': { color: '#b45309' } }}
+                sx={styles.loginStyles.linkButton}
               >
                 Quên mật khẩu?
               </MuiButton>
@@ -272,14 +207,7 @@ export default function Login() {
                 size="large"
                 block
                 loading={loading}
-                style={{
-                  height: 48,
-                  background: 'linear-gradient(to right, #f59e0b, #facc15)',
-                  border: 0,
-                  fontSize: '1.125rem',
-                  fontFamily: 'serif',
-                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-                }}
+                style={styles.buttonStyles.primary}
               >
                 Đăng nhập
               </Button>
@@ -292,51 +220,32 @@ export default function Login() {
                 block
                 onClick={handleGoogleLogin}
                 loading={googleLoading}
-                style={{
-                  height: 48,
-                  background: 'white',
-                  borderColor: '#d4a017',
-                  color: '#f59e0b',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 8,
-                }}
+                style={styles.loginStyles.googleButton}
               >
                 <GoogleOutlined style={{ color: '#db4437' }} />
                 Đăng nhập bằng Google
               </Button>
             </Form.Item>
 
-            <Box sx={{ textAlign: 'center', color: '#f59e0b' }}>
-              Bạn chưa có tài khoản?{' '}
-              <MuiButton
-                component={Link}
-                to="/register"
-                sx={{ color: '#f59e0b', fontWeight: 'bold', '&:hover': { color: '#b45309' } }}
-              >
-                Đăng ký ngay
-              </MuiButton>
+            <Box sx={{ textAlign: 'center' }}>
+              <Typography variant="body2" sx={styles.textStyles.grayLight}>
+                Bạn chưa có tài khoản?{' '}
+                <MuiButton
+                  component={Link}
+                  to="/register"
+                  sx={styles.loginStyles.linkButton}
+                >
+                  Đăng ký ngay
+                </MuiButton>
+              </Typography>
             </Box>
 
-            <Box sx={{ pt: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
-              <Box
-                sx={{
-                  width: '100%',
-                  height: 1,
-                  background: 'linear-gradient(to right, transparent, #f59e0b, transparent)',
-                }}
-              />
-              <Typography variant="body2" color="text.secondary">
+            <Box sx={{ ...styles.boxStyles.buttonGroup, pt: 4, justifyContent: 'center' }}>
+              <Box sx={styles.loginStyles.dividerLine} />
+              <Typography variant="body2" sx={styles.textStyles.grayLight}>
                 ✦
               </Typography>
-              <Box
-                sx={{
-                  width: '100%',
-                  height: 1,
-                  background: 'linear-gradient(to right, transparent, #f59e0b, transparent)',
-                }}
-              />
+              <Box sx={styles.loginStyles.dividerLine} />
             </Box>
           </Form>
         </Card>

@@ -2,6 +2,75 @@
 
 import { colors, gradients, shadows, typography, animations } from "./themes";
 
+// Trong src/styles/components.js
+export const loginStyles = {
+  logoContainer: {
+    position: 'absolute',
+    top: 0,
+    left: '50%',
+    transform: 'translateX(-50%)',
+    width: 128,
+    height: 128,
+    borderRadius: '50%',
+    bgcolor: colors.white,
+    p: 0.5,
+    boxShadow: shadows.medium,
+    zIndex: 2,
+  },
+  logoInner: {
+    width: '100%',
+    height: '100%',
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden', // Đảm bảo hình ảnh không tràn ra ngoài
+  },
+  dividerLine: {
+    width: 48,
+    height: 1,
+    bgcolor: colors.primary.main,
+  },
+  linkButton: {
+    color: colors.primary.main,
+    fontWeight: 500,
+    textTransform: 'none',
+    '&:hover': {
+      color: colors.primary.dark,
+    },
+    transition: animations.transition,
+  },
+  input: {
+    height: 40,
+    borderRadius: 2,
+    borderColor: colors.neutral[400],
+    background: colors.neutral[100],
+    '&:hover': {
+      borderColor: colors.primary.main,
+    },
+    '&:focus': {
+      borderColor: colors.primary.main,
+      borderWidth: 2,
+    },
+  },
+  googleButton: {
+    height: 40,
+    borderRadius: 28,
+    borderColor: colors.neutral[400],
+    color: colors.neutral[800],
+    background: colors.white,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    '&:hover': {
+      borderColor: colors.primary.main,
+      background: 'rgba(0, 113, 227, 0.05)',
+    },
+    transition: animations.transition,
+  },
+};
+
 // Style cho avatar
 export const avatarStyles = {
   categoryIndicator: {
@@ -141,6 +210,11 @@ export const cardStyles = {
     boxShadow: shadows.large,
     border: "1px solid rgba(0, 0, 0, 0.05)",
     overflow: "hidden",
+  },
+  login: {
+    borderRadius: 4,
+    boxShadow: shadows.large,
+    border: '1px solid rgba(0, 0, 0, 0.05)',
   },
   headerBlue: {
     p: 3,
