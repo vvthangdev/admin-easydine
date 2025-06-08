@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   Dialog,
@@ -15,10 +15,17 @@ import {
   Typography,
   IconButton,
   Chip,
-} from "@mui/material"
-import { Upload, Button as AntButton } from "antd"
-import { UploadOutlined } from "@ant-design/icons"
-import { Plus, Minus, Tag, DollarSign, FileText, ImageIcon } from "lucide-react"
+} from "@mui/material";
+import { Upload, Button as AntButton } from "antd";
+import { UploadOutlined } from "@ant-design/icons";
+import {
+  Plus,
+  Minus,
+  Tag,
+  DollarSign,
+  FileText,
+  ImageIcon,
+} from "lucide-react";
 import {
   dialogStyles,
   inputStyles,
@@ -26,7 +33,7 @@ import {
   chipStyles,
   textStyles,
   boxStyles,
-} from "../../styles"
+} from "../../styles";
 
 const ItemModalView = ({
   type,
@@ -44,60 +51,60 @@ const ItemModalView = ({
   const getTitle = () => {
     switch (type) {
       case "item":
-        return editingItem ? "Sửa món ăn" : "Thêm món ăn mới"
+        return editingItem ? "Sửa món ăn" : "Thêm món ăn mới";
       case "category":
-        return "Thêm danh mục mới"
+        return "Thêm danh mục mới";
       case "deleteItem":
-        return "Xác nhận xóa món ăn"
+        return "Xác nhận xóa món ăn";
       case "deleteCategory":
-        return "Xác nhận xóa danh mục"
+        return "Xác nhận xóa danh mục";
       default:
-        return ""
+        return "";
     }
-  }
+  };
 
   const getDeleteMessage = () => {
     if (type === "deleteItem") {
-      return `Bạn có chắc chắn muốn xóa món ăn <strong>${selectedItem?.name}</strong> không?`
+      return `Bạn có chắc chắn muốn xóa món ăn <strong>${selectedItem?.name}</strong> không?`;
     }
     if (type === "deleteCategory") {
-      return `Bạn có chắc chắn muốn xóa danh mục <strong>${selectedItem?.name}</strong> không?`
+      return `Bạn có chắc chắn muốn xóa danh mục <strong>${selectedItem?.name}</strong> không?`;
     }
-    return ""
-  }
+    return "";
+  };
 
   // Helper function để update form data (với null check)
   const updateField = (field, value) => {
     if (setFormData) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        [field]: value
-      }))
+        [field]: value,
+      }));
     }
-  }
+  };
 
   // Helper function để update sizes (với null check)
   const updateSize = (index, field, value) => {
     if (setFormData && formData) {
-      const newSizes = [...(formData.sizes || [])]
-      newSizes[index] = { ...newSizes[index], [field]: value }
-      updateField('sizes', newSizes)
+      const newSizes = [...(formData.sizes || [])];
+      newSizes[index] = { ...newSizes[index], [field]: value };
+      updateField("sizes", newSizes);
     }
-  }
+  };
 
   const addSize = () => {
     if (setFormData && formData) {
-      const newSizes = [...(formData.sizes || []), { name: "", price: 0 }]
-      updateField('sizes', newSizes)
+      const newSizes = [...(formData.sizes || []), { name: "", price: 0 }];
+      updateField("sizes", newSizes);
     }
-  }
+  };
 
   const removeSize = (index) => {
     if (setFormData && formData) {
-      const newSizes = formData.sizes?.filter((_, i) => i !== index) || []
-      updateField('sizes', newSizes)
+      const newSizes = formData.sizes?.filter((_, i) => i !== index) || [];
+      updateField("sizes", newSizes);
     }
-  }
+  };
 
   return (
     <Dialog
@@ -107,7 +114,11 @@ const ItemModalView = ({
       fullWidth
       PaperProps={{ style: dialogStyles.paper }}
     >
-      <DialogTitle style={type.includes("delete") ? dialogStyles.titleError : dialogStyles.title}>
+      <DialogTitle
+        style={
+          type.includes("delete") ? dialogStyles.titleError : dialogStyles.title
+        }
+      >
         {getTitle()}
       </DialogTitle>
       <DialogContent style={dialogStyles.content}>
@@ -116,14 +127,16 @@ const ItemModalView = ({
             {/* Basic Information */}
             <Box style={boxStyles.header}>
               <FileText size={20} color="#0071e3" />
-              <Typography style={textStyles.blackBold}>Thông tin cơ bản</Typography>
+              <Typography style={textStyles.blackBold}>
+                Thông tin cơ bản
+              </Typography>
             </Box>
             <TextField
               fullWidth
               label="Tên món"
               name="name"
               value={formData.name || ""}
-              onChange={(e) => updateField('name', e.target.value)}
+              onChange={(e) => updateField("name", e.target.value)}
               required
               margin="dense"
               style={inputStyles.textField}
@@ -134,12 +147,20 @@ const ItemModalView = ({
               name="price"
               type="number"
               value={formData.price || ""}
-              onChange={(e) => updateField('price', Number.parseFloat(e.target.value) || 0)}
+              onChange={(e) =>
+                updateField("price", Number.parseFloat(e.target.value) || 0)
+              }
               required
               margin="dense"
               style={inputStyles.textField}
               InputProps={{
-                startAdornment: <DollarSign size={16} color="#0071e3" style={{ marginRight: 8 }} />,
+                startAdornment: (
+                  <DollarSign
+                    size={16}
+                    color="#0071e3"
+                    style={{ marginRight: 8 }}
+                  />
+                ),
               }}
             />
             <TextField
@@ -147,7 +168,7 @@ const ItemModalView = ({
               label="Mô tả"
               name="description"
               value={formData.description || ""}
-              onChange={(e) => updateField('description', e.target.value)}
+              onChange={(e) => updateField("description", e.target.value)}
               multiline
               rows={3}
               margin="dense"
@@ -165,12 +186,16 @@ const ItemModalView = ({
                 <Select
                   multiple
                   value={formData.categories || []}
-                  onChange={(e) => updateField('categories', e.target.value)}
+                  onChange={(e) => updateField("categories", e.target.value)}
                   label="Chọn danh mục"
                   renderValue={(selected) => (
-                    <Box style={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                    <Box
+                      style={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}
+                    >
                       {(selected || []).map((value) => {
-                        const category = (categories || []).find((cat) => cat._id === value)
+                        const category = (categories || []).find(
+                          (cat) => cat._id === value
+                        );
                         return (
                           <Chip
                             key={value}
@@ -178,7 +203,7 @@ const ItemModalView = ({
                             size="small"
                             style={chipStyles.category}
                           />
-                        )
+                        );
                       })}
                     </Box>
                   )}
@@ -198,14 +223,16 @@ const ItemModalView = ({
             <Box style={boxStyles.section}>
               <Box style={boxStyles.header}>
                 <DollarSign size={20} color="#0071e3" />
-                <Typography style={textStyles.blackBold}>Kích cỡ (tùy chọn)</Typography>
+                <Typography style={textStyles.blackBold}>
+                  Kích cỡ (tùy chọn)
+                </Typography>
               </Box>
               {formData.sizes?.map((size, index) => (
                 <Box key={index} style={boxStyles.sizeContainer}>
                   <TextField
                     label="Tên kích cỡ"
                     value={size.name || ""}
-                    onChange={(e) => updateSize(index, 'name', e.target.value)}
+                    onChange={(e) => updateSize(index, "name", e.target.value)}
                     size="small"
                     style={{ ...inputStyles.textField, flex: 1 }}
                   />
@@ -213,7 +240,13 @@ const ItemModalView = ({
                     label="Giá"
                     type="number"
                     value={size.price || ""}
-                    onChange={(e) => updateSize(index, 'price', Number.parseFloat(e.target.value) || 0)}
+                    onChange={(e) =>
+                      updateSize(
+                        index,
+                        "price",
+                        Number.parseFloat(e.target.value) || 0
+                      )
+                    }
                     size="small"
                     style={{ ...inputStyles.textField, flex: 1 }}
                   />
@@ -239,7 +272,9 @@ const ItemModalView = ({
             <Box style={boxStyles.section}>
               <Box style={boxStyles.header}>
                 <ImageIcon size={20} color="#0071e3" />
-                <Typography style={textStyles.blackBold}>Ảnh món ăn (tùy chọn)</Typography>
+                <Typography style={textStyles.blackBold}>
+                  Ảnh món ăn (tùy chọn)
+                </Typography>
               </Box>
               <Upload
                 listType="picture"
@@ -263,14 +298,16 @@ const ItemModalView = ({
           <Box style={boxStyles.section}>
             <Box style={boxStyles.header}>
               <Tag size={20} color="#0071e3" />
-              <Typography style={textStyles.blackBold}>Thông tin danh mục</Typography>
+              <Typography style={textStyles.blackBold}>
+                Thông tin danh mục
+              </Typography>
             </Box>
             <TextField
               fullWidth
               label="Tên danh mục"
               name="name"
               value={formData.name || ""}
-              onChange={(e) => updateField('name', e.target.value)}
+              onChange={(e) => updateField("name", e.target.value)}
               required
               margin="dense"
               style={inputStyles.textField}
@@ -280,7 +317,7 @@ const ItemModalView = ({
               label="Mô tả"
               name="description"
               value={formData.description || ""}
-              onChange={(e) => updateField('description', e.target.value)}
+              onChange={(e) => updateField("description", e.target.value)}
               margin="dense"
               style={inputStyles.textField}
             />
@@ -292,7 +329,9 @@ const ItemModalView = ({
             <Typography style={textStyles.blackLight}>
               <span dangerouslySetInnerHTML={{ __html: getDeleteMessage() }} />
             </Typography>
-            <Typography style={textStyles.error}>Lưu ý: Hành động này không thể hoàn tác.</Typography>
+            <Typography style={textStyles.error}>
+              Lưu ý: Hành động này không thể hoàn tác.
+            </Typography>
           </Box>
         )}
       </DialogContent>
@@ -306,14 +345,16 @@ const ItemModalView = ({
         </Button>
         <Button
           onClick={() => onOk(formData)}
-          style={type.includes("delete") ? buttonStyles.danger : buttonStyles.primary}
+          style={
+            type.includes("delete") ? buttonStyles.danger : buttonStyles.primary
+          }
           variant="contained"
         >
           {type.includes("delete") ? "Xóa" : "OK"}
         </Button>
       </DialogActions>
     </Dialog>
-  )
-}
+  );
+};
 
-export default ItemModalView
+export default ItemModalView;

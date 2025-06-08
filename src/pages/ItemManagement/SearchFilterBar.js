@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   Box,
@@ -11,27 +11,41 @@ import {
   Button,
   Grid,
   InputAdornment,
-} from "@mui/material"
-import { Search, Plus, Tag } from 'lucide-react'
-import { useMemo } from "react"
-import { debounce } from "lodash"
-import { textStyles, inputStyles, buttonStyles, boxStyles } from '../../styles/index'
+} from "@mui/material";
+import { Search, Plus, Tag } from "lucide-react";
+import { useMemo } from "react";
+import { debounce } from "lodash";
+import {
+  textStyles,
+  inputStyles,
+  buttonStyles,
+  boxStyles,
+} from "../../styles/index";
 
-const SearchFilterBar = ({ categories, onSearch, onFilter, onAddItem, onAddCategory }) => {
-  const debouncedSearch = useMemo(() => debounce((value) => onSearch(value), 300), [onSearch])
+const SearchFilterBar = ({
+  categories,
+  onSearch,
+  onFilter,
+  onAddItem,
+  onAddCategory,
+}) => {
+  const debouncedSearch = useMemo(
+    () => debounce((value) => onSearch(value), 300),
+    [onSearch]
+  );
 
   const handleSearchChange = (e) => {
-    debouncedSearch(e.target.value)
-  }
+    debouncedSearch(e.target.value);
+  };
 
   const handleCategoryChange = (e) => {
-    const value = e.target.value
+    const value = e.target.value;
     if (!value || value === "all") {
-      onFilter("all")
+      onFilter("all");
     } else {
-      onFilter(value)
+      onFilter(value);
     }
-  }
+  };
 
   return (
     <Box sx={boxStyles.section}>
@@ -39,7 +53,7 @@ const SearchFilterBar = ({ categories, onSearch, onFilter, onAddItem, onAddCateg
         variant="h4"
         sx={{
           ...textStyles.blackBold,
-          fontSize: '1.5rem', // Điều chỉnh để giống h4
+          fontSize: "1.5rem", // Điều chỉnh để giống h4
         }}
       >
         Quản lý menu món ăn
@@ -70,7 +84,11 @@ const SearchFilterBar = ({ categories, onSearch, onFilter, onAddItem, onAddCateg
               defaultValue="all"
               startAdornment={
                 <InputAdornment position="start">
-                  <Tag size={16} color="#0071e3" style={{ marginLeft: -4, marginRight: 8 }} />
+                  <Tag
+                    size={16}
+                    color="#0071e3"
+                    style={{ marginLeft: -4, marginRight: 8 }}
+                  />
                 </InputAdornment>
               }
             >
@@ -86,10 +104,12 @@ const SearchFilterBar = ({ categories, onSearch, onFilter, onAddItem, onAddCateg
           </FormControl>
         </Grid>
         <Grid item xs={12} sm={12} md={6}>
-          <Box sx={{
-            ...boxStyles.buttonGroup,
-            justifyContent: { xs: 'flex-start', md: 'flex-end' },
-          }}>
+          <Box
+            sx={{
+              ...boxStyles.buttonGroup,
+              justifyContent: { xs: "flex-start", md: "flex-end" },
+            }}
+          >
             <Button
               variant="outlined"
               startIcon={<Tag size={18} />}
@@ -110,7 +130,7 @@ const SearchFilterBar = ({ categories, onSearch, onFilter, onAddItem, onAddCateg
         </Grid>
       </Grid>
     </Box>
-  )
-}
+  );
+};
 
-export default SearchFilterBar
+export default SearchFilterBar;

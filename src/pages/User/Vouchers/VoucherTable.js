@@ -14,14 +14,25 @@ import {
   Tooltip,
 } from "@mui/material";
 import { Edit, Trash2, Percent, Calendar, Tag, DollarSign } from "lucide-react";
-import { tableStyles, chipStyles, buttonStyles, colors, boxStyles } from "../../../styles"; // Import styles từ index.js
+import {
+  tableStyles,
+  chipStyles,
+  buttonStyles,
+  colors,
+  boxStyles,
+} from "../../../styles"; // Import styles từ index.js
 
 const VoucherTable = ({ vouchers, loading, onEdit, onDelete }) => {
   const columns = [
     { id: "code", label: "Mã", width: "15%" },
     { id: "discount", label: "Giảm giá", width: "15%" },
     { id: "discountType", label: "Loại", width: "10%", hideOnMobile: true },
-    { id: "minOrderValue", label: "Đơn tối thiểu", width: "15%", hideOnMobile: true },
+    {
+      id: "minOrderValue",
+      label: "Đơn tối thiểu",
+      width: "15%",
+      hideOnMobile: true,
+    },
     { id: "dates", label: "Thời gian", width: "25%" },
     { id: "status", label: "Trạng thái", width: "10%" },
     { id: "action", label: "Thao tác", width: "10%" },
@@ -62,9 +73,13 @@ const VoucherTable = ({ vouchers, loading, onEdit, onDelete }) => {
   };
 
   return (
-    <TableContainer component={Paper} sx={tableStyles.container}> {/* Sử dụng tableStyles.container */}
+    <TableContainer component={Paper} sx={tableStyles.container}>
+      {" "}
+      {/* Sử dụng tableStyles.container */}
       <Table sx={{ minWidth: 650 }} size="small">
-        <TableHead sx={tableStyles.head}> {/* Sử dụng tableStyles.head */}
+        <TableHead sx={tableStyles.head}>
+          {" "}
+          {/* Sử dụng tableStyles.head */}
           <TableRow>
             {columns.map((column) => (
               <TableCell
@@ -73,7 +88,9 @@ const VoucherTable = ({ vouchers, loading, onEdit, onDelete }) => {
                   ...tableStyles.cell, // Sử dụng tableStyles.cell
                   width: column.width,
                   fontWeight: 600, // Giữ fontWeight cho header
-                  display: column.hideOnMobile ? { xs: "none", md: "table-cell" } : "table-cell",
+                  display: column.hideOnMobile
+                    ? { xs: "none", md: "table-cell" }
+                    : "table-cell",
                 }}
               >
                 {column.label}
@@ -84,15 +101,21 @@ const VoucherTable = ({ vouchers, loading, onEdit, onDelete }) => {
         <TableBody>
           {Array.isArray(vouchers) && vouchers.length > 0 ? (
             vouchers.map((voucher) => (
-              <TableRow key={voucher._id} sx={tableStyles.row}> {/* Sử dụng tableStyles.row */}
+              <TableRow key={voucher._id} sx={tableStyles.row}>
+                {" "}
+                {/* Sử dụng tableStyles.row */}
                 <TableCell sx={{ ...tableStyles.cell, fontWeight: 500 }}>
-                  <Box sx={{ ...boxStyles.buttonGroup, gap: 1 }}> {/* Sử dụng boxStyles.buttonGroup */}
+                  <Box sx={{ ...boxStyles.buttonGroup, gap: 1 }}>
+                    {" "}
+                    {/* Sử dụng boxStyles.buttonGroup */}
                     <Tag size={14} color={colors.primary.main} />
                     {voucher.code}
                   </Box>
                 </TableCell>
                 <TableCell sx={tableStyles.cell}>
-                  <Box sx={{ ...boxStyles.buttonGroup, gap: 1 }}> {/* Sử dụng boxStyles.buttonGroup */}
+                  <Box sx={{ ...boxStyles.buttonGroup, gap: 1 }}>
+                    {" "}
+                    {/* Sử dụng boxStyles.buttonGroup */}
                     {voucher.discountType === "percentage" ? (
                       <Percent size={14} color={colors.primary.main} />
                     ) : (
@@ -104,19 +127,42 @@ const VoucherTable = ({ vouchers, loading, onEdit, onDelete }) => {
                     </span>
                   </Box>
                 </TableCell>
-                <TableCell sx={{ ...tableStyles.cell, display: { xs: "none", md: "table-cell" } }}>
-                  {voucher.discountType === "percentage" ? "Phần trăm" : "Cố định"}
+                <TableCell
+                  sx={{
+                    ...tableStyles.cell,
+                    display: { xs: "none", md: "table-cell" },
+                  }}
+                >
+                  {voucher.discountType === "percentage"
+                    ? "Phần trăm"
+                    : "Cố định"}
                 </TableCell>
-                <TableCell sx={{ ...tableStyles.cell, display: { xs: "none", md: "table-cell" } }}>
+                <TableCell
+                  sx={{
+                    ...tableStyles.cell,
+                    display: { xs: "none", md: "table-cell" },
+                  }}
+                >
                   {voucher.minOrderValue.toLocaleString()} VNĐ
                 </TableCell>
                 <TableCell sx={tableStyles.cell}>
-                  <Box sx={{ ...boxStyles.buttonGroup, gap: 1, flexDirection: "column" }}>
+                  <Box
+                    sx={{
+                      ...boxStyles.buttonGroup,
+                      gap: 1,
+                      flexDirection: "column",
+                    }}
+                  >
                     <Calendar size={14} color={colors.primary.main} />
                     <Box sx={{ display: "flex", flexDirection: "column" }}>
-                      <span>{new Date(voucher.startDate).toLocaleDateString("vi-VN")}</span>
+                      <span>
+                        {new Date(voucher.startDate).toLocaleDateString(
+                          "vi-VN"
+                        )}
+                      </span>
                       <span style={{ color: colors.neutral[400] }}>
-                        → {new Date(voucher.endDate).toLocaleDateString("vi-VN")}
+                        →{" "}
+                        {new Date(voucher.endDate).toLocaleDateString("vi-VN")}
                       </span>
                     </Box>
                   </Box>
@@ -133,7 +179,9 @@ const VoucherTable = ({ vouchers, loading, onEdit, onDelete }) => {
                   />
                 </TableCell>
                 <TableCell sx={tableStyles.cell}>
-                  <Box sx={{ ...boxStyles.buttonGroup, gap: 0.5 }}> {/* Sử dụng boxStyles.buttonGroup */}
+                  <Box sx={{ ...boxStyles.buttonGroup, gap: 0.5 }}>
+                    {" "}
+                    {/* Sử dụng boxStyles.buttonGroup */}
                     <Tooltip title="Sửa">
                       <IconButton
                         size="small"
@@ -158,7 +206,13 @@ const VoucherTable = ({ vouchers, loading, onEdit, onDelete }) => {
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={columns.length} align="center" sx={tableStyles.empty}> {/* Sử dụng tableStyles.empty */}
+              <TableCell
+                colSpan={columns.length}
+                align="center"
+                sx={tableStyles.empty}
+              >
+                {" "}
+                {/* Sử dụng tableStyles.empty */}
                 {loading ? "Đang tải..." : "Không có dữ liệu"}
               </TableCell>
             </TableRow>

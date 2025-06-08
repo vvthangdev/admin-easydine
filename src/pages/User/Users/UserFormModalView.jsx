@@ -18,7 +18,14 @@ import {
 import { Upload, Button as AntButton } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { User, Mail, AtSign, Phone, Home, Shield, Lock } from "lucide-react";
-import { dialogStyles, inputStyles, buttonStyles, typography, colors, boxStyles } from "../../../styles"; // Import styles từ index.js
+import {
+  dialogStyles,
+  inputStyles,
+  buttonStyles,
+  typography,
+  colors,
+  boxStyles,
+} from "../../../styles"; // Import styles từ index.js
 
 const UserFormModalView = ({
   visible,
@@ -33,15 +40,37 @@ const UserFormModalView = ({
   errors,
 }) => {
   return (
-    <Dialog open={visible} onClose={onCancel} PaperProps={{ sx: dialogStyles.paper }}> {/* Sử dụng dialogStyles.paper */}
-      <DialogTitle sx={dialogStyles.title}> {/* Sử dụng dialogStyles.title */}
+    <Dialog
+      open={visible}
+      onClose={onCancel}
+      PaperProps={{ sx: dialogStyles.paper }}
+    >
+      {" "}
+      {/* Sử dụng dialogStyles.paper */}
+      <DialogTitle sx={dialogStyles.title}>
+        {" "}
+        {/* Sử dụng dialogStyles.title */}
         {editingUser ? "Sửa thông tin người dùng" : "Thêm người dùng mới"}
       </DialogTitle>
-      <DialogContent sx={dialogStyles.content}> {/* Sử dụng dialogStyles.content */}
+      <DialogContent sx={dialogStyles.content}>
+        {" "}
+        {/* Sử dụng dialogStyles.content */}
         <Box sx={{ mb: 3 }}>
-          <Box sx={{ ...boxStyles.buttonGroup, alignItems: "center", mb: 2, gap: 2 }}> {/* Sử dụng boxStyles.buttonGroup */}
+          <Box
+            sx={{
+              ...boxStyles.buttonGroup,
+              alignItems: "center",
+              mb: 2,
+              gap: 2,
+            }}
+          >
+            {" "}
+            {/* Sử dụng boxStyles.buttonGroup */}
             <User size={20} color={colors.primary.main} />
-            <Typography variant="subtitle1" sx={{ color: colors.neutral[800], ...typography.subtitle1 }}>
+            <Typography
+              variant="subtitle1"
+              sx={{ color: colors.neutral[800], ...typography.subtitle1 }}
+            >
               Thông tin cá nhân
             </Typography>
           </Box>
@@ -59,7 +88,13 @@ const UserFormModalView = ({
             helperText={errors.name || ""}
             sx={inputStyles.textField} // Sử dụng inputStyles.textField
             InputProps={{
-              startAdornment: <User size={16} color={colors.primary.main} style={{ marginRight: 8 }} />,
+              startAdornment: (
+                <User
+                  size={16}
+                  color={colors.primary.main}
+                  style={{ marginRight: 8 }}
+                />
+              ),
             }}
           />
 
@@ -77,7 +112,13 @@ const UserFormModalView = ({
             helperText={errors.email || ""}
             sx={inputStyles.textField} // Sử dụng inputStyles.textField
             InputProps={{
-              startAdornment: <Mail size={16} color={colors.primary.main} style={{ marginRight: 8 }} />,
+              startAdornment: (
+                <Mail
+                  size={16}
+                  color={colors.primary.main}
+                  style={{ marginRight: 8 }}
+                />
+              ),
             }}
           />
 
@@ -94,15 +135,32 @@ const UserFormModalView = ({
             helperText={errors.username || ""}
             sx={inputStyles.textField} // Sử dụng inputStyles.textField
             InputProps={{
-              startAdornment: <AtSign size={16} color={colors.primary.main} style={{ marginRight: 8 }} />,
+              startAdornment: (
+                <AtSign
+                  size={16}
+                  color={colors.primary.main}
+                  style={{ marginRight: 8 }}
+                />
+              ),
             }}
           />
         </Box>
-
         <Box sx={{ mb: 3 }}>
-          <Box sx={{ ...boxStyles.buttonGroup, alignItems: "center", mb: 2, gap: 2 }}> {/* Sử dụng boxStyles.buttonGroup */}
+          <Box
+            sx={{
+              ...boxStyles.buttonGroup,
+              alignItems: "center",
+              mb: 2,
+              gap: 2,
+            }}
+          >
+            {" "}
+            {/* Sử dụng boxStyles.buttonGroup */}
             <Phone size={20} color={colors.primary.main} />
-            <Typography variant="subtitle1" sx={{ color: colors.neutral[800], ...typography.subtitle1 }}>
+            <Typography
+              variant="subtitle1"
+              sx={{ color: colors.neutral[800], ...typography.subtitle1 }}
+            >
               Thông tin liên hệ
             </Typography>
           </Box>
@@ -119,7 +177,13 @@ const UserFormModalView = ({
             helperText={errors.phone || ""}
             sx={inputStyles.textField} // Sử dụng inputStyles.textField
             InputProps={{
-              startAdornment: <Phone size={16} color={colors.primary.main} style={{ marginRight: 8 }} />,
+              startAdornment: (
+                <Phone
+                  size={16}
+                  color={colors.primary.main}
+                  style={{ marginRight: 8 }}
+                />
+              ),
             }}
           />
 
@@ -133,37 +197,74 @@ const UserFormModalView = ({
             size="small"
             sx={inputStyles.textField} // Sử dụng inputStyles.textField
             InputProps={{
-              startAdornment: <Home size={16} color={colors.primary.main} style={{ marginRight: 8 }} />,
+              startAdornment: (
+                <Home
+                  size={16}
+                  color={colors.primary.main}
+                  style={{ marginRight: 8 }}
+                />
+              ),
             }}
           />
         </Box>
-
         <Box sx={{ mb: 3 }}>
-          <Box sx={{ ...boxStyles.buttonGroup, alignItems: "center", mb: 2, gap: 2 }}> {/* Sử dụng boxStyles.buttonGroup */}
+          <Box
+            sx={{
+              ...boxStyles.buttonGroup,
+              alignItems: "center",
+              mb: 2,
+              gap: 2,
+            }}
+          >
+            {" "}
+            {/* Sử dụng boxStyles.buttonGroup */}
             <Shield size={20} color={colors.primary.main} />
-            <Typography variant="subtitle1" sx={{ color: colors.neutral[800], ...typography.subtitle1 }}>
+            <Typography
+              variant="subtitle1"
+              sx={{ color: colors.neutral[800], ...typography.subtitle1 }}
+            >
               Quyền hạn và bảo mật
             </Typography>
           </Box>
 
-          <FormControl fullWidth margin="dense" size="small" required error={!!errors.role} sx={inputStyles.select}> {/* Sử dụng inputStyles.select */}
+          <FormControl
+            fullWidth
+            margin="dense"
+            size="small"
+            required
+            error={!!errors.role}
+            sx={inputStyles.select}
+          >
+            {" "}
+            {/* Sử dụng inputStyles.select */}
             <InputLabel>Vai trò</InputLabel>
             <Select
               name="role"
               value={form.role || ""}
               onChange={handleRoleChange}
-              startAdornment={<Shield size={16} color={colors.primary.main} style={{ marginRight: 8, marginLeft: -4 }} />}
+              startAdornment={
+                <Shield
+                  size={16}
+                  color={colors.primary.main}
+                  style={{ marginRight: 8, marginLeft: -4 }}
+                />
+              }
               label="Vai trò"
             >
               <MenuItem value="CUSTOMER">Khách hàng</MenuItem>
               <MenuItem value="STAFF">Nhân viên</MenuItem>
               <MenuItem value="ADMIN">Quản trị viên</MenuItem>
             </Select>
-            {errors.role && <FormHelperText error>{errors.role}</FormHelperText>}
+            {errors.role && (
+              <FormHelperText error>{errors.role}</FormHelperText>
+            )}
           </FormControl>
 
           <Box sx={{ mb: 2 }}>
-            <Typography variant="body2" sx={{ mb: 1, color: colors.neutral[800], ...typography.body2 }}>
+            <Typography
+              variant="body2"
+              sx={{ mb: 1, color: colors.neutral[800], ...typography.body2 }}
+            >
               Ảnh đại diện
             </Typography>
             <Upload
@@ -201,16 +302,26 @@ const UserFormModalView = ({
             helperText={errors.password || ""}
             sx={inputStyles.textField}
             InputProps={{
-              startAdornment: <Lock size={16} color={colors.primary.main} style={{ marginRight: 8 }} />,
+              startAdornment: (
+                <Lock
+                  size={16}
+                  color={colors.primary.main}
+                  style={{ marginRight: 8 }}
+                />
+              ),
             }}
           />
         </Box>
       </DialogContent>
       <DialogActions sx={dialogStyles.actions}>
-        <Button onClick={onCancel} sx={buttonStyles.outlined} variant="outlined"> 
+        <Button
+          onClick={onCancel}
+          sx={buttonStyles.outlined}
+          variant="outlined"
+        >
           Hủy
         </Button>
-        <Button onClick={onOk} sx={buttonStyles.primary} variant="contained"> 
+        <Button onClick={onOk} sx={buttonStyles.primary} variant="contained">
           {editingUser ? "Cập nhật" : "Thêm mới"}
         </Button>
       </DialogActions>

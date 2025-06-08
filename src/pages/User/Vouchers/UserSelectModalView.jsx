@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   Dialog,
@@ -19,9 +19,9 @@ import {
   CircularProgress,
   InputAdornment,
   TextField,
-} from "@mui/material"
-import { Search, UserPlus } from 'lucide-react'
-import UserSelectModalViewModel from "./UserSelectModalViewModel"
+} from "@mui/material";
+import { Search, UserPlus } from "lucide-react";
+import UserSelectModalViewModel from "./UserSelectModalViewModel";
 import {
   dialogStyles,
   buttonStyles,
@@ -32,24 +32,36 @@ import {
   typography,
   colors,
   avatarStyles,
-  
-} from "../../../styles/index" // Import styles từ index.js
+} from "../../../styles/index"; // Import styles từ index.js
 
-const UserSelectModalView = ({ visible, onOk, onCancel, selectedUsers, setSelectedUsers, setSnackbar }) => {
-  const { filteredUsers, loading, inputValue, handleSearch, handleEnterSearch, handleSelectUser } =
-    UserSelectModalViewModel({
-      visible,
-      selectedUsers,
-      setSelectedUsers,
-      setSnackbar,
-    })
+const UserSelectModalView = ({
+  visible,
+  onOk,
+  onCancel,
+  selectedUsers,
+  setSelectedUsers,
+  setSnackbar,
+}) => {
+  const {
+    filteredUsers,
+    loading,
+    inputValue,
+    handleSearch,
+    handleEnterSearch,
+    handleSelectUser,
+  } = UserSelectModalViewModel({
+    visible,
+    selectedUsers,
+    setSelectedUsers,
+    setSnackbar,
+  });
 
   const columns = [
     { id: "select", label: "", width: "5%" },
     { id: "avatar", label: "Ảnh", width: "10%" },
     { id: "name", label: "Tên", width: "35%" },
     { id: "username", label: "Tên người dùng", width: "50%" },
-  ]
+  ];
 
   return (
     <Dialog
@@ -70,7 +82,7 @@ const UserSelectModalView = ({ visible, onOk, onCancel, selectedUsers, setSelect
           onChange={(e) => handleSearch(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
-              handleEnterSearch(e.target.value)
+              handleEnterSearch(e.target.value);
             }
           }}
           fullWidth
@@ -88,7 +100,8 @@ const UserSelectModalView = ({ visible, onOk, onCancel, selectedUsers, setSelect
 
         {loading ? (
           <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-            <CircularProgress sx={progressStyles.primary} /> {/* Sử dụng progressStyles.primary */}
+            <CircularProgress sx={progressStyles.primary} />{" "}
+            {/* Sử dụng progressStyles.primary */}
           </Box>
         ) : (
           <TableContainer
@@ -96,7 +109,9 @@ const UserSelectModalView = ({ visible, onOk, onCancel, selectedUsers, setSelect
             sx={tableStyles.container} // Sử dụng tableStyles.container
           >
             <Table stickyHeader sx={{ tableLayout: "fixed" }}>
-              <TableHead sx={tableStyles.head}> {/* Sử dụng tableStyles.head */}
+              <TableHead sx={tableStyles.head}>
+                {" "}
+                {/* Sử dụng tableStyles.head */}
                 <TableRow>
                   {columns.map((column) => (
                     <TableCell
@@ -128,9 +143,14 @@ const UserSelectModalView = ({ visible, onOk, onCancel, selectedUsers, setSelect
                         />
                       </TableCell>
                       <TableCell sx={tableStyles.cell}>
-                        <Box sx={avatarStyles.userAvatar}> {/* Sử dụng avatarStyles.userAvatar */}
+                        <Box sx={avatarStyles.userAvatar}>
+                          {" "}
+                          {/* Sử dụng avatarStyles.userAvatar */}
                           <img
-                            src={user.avatar || "/placeholder.svg?height=24&width=24"}
+                            src={
+                              user.avatar ||
+                              "/placeholder.svg?height=24&width=24"
+                            }
                             alt={user.name}
                             style={{
                               width: "100%",
@@ -138,7 +158,8 @@ const UserSelectModalView = ({ visible, onOk, onCancel, selectedUsers, setSelect
                               objectFit: "cover",
                             }}
                             onError={(e) => {
-                              e.target.src = "/placeholder.svg?height=24&width=24"
+                              e.target.src =
+                                "/placeholder.svg?height=24&width=24";
                             }}
                           />
                         </Box>
@@ -146,7 +167,9 @@ const UserSelectModalView = ({ visible, onOk, onCancel, selectedUsers, setSelect
                       <TableCell sx={{ ...tableStyles.cell, fontWeight: 500 }}>
                         {user.name}
                       </TableCell>
-                      <TableCell sx={{ ...tableStyles.cell, color: colors.neutral[400] }}>
+                      <TableCell
+                        sx={{ ...tableStyles.cell, color: colors.neutral[400] }}
+                      >
                         {user.username}
                       </TableCell>
                     </TableRow>
@@ -166,8 +189,18 @@ const UserSelectModalView = ({ visible, onOk, onCancel, selectedUsers, setSelect
           </TableContainer>
         )}
 
-        <Box sx={{ mt: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <Typography variant="body2" sx={{ color: colors.neutral[400], ...typography.body2 }}>
+        <Box
+          sx={{
+            mt: 2,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <Typography
+            variant="body2"
+            sx={{ color: colors.neutral[400], ...typography.body2 }}
+          >
             Đã chọn {selectedUsers.length} người dùng
           </Typography>
         </Box>
@@ -189,7 +222,7 @@ const UserSelectModalView = ({ visible, onOk, onCancel, selectedUsers, setSelect
         </Button>
       </DialogActions>
     </Dialog>
-  )
-}
+  );
+};
 
-export default UserSelectModalView
+export default UserSelectModalView;

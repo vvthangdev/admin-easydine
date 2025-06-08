@@ -18,7 +18,7 @@ import {
   TablePagination,
 } from "@mui/material";
 import { useState } from "react";
-import { Edit, Trash2, Eye, Tag, ImageIcon } from 'lucide-react';
+import { Edit, Trash2, Eye, Tag, ImageIcon } from "lucide-react";
 import {
   cardStyles,
   buttonStyles,
@@ -29,9 +29,16 @@ import {
   avatarStyles,
   typography,
   colors,
-} from '../../styles';
+} from "../../styles";
 
-const ItemTable = ({ menuItems, categories, loading, onEdit, onDelete, onDeleteCategory }) => {
+const ItemTable = ({
+  menuItems,
+  categories,
+  loading,
+  onEdit,
+  onDelete,
+  onDeleteCategory,
+}) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedSizes, setSelectedSizes] = useState(null);
   const [page, setPage] = useState(0);
@@ -53,94 +60,110 @@ const ItemTable = ({ menuItems, categories, loading, onEdit, onDelete, onDeleteC
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0); // Reset về彼此
-  }
+    setPage(0);
+  };
+
   const itemColumns = [
     {
       id: "image",
       label: "Hình ảnh",
       width: "10%",
-      render: (item) => (
-        item.image ? (
-          <Box style={imageStyles.container}>
-            <img
-              src={item.image || "/placeholder.svg"}
-              alt={item.name}
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
-            />
-            <Box style={imageStyles.overlay}>
-              <Eye size={20} color="#ffffff" />
+      render: (item) => {
+        if (!item) return null;
+        return (
+          item.image ? (
+            <Box style={imageStyles.container}>
+              <img
+                src={item.image || "/placeholder.svg"}
+                alt={item.name}
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
+              <Box style={imageStyles.overlay}>
+                <Eye size={20} color="#ffffff" />
+              </Box>
             </Box>
-          </Box>
-        ) : (
-          <Box style={imageStyles.placeholder}>
-            <ImageIcon size={24} color={colors.neutral[400]} />
-          </Box>
-        )
-      ),
+          ) : (
+            <Box style={imageStyles.placeholder}>
+              <ImageIcon size={24} color={colors.neutral[400]} />
+            </Box>
+          )
+        );
+      },
     },
     {
       id: "name",
       label: "Tên món",
       width: "20%",
-      render: (item) => (
-        <Typography style={typography.body1}>
-          {item.name}
-        </Typography>
-      ),
+      render: (item) => {
+        if (!item) return null;
+        return <Typography style={typography.body1}>{item.name || "N/A"}</Typography>;
+      },
     },
     {
       id: "price",
       label: "Giá cơ bản",
       width: "15%",
-      render: (item) => (
-        <Box style={{
-          display: "inline-block",
-          px: 2,
-          py: 0.5,
-          borderRadius: 2,
-          background: colors.neutral[200],
-          border: `1px solid ${colors.success.main}33`,
-        }}>
-          <Typography style={{ ...typography.body2, color: colors.neutral[800] }}>
-            {item.price?.toLocaleString()} VNĐ
-          </Typography>
-        </Box>
-      ),
+      render: (item) => {
+        if (!item) return null;
+        return (
+          <Box
+            style={{
+              display: "inline-block",
+              px: 2,
+              py: 0.5,
+              borderRadius: 2,
+              background: colors.neutral[200],
+              border: `1px solid ${colors.success.main}33`,
+            }}
+          >
+            <Typography
+              style={{ ...typography.body2, color: colors.neutral[800] }}
+            >
+              {item.price?.toLocaleString() || "N/A"} VNĐ
+            </Typography>
+          </Box>
+        );
+      },
     },
     {
       id: "categories",
       label: "Danh mục",
       width: "20%",
-      render: (item) => (
-        <Box style={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-          {Array.isArray(item.categories) && item.categories.length > 0 ? (
-            item.categories.map((cat, index) => (
+      render: (item) => {
+        if (!item) return null;
+        return (
+          <Box style={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+            {Array.isArray(item.categories) && item.categories.length > 0 ? (
+              item.categories.map((cat, index) => (
+                <Chip
+                  key={index}
+                  label={cat.name || "N/A"}
+                  style={chipStyles.category}
+                  size="small"
+                  icon={<Tag size={12} />}
+                />
+              ))
+            ) : (
               <Chip
-                key={index}
-                label={cat.name}
-                style={chipStyles.category}
+                label="Chưa phân loại"
+                style={chipStyles.empty}
                 size="small"
-                icon={<Tag size={12} />}
               />
-            ))
-          ) : (
-            <Chip
-              label="Chưa phân loại"
-              style={chipStyles.empty}
-              size="small"
-            />
-          )}
-        </Box>
-      ),
+            )}
+          </Box>
+        );
+      },
     },
     {
       id: "sizes",
       label: "Kích cỡ",
       width: "15%",
       render: (item) => {
+        if (!item) return null;
         if (!Array.isArray(item.sizes) || item.sizes.length === 0) {
-          return <Chip label="Không có" style={chipStyles.empty} size="small" />;
+          return (
+            <Chip label="Không có" style={chipStyles.empty} size="small" />
+          );
         }
         return (
           <>
@@ -160,12 +183,29 @@ const ItemTable = ({ menuItems, categories, loading, onEdit, onDelete, onDeleteC
             >
               {selectedSizes?.map((size, index) => (
                 <MenuItem key={index} style={menuStyles.item}>
-                  <Box style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
-                    <Typography style={{ ...typography.body2, color: colors.neutral[800] }}>
-                      {size.name}
+                  <Box
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      width: "100%",
+                    }}
+                  >
+                    <Typography
+                      style={{
+                        ...typography.body2,
+                        color: colors.neutral[800],
+                      }}
+                    >
+                      {size.name || "N/A"}
                     </Typography>
-                    <Typography style={{ ...typography.body2, color: colors.success.main, ml: 2 }}>
-                      {size.price?.toLocaleString()} VNĐ
+                    <Typography
+                      style={{
+                        ...typography.body2,
+                        color: colors.success.main,
+                        ml: 2,
+                      }}
+                    >
+                      {size.price?.toLocaleString() || "N/A"} VNĐ
                     </Typography>
                   </Box>
                 </MenuItem>
@@ -179,39 +219,58 @@ const ItemTable = ({ menuItems, categories, loading, onEdit, onDelete, onDeleteC
       id: "description",
       label: "Mô tả",
       width: "15%",
-      render: (item) => (
-        <Tooltip title={item.description || "Không có mô tả"} placement="topLeft">
-          <Typography style={{
-            ...typography.body2,
-            color: colors.neutral[400],
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-            maxWidth: 150,
-          }}>
-            {item.description || "Không có mô tả"}
-          </Typography>
-        </Tooltip>
-      ),
+      render: (item) => {
+        if (!item) return null;
+        return (
+          <Tooltip
+            title={item.description || "Không có mô tả"}
+            placement="top-start"
+          >
+            <Typography
+              style={{
+                ...typography.body2,
+                color: colors.neutral[400],
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                maxWidth: 150,
+              }}
+            >
+              {item.description || "Không có mô tả"}
+            </Typography>
+          </Tooltip>
+        );
+      },
     },
     {
       id: "actions",
       label: "Thao tác",
       width: "10%",
-      render: (item) => (
-        <Box style={{ display: "flex", gap: 0.5 }}>
-          <Tooltip title="Chỉnh sửa">
-            <IconButton size="small" onClick={() => onEdit(item)} style={buttonStyles.iconButton}>
-              <Edit size={16} />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Xóa">
-            <IconButton size="small" onClick={() => onDelete(item)} style={buttonStyles.dangerIconButton}>
-              <Trash2 size={16} />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      ),
+      render: (item) => {
+        if (!item) return null;
+        return (
+          <Box style={{ display: "flex", gap: 0.5 }}>
+            <Tooltip title="Chỉnh sửa">
+              <IconButton
+                size="small"
+                onClick={() => onEdit(item)}
+                style={buttonStyles.iconButton}
+              >
+                <Edit size={16} />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="Xóa">
+              <IconButton
+                size="small"
+                onClick={() => onDelete(item)}
+                style={buttonStyles.dangerIconButton}
+              >
+                <Trash2 size={16} />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        );
+      },
     },
   ];
 
@@ -223,9 +282,7 @@ const ItemTable = ({ menuItems, categories, loading, onEdit, onDelete, onDeleteC
       render: (category) => (
         <Box style={{ display: "flex", alignItems: "center", gap: 1.5 }}>
           <Box style={avatarStyles.categoryIndicator} />
-          <Typography style={typography.body1}>
-            {category.name}
-          </Typography>
+          <Typography style={typography.body1}>{category.name}</Typography>
         </Box>
       ),
     },
@@ -245,7 +302,11 @@ const ItemTable = ({ menuItems, categories, loading, onEdit, onDelete, onDeleteC
       width: "10%",
       render: (category) => (
         <Tooltip title="Xóa danh mục">
-          <IconButton size="small" onClick={() => onDeleteCategory(category)} style={buttonStyles.dangerIconButton}>
+          <IconButton
+            size="small"
+            onClick={() => onDeleteCategory(category)}
+            style={buttonStyles.dangerIconButton}
+          >
             <Trash2 size={16} />
           </IconButton>
         </Tooltip>
@@ -253,19 +314,20 @@ const ItemTable = ({ menuItems, categories, loading, onEdit, onDelete, onDeleteC
     },
   ];
 
-  // Tính toán dữ liệu hiển thị cho trang hiện tại
-  const paginatedMenuItems = menuItems.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  const paginatedMenuItems = menuItems.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
 
   return (
     <Box style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-      {/* Menu Items Table */}
       <Card style={cardStyles.main}>
         <Box style={cardStyles.headerBlue}>
           <Box style={{ display: "flex", alignItems: "center", gap: 2 }}>
             <Box style={cardStyles.headerIcon}>
               <ImageIcon size={20} color="#ffffff" />
             </Box>
-            <Typography style={{ ...typography.h6, color: '#ffffff' }}>
+            <Typography style={{ ...typography.h6, color: "#ffffff" }}>
               Danh sách món ăn
             </Typography>
           </Box>
@@ -276,7 +338,10 @@ const ItemTable = ({ menuItems, categories, loading, onEdit, onDelete, onDeleteC
               <TableHead style={tableStyles.head}>
                 <TableRow>
                   {itemColumns.map((column) => (
-                    <TableCell key={column.id} style={{ ...tableStyles.cell, width: column.width }}>
+                    <TableCell
+                      key={column.id}
+                      style={{ ...tableStyles.cell, width: column.width }}
+                    >
                       {column.label}
                     </TableCell>
                   ))}
@@ -284,18 +349,23 @@ const ItemTable = ({ menuItems, categories, loading, onEdit, onDelete, onDeleteC
               </TableHead>
               <TableBody>
                 {paginatedMenuItems.length > 0 ? (
-                  paginatedMenuItems.map((item) => (
-                    <TableRow key={item._id} style={tableStyles.row}>
-                      {itemColumns.map((column) => (
-                        <TableCell key={column.id} style={{ py: 2 }}>
-                          {column.render(item)}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  ))
+                  paginatedMenuItems
+                    .filter((item) => item && item._id) // Lọc mục hợp lệ
+                    .map((item) => (
+                      <TableRow key={item._id} style={tableStyles.row}>
+                        {itemColumns.map((column) => (
+                          <TableCell key={column.id} style={{ py: 2 }}>
+                            {column.render(item)}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={itemColumns.length} style={tableStyles.empty}>
+                    <TableCell
+                      colSpan={itemColumns.length}
+                      style={tableStyles.empty}
+                    >
                       <Typography style={typography.body1}>
                         {loading ? "Đang tải..." : "Không có món ăn nào"}
                       </Typography>
@@ -315,19 +385,20 @@ const ItemTable = ({ menuItems, categories, loading, onEdit, onDelete, onDeleteC
             onRowsPerPageChange={handleChangeRowsPerPage}
             style={tableStyles.pagination}
             labelRowsPerPage="Số hàng mỗi trang:"
-            labelDisplayedRows={({ from, to, count }) => `${from}–${to} của ${count}`}
+            labelDisplayedRows={({ from, to, count }) =>
+              `${from}–${to} của ${count}`
+            }
           />
         </CardContent>
       </Card>
 
-      {/* Categories Table */}
       <Card style={cardStyles.main}>
         <Box style={cardStyles.headerPink}>
           <Box style={{ display: "flex", alignItems: "center", gap: 2 }}>
             <Box style={cardStyles.headerIcon}>
               <Tag size={20} color="#ffffff" />
             </Box>
-            <Typography style={{ ...typography.h6, color: '#ffffff' }}>
+            <Typography style={{ ...typography.h6, color: "#ffffff" }}>
               Danh sách danh mục
             </Typography>
           </Box>
@@ -335,10 +406,18 @@ const ItemTable = ({ menuItems, categories, loading, onEdit, onDelete, onDeleteC
         <CardContent style={{ p: 0 }}>
           <TableContainer style={tableStyles.container}>
             <Table>
-              <TableHead style={{ ...tableStyles.head, ...tableStyles.head['&.category'] }}>
+              <TableHead
+                style={{
+                  ...tableStyles.head,
+                  ...tableStyles.head["&.category"],
+                }}
+              >
                 <TableRow>
                   {categoryColumns.map((column) => (
-                    <TableCell key={column.id} style={{ ...tableStyles.cell, width: column.width }}>
+                    <TableCell
+                      key={column.id}
+                      style={{ ...tableStyles.cell, width: column.width }}
+                    >
                       {column.label}
                     </TableCell>
                   ))}
@@ -349,7 +428,13 @@ const ItemTable = ({ menuItems, categories, loading, onEdit, onDelete, onDeleteC
                   categories
                     .filter((cat) => cat && cat._id)
                     .map((category) => (
-                      <TableRow key={category._id} style={{ ...tableStyles.row, ...tableStyles.row['&.category'] }}>
+                      <TableRow
+                        key={category._id}
+                        style={{
+                          ...tableStyles.row,
+                          ...tableStyles.row["&.category"],
+                        }}
+                      >
                         {categoryColumns.map((column) => (
                           <TableCell key={column.id} style={{ py: 2 }}>
                             {column.render(category)}
@@ -359,7 +444,10 @@ const ItemTable = ({ menuItems, categories, loading, onEdit, onDelete, onDeleteC
                     ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={categoryColumns.length} style={tableStyles.empty}>
+                    <TableCell
+                      colSpan={categoryColumns.length}
+                      style={tableStyles.empty}
+                    >
                       <Typography style={typography.body1}>
                         Không có danh mục nào
                       </Typography>

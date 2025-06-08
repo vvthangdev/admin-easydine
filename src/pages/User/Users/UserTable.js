@@ -18,7 +18,14 @@ import {
 } from "@mui/material";
 import { Edit, Trash2, Lock, Unlock } from "lucide-react";
 import placeholderImage from "../../../assets/images/user_place_holder.jpg";
-import { tableStyles, avatarStyles, chipStyles, buttonStyles, colors, boxStyles } from "../../../styles";
+import {
+  tableStyles,
+  avatarStyles,
+  chipStyles,
+  buttonStyles,
+  colors,
+  boxStyles,
+} from "../../../styles";
 
 const UserTable = ({ users, loading, onEdit, onDelete, onToggleActive }) => {
   // State phân trang
@@ -80,11 +87,14 @@ const UserTable = ({ users, loading, onEdit, onDelete, onToggleActive }) => {
 
   return (
     <>
-      <TableContainer component={Paper} sx={{
-    ...tableStyles.container,
-    maxHeight: 440,
-    overflowY: "auto",
-  }}>
+      <TableContainer
+        component={Paper}
+        sx={{
+          ...tableStyles.container,
+          maxHeight: 440,
+          overflowY: "auto",
+        }}
+      >
         <Table sx={{ minWidth: 650 }} size="small">
           <TableHead sx={tableStyles.head}>
             <TableRow>
@@ -124,13 +134,28 @@ const UserTable = ({ users, loading, onEdit, onDelete, onToggleActive }) => {
                   <TableCell sx={{ ...tableStyles.cell, fontWeight: 500 }}>
                     {user.name}
                   </TableCell>
-                  <TableCell sx={{ ...tableStyles.cell, display: { xs: "none", md: "table-cell" } }}>
+                  <TableCell
+                    sx={{
+                      ...tableStyles.cell,
+                      display: { xs: "none", md: "table-cell" },
+                    }}
+                  >
                     {user.username}
                   </TableCell>
-                  <TableCell sx={{ ...tableStyles.cell, display: { xs: "none", md: "table-cell" } }}>
+                  <TableCell
+                    sx={{
+                      ...tableStyles.cell,
+                      display: { xs: "none", md: "table-cell" },
+                    }}
+                  >
                     {user.email}
                   </TableCell>
-                  <TableCell sx={{ ...tableStyles.cell, display: { xs: "none", md: "table-cell" } }}>
+                  <TableCell
+                    sx={{
+                      ...tableStyles.cell,
+                      display: { xs: "none", md: "table-cell" },
+                    }}
+                  >
                     {user.phone}
                   </TableCell>
                   <TableCell
@@ -180,9 +205,17 @@ const UserTable = ({ users, loading, onEdit, onDelete, onToggleActive }) => {
                         <IconButton
                           size="small"
                           onClick={() => onToggleActive(user)}
-                          sx={user.isActive ? buttonStyles.warningIconButton : buttonStyles.successIconButton}
+                          sx={
+                            user.isActive
+                              ? buttonStyles.warningIconButton
+                              : buttonStyles.successIconButton
+                          }
                         >
-                          {user.isActive ? <Lock size={16} /> : <Unlock size={16} />}
+                          {user.isActive ? (
+                            <Lock size={16} />
+                          ) : (
+                            <Unlock size={16} />
+                          )}
                         </IconButton>
                       </Tooltip>
                     </Box>
@@ -191,7 +224,11 @@ const UserTable = ({ users, loading, onEdit, onDelete, onToggleActive }) => {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} align="center" sx={tableStyles.empty}>
+                <TableCell
+                  colSpan={columns.length}
+                  align="center"
+                  sx={tableStyles.empty}
+                >
                   {loading ? "Đang tải..." : "Không có dữ liệu"}
                 </TableCell>
               </TableRow>

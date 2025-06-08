@@ -17,7 +17,6 @@ export const ItemManagementViewModel = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [filterCategory, setFilterCategory] = useState(null);
   
-  // Thêm state cho form data
   const [formData, setFormData] = useState({
     name: "",
     price: 0,
@@ -68,7 +67,6 @@ export const ItemManagementViewModel = () => {
     }
   };
 
-  // Reset form data
   const resetFormData = () => {
     setFormData({
       name: "",
@@ -81,7 +79,7 @@ export const ItemManagementViewModel = () => {
 
   const handleAdd = () => {
     setEditingItem(null);
-    resetFormData(); // Reset form data khi thêm mới
+    resetFormData();
     setFileList([]);
     setIsModalVisible(true);
   };
@@ -93,7 +91,6 @@ export const ItemManagementViewModel = () => {
         ? [{ uid: "-1", name: record.image, status: "done", url: record.image }]
         : []
     );
-    // Điền toàn bộ thông tin món ăn vào formData
     setFormData({
       name: record.name || "",
       price: record.price || 0,
@@ -140,17 +137,19 @@ export const ItemManagementViewModel = () => {
 
       const requestData = { ...formValues, image: imageUrl };
       if (editingItem) {
-        const response = await itemAPI.updateItem({
+        await itemAPI.updateItem({
           ...requestData,
           id: editingItem._id,
         });
+        // Cập nhật menuItems bằng requestData và giữ _id
         setMenuItems(
           menuItems.map((item) =>
-            item._id === editingItem._id ? response.Item : item
+            item._id === editingItem._id
+              ? { ...requestData, _id: editingItem._id }
+              : item
           )
         );
         message.success("Cập nhật món ăn thành công");
-        await fetchMenuItems(filterCategory);
       } else {
         const newItem = await itemAPI.addItem(requestData);
         setMenuItems([...menuItems, newItem]);
@@ -159,14 +158,14 @@ export const ItemManagementViewModel = () => {
       setIsModalVisible(false);
       setFileList([]);
       setEditingItem(null);
-      resetFormData(); // Reset form sau khi hoàn thành
+      resetFormData();
     } catch (error) {
       message.error("Có lỗi xảy ra. Vui lòng thử lại.");
     }
   };
 
   const handleAddCategory = () => {
-    resetFormData(); // Reset form data cho category
+    resetFormData();
     setIsCategoryModalVisible(true);
   };
 
@@ -176,7 +175,7 @@ export const ItemManagementViewModel = () => {
       setCategories([...categories, newCategory]);
       message.success("Tạo danh mục thành công");
       setIsCategoryModalVisible(false);
-      resetFormData(); // Reset form sau khi hoàn thành
+      resetFormData();
     } catch (error) {
       message.error("Tạo danh mục không thành công");
     }
@@ -208,7 +207,6 @@ export const ItemManagementViewModel = () => {
     fetchMenuItems(categoryId === "all" ? null : categoryId);
   };
 
-  // Handle modal cancel
   const handleModalCancel = () => {
     setIsModalVisible(false);
     resetFormData();
@@ -238,8 +236,8 @@ export const ItemManagementViewModel = () => {
     fileList,
     selectedItem,
     selectedCategory,
-    formData, // Thêm formData vào return
-    setFormData, // Thêm setFormData vào return
+    formData,
+    setFormData,
     setIsModalVisible,
     setIsCategoryModalVisible,
     setIsDeleteConfirmModalVisible,
@@ -256,7 +254,7 @@ export const ItemManagementViewModel = () => {
     handleDeleteCategory,
     handleConfirmDeleteCategory,
     handleFilterByCategory,
-    handleModalCancel, // Thêm handler cancel
-    handleCategoryModalCancel, // Thêm handler cancel cho category
+    handleModalCancel,
+    handleCategoryModalCancel,
   };
 };

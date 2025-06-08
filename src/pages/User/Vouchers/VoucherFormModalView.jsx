@@ -31,7 +31,15 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import viLocale from "date-fns/locale/vi";
-import { Ticket, Calendar, Percent, DollarSign, Users, UserPlus, Trash2 } from "lucide-react";
+import {
+  Ticket,
+  Calendar,
+  Percent,
+  DollarSign,
+  Users,
+  UserPlus,
+  Trash2,
+} from "lucide-react";
 import UserSelectModalView from "./UserSelectModalView";
 import VoucherFormModalViewModel from "./VoucherFormModalViewModel";
 import {
@@ -96,7 +104,10 @@ const VoucherFormModalView = ({
           <Box sx={{ mb: 3 }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
               <Ticket size={20} color={colors.primary.main} />
-              <Typography variant="subtitle1" sx={{ color: colors.neutral[800], ...typography.subtitle1 }}>
+              <Typography
+                variant="subtitle1"
+                sx={{ color: colors.neutral[800], ...typography.subtitle1 }}
+              >
                 Thông tin Voucher
               </Typography>
             </Box>
@@ -114,7 +125,13 @@ const VoucherFormModalView = ({
               helperText={form.touched?.code || ""}
               sx={inputStyles.textField} // Sử dụng inputStyles.textField
               InputProps={{
-                startAdornment: <Ticket size={16} color={colors.primary.main} style={{ marginRight: 8 }} />,
+                startAdornment: (
+                  <Ticket
+                    size={16}
+                    color={colors.primary.main}
+                    style={{ marginRight: 8 }}
+                  />
+                ),
               }}
             />
 
@@ -132,7 +149,13 @@ const VoucherFormModalView = ({
               helperText={form.touched?.discount || ""}
               sx={inputStyles.textField} // Sử dụng inputStyles.textField
               InputProps={{
-                startAdornment: <Percent size={16} color={colors.primary.main} style={{ marginRight: 8 }} />,
+                startAdornment: (
+                  <Percent
+                    size={16}
+                    color={colors.primary.main}
+                    style={{ marginRight: 8 }}
+                  />
+                ),
               }}
             />
 
@@ -148,15 +171,23 @@ const VoucherFormModalView = ({
               <Select
                 name="discountType"
                 value={form.discountType || ""}
-                onChange={(e) => handleFieldChange("discountType", e.target.value)}
+                onChange={(e) =>
+                  handleFieldChange("discountType", e.target.value)
+                }
                 startAdornment={
-                  <Percent size={16} color={colors.primary.main} style={{ marginRight: 8, marginLeft: -4 }} />
+                  <Percent
+                    size={16}
+                    color={colors.primary.main}
+                    style={{ marginRight: 8, marginLeft: -4 }}
+                  />
                 }
               >
                 <MenuItem value="percentage">Phần trăm</MenuItem>
                 <MenuItem value="fixed">Cố định</MenuItem>
               </Select>
-              {!!form.touched?.discountType && <FormHelperText>{form.touched?.discountType}</FormHelperText>}
+              {!!form.touched?.discountType && (
+                <FormHelperText>{form.touched?.discountType}</FormHelperText>
+              )}
             </FormControl>
 
             <TextField
@@ -165,14 +196,22 @@ const VoucherFormModalView = ({
               name="minOrderValue"
               type="number"
               value={form.minOrderValue || 0}
-              onChange={(e) => handleFieldChange("minOrderValue", e.target.value)}
+              onChange={(e) =>
+                handleFieldChange("minOrderValue", e.target.value)
+              }
               margin="dense"
               size="small"
               error={!!form.touched?.minOrderValue}
               helperText={form.touched?.minOrderValue || ""}
               sx={inputStyles.textField} // Sử dụng inputStyles.textField
               InputProps={{
-                startAdornment: <DollarSign size={16} color={colors.primary.main} style={{ marginRight: 8 }} />,
+                startAdornment: (
+                  <DollarSign
+                    size={16}
+                    color={colors.primary.main}
+                    style={{ marginRight: 8 }}
+                  />
+                ),
               }}
             />
           </Box>
@@ -180,12 +219,18 @@ const VoucherFormModalView = ({
           <Box sx={{ mb: 3 }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
               <Calendar size={20} color={colors.primary.main} />
-              <Typography variant="subtitle1" sx={{ color: colors.neutral[800], ...typography.subtitle1 }}>
+              <Typography
+                variant="subtitle1"
+                sx={{ color: colors.neutral[800], ...typography.subtitle1 }}
+              >
                 Thời gian hiệu lực
               </Typography>
             </Box>
 
-            <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={viLocale}>
+            <LocalizationProvider
+              dateAdapter={AdapterDateFns}
+              adapterLocale={viLocale}
+            >
               <DatePicker
                 label="Ngày bắt đầu"
                 value={form.startDate || null}
@@ -199,7 +244,13 @@ const VoucherFormModalView = ({
                     helperText: form.touched?.startDate || "",
                     sx: inputStyles.datePicker, // Sử dụng inputStyles.datePicker
                     InputProps: {
-                      startAdornment: <Calendar size={16} color={colors.primary.main} style={{ marginRight: 8 }} />,
+                      startAdornment: (
+                        <Calendar
+                          size={16}
+                          color={colors.primary.main}
+                          style={{ marginRight: 8 }}
+                        />
+                      ),
                     },
                   },
                 }}
@@ -217,7 +268,13 @@ const VoucherFormModalView = ({
                     helperText: form.touched?.endDate || "",
                     sx: inputStyles.datePicker, // Sử dụng inputStyles.datePicker
                     InputProps: {
-                      startAdornment: <Calendar size={16} color={colors.primary.main} style={{ marginRight: 8 }} />,
+                      startAdornment: (
+                        <Calendar
+                          size={16}
+                          color={colors.primary.main}
+                          style={{ marginRight: 8 }}
+                        />
+                      ),
                     },
                   },
                 }}
@@ -228,7 +285,10 @@ const VoucherFormModalView = ({
           <Box sx={{ mb: 3 }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
               <Users size={20} color={colors.primary.main} />
-              <Typography variant="subtitle1" sx={{ color: colors.neutral[800], ...typography.subtitle1 }}>
+              <Typography
+                variant="subtitle1"
+                sx={{ color: colors.neutral[800], ...typography.subtitle1 }}
+              >
                 Cài đặt sử dụng
               </Typography>
             </Box>
@@ -237,7 +297,9 @@ const VoucherFormModalView = ({
               control={
                 <Switch
                   checked={form.isActive || false}
-                  onChange={(e) => handleFieldChange("isActive", e.target.checked)}
+                  onChange={(e) =>
+                    handleFieldChange("isActive", e.target.checked)
+                  }
                   sx={switchStyles.default} // Sử dụng switchStyles.default
                 />
               }
@@ -255,10 +317,18 @@ const VoucherFormModalView = ({
               margin="dense"
               size="small"
               error={!!form.touched?.usageLimit}
-              helperText={form.touched?.usageLimit || "Để trống nếu không giới hạn"}
+              helperText={
+                form.touched?.usageLimit || "Để trống nếu không giới hạn"
+              }
               sx={inputStyles.textField} // Sử dụng inputStyles.textField
               InputProps={{
-                startAdornment: <Users size={16} color={colors.primary.main} style={{ marginRight: 8 }} />,
+                startAdornment: (
+                  <Users
+                    size={16}
+                    color={colors.primary.main}
+                    style={{ marginRight: 8 }}
+                  />
+                ),
               }}
             />
 
@@ -274,17 +344,33 @@ const VoucherFormModalView = ({
                 size="small"
                 sx={inputStyles.disabled} // Sử dụng inputStyles.disabled
                 InputProps={{
-                  startAdornment: <Users size={16} color={colors.neutral[400]} style={{ marginRight: 8 }} />,
+                  startAdornment: (
+                    <Users
+                      size={16}
+                      color={colors.neutral[400]}
+                      style={{ marginRight: 8 }}
+                    />
+                  ),
                 }}
               />
             )}
           </Box>
 
           <Box sx={{ mb: 3 }}>
-            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 2,
+              }}
+            >
               <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                 <UserPlus size={20} color={colors.primary.main} />
-                <Typography variant="subtitle1" sx={{ color: colors.neutral[800], ...typography.subtitle1 }}>
+                <Typography
+                  variant="subtitle1"
+                  sx={{ color: colors.neutral[800], ...typography.subtitle1 }}
+                >
                   Người dùng áp dụng
                 </Typography>
               </Box>
@@ -304,7 +390,9 @@ const VoucherFormModalView = ({
               sx={{ ...tableStyles.container, minHeight: 120 }} // Sử dụng tableStyles.container, thêm minHeight
             >
               <Table stickyHeader sx={{ tableLayout: "fixed" }}>
-                <TableHead sx={tableStyles.head}> {/* Sử dụng tableStyles.head */}
+                <TableHead sx={tableStyles.head}>
+                  {" "}
+                  {/* Sử dụng tableStyles.head */}
                   <TableRow>
                     {userColumns.map((column) => (
                       <TableCell
@@ -323,8 +411,15 @@ const VoucherFormModalView = ({
                 <TableBody>
                   {loading ? (
                     <TableRow>
-                      <TableCell colSpan={3} sx={{ textAlign: "center", py: 4 }}>
-                        <CircularProgress size={24} sx={progressStyles.primary} /> {/* Sử dụng progressStyles.primary */}
+                      <TableCell
+                        colSpan={3}
+                        sx={{ textAlign: "center", py: 4 }}
+                      >
+                        <CircularProgress
+                          size={24}
+                          sx={progressStyles.primary}
+                        />{" "}
+                        {/* Sử dụng progressStyles.primary */}
                       </TableCell>
                     </TableRow>
                   ) : selectedUsers.length > 0 ? (
@@ -391,7 +486,12 @@ const VoucherFormModalView = ({
             </TableContainer>
             <Typography
               variant="caption"
-              sx={{ color: colors.neutral[400], mt: 1, display: "block", ...typography.caption }}
+              sx={{
+                color: colors.neutral[400],
+                mt: 1,
+                display: "block",
+                ...typography.caption,
+              }}
             >
               {selectedUsers.length === 0
                 ? "Không chọn người dùng nào sẽ áp dụng voucher cho tất cả người dùng"
@@ -414,7 +514,13 @@ const VoucherFormModalView = ({
             sx={buttonStyles.primary} // Sử dụng buttonStyles.primary
             variant="contained"
           >
-            {loading ? <CircularProgress size={20} sx={progressStyles.white} /> : editingVoucher ? "Cập nhật" : "Thêm mới"}
+            {loading ? (
+              <CircularProgress size={20} sx={progressStyles.white} />
+            ) : editingVoucher ? (
+              "Cập nhật"
+            ) : (
+              "Thêm mới"
+            )}
           </Button>
         </DialogActions>
       </Dialog>

@@ -24,7 +24,11 @@ import {
   textStyles,
 } from "../../../styles"; // Import styles từ index.js
 
-const VoucherScreenView = ({ selectedUsers, setSelectedUsers, setSnackbar }) => {
+const VoucherScreenView = ({
+  selectedUsers,
+  setSelectedUsers,
+  setSnackbar,
+}) => {
   const {
     vouchers,
     isModalVisible,
@@ -47,11 +51,18 @@ const VoucherScreenView = ({ selectedUsers, setSelectedUsers, setSnackbar }) => 
 
   return (
     <Box>
-      <Box sx={boxStyles.header}> {/* Sử dụng boxStyles.header */}
-        <Typography variant="h6" sx={{ color: colors.neutral[800], ...typography.h6 }}>
+      <Box sx={boxStyles.header}>
+        {" "}
+        {/* Sử dụng boxStyles.header */}
+        <Typography
+          variant="h6"
+          sx={{ color: colors.neutral[800], ...typography.h6 }}
+        >
           Quản lý Voucher
         </Typography>
-        <Box sx={boxStyles.buttonGroup}> {/* Sử dụng boxStyles.buttonGroup */}
+        <Box sx={boxStyles.buttonGroup}>
+          {" "}
+          {/* Sử dụng boxStyles.buttonGroup */}
           <Button
             variant="outlined"
             startIcon={<RefreshCw size={16} />}
@@ -73,10 +84,16 @@ const VoucherScreenView = ({ selectedUsers, setSelectedUsers, setSnackbar }) => 
 
       {loading ? (
         <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-          <CircularProgress sx={progressStyles.primary} /> {/* Sử dụng progressStyles.primary */}
+          <CircularProgress sx={progressStyles.primary} />{" "}
+          {/* Sử dụng progressStyles.primary */}
         </Box>
       ) : (
-        <VoucherTable vouchers={vouchers} loading={loading} onEdit={handleEdit} onDelete={confirmDelete} />
+        <VoucherTable
+          vouchers={vouchers}
+          loading={loading}
+          onEdit={handleEdit}
+          onDelete={confirmDelete}
+        />
       )}
 
       <VoucherFormModalView
@@ -100,15 +117,23 @@ const VoucherScreenView = ({ selectedUsers, setSelectedUsers, setSnackbar }) => 
         onClose={cancelDelete}
         PaperProps={{ sx: dialogStyles.paper }} // Sử dụng dialogStyles.paper
       >
-        <DialogTitle sx={dialogStyles.titleError}> {/* Sử dụng dialogStyles.titleError */}
+        <DialogTitle sx={dialogStyles.titleError}>
+          {" "}
+          {/* Sử dụng dialogStyles.titleError */}
           <AlertTriangle size={20} color={colors.error.main} />
           Xác nhận xóa Voucher
         </DialogTitle>
         <DialogContent sx={dialogStyles.content}>
-          <Typography variant="body1" sx={{ color: colors.neutral[800], ...typography.body1 }}>
-            Bạn có chắc chắn muốn xóa voucher <strong>{voucherToDelete?.code}</strong> không?
+          <Typography
+            variant="body1"
+            sx={{ color: colors.neutral[800], ...typography.body1 }}
+          >
+            Bạn có chắc chắn muốn xóa voucher{" "}
+            <strong>{voucherToDelete?.code}</strong> không?
           </Typography>
-          <Typography variant="body2" sx={textStyles.error}> {/* Sử dụng textStyles.error */}
+          <Typography variant="body2" sx={textStyles.error}>
+            {" "}
+            {/* Sử dụng textStyles.error */}
             Lưu ý: Hành động này không thể hoàn tác.
           </Typography>
         </DialogContent>

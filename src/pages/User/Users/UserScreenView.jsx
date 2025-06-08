@@ -86,11 +86,18 @@ const UserScreenView = ({ setSnackbar }) => {
 
   return (
     <Box>
-      <Box sx={boxStyles.header}> {/* Sử dụng boxStyles.header */}
-        <Typography variant="h6" sx={{ color: colors.neutral[800], ...typography.h6 }}>
+      <Box sx={boxStyles.header}>
+        {" "}
+        {/* Sử dụng boxStyles.header */}
+        <Typography
+          variant="h6"
+          sx={{ color: colors.neutral[800], ...typography.h6 }}
+        >
           Danh sách người dùng
         </Typography>
-        <Box sx={boxStyles.buttonGroup}> {/* Sử dụng boxStyles.buttonGroup */}
+        <Box sx={boxStyles.buttonGroup}>
+          {" "}
+          {/* Sử dụng boxStyles.buttonGroup */}
           <Button
             variant="outlined"
             startIcon={<RefreshCw size={16} />}
@@ -114,12 +121,17 @@ const UserScreenView = ({ setSnackbar }) => {
       </Box>
 
       <Box sx={{ mb: 3 }}>
-        <UserSearch searchTerm={searchTerm} onSearch={handleSearch} onEnter={handleEnter} />
+        <UserSearch
+          searchTerm={searchTerm}
+          onSearch={handleSearch}
+          onEnter={handleEnter}
+        />
       </Box>
 
       {loading ? (
         <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-          <CircularProgress sx={progressStyles.primary} /> {/* Sử dụng progressStyles.primary */}
+          <CircularProgress sx={progressStyles.primary} />{" "}
+          {/* Sử dụng progressStyles.primary */}
         </Box>
       ) : (
         <UserTable
@@ -152,18 +164,30 @@ const UserScreenView = ({ setSnackbar }) => {
         onClose={() => setIsDeleteDialogOpen(false)}
         PaperProps={{ sx: dialogStyles.paper }} // Sử dụng dialogStyles.paper
       >
-        <DialogTitle sx={dialogStyles.titleError}> {/* Sử dụng dialogStyles.titleError */}
+        <DialogTitle sx={dialogStyles.titleError}>
+          {" "}
+          {/* Sử dụng dialogStyles.titleError */}
           Xác nhận xóa người dùng
         </DialogTitle>
-        <DialogContent sx={dialogStyles.content}> {/* Sử dụng dialogStyles.content */}
-          <Typography variant="body1" sx={{ color: colors.neutral[800], ...typography.body1 }}>
-            Bạn có chắc chắn muốn xóa người dùng <strong>{userToDelete?.name}</strong> không?
+        <DialogContent sx={dialogStyles.content}>
+          {" "}
+          {/* Sử dụng dialogStyles.content */}
+          <Typography
+            variant="body1"
+            sx={{ color: colors.neutral[800], ...typography.body1 }}
+          >
+            Bạn có chắc chắn muốn xóa người dùng{" "}
+            <strong>{userToDelete?.name}</strong> không?
           </Typography>
-          <Typography variant="body2" sx={textStyles.error}> {/* Sử dụng textStyles.error */}
+          <Typography variant="body2" sx={textStyles.error}>
+            {" "}
+            {/* Sử dụng textStyles.error */}
             Lưu ý: Hành động này không thể hoàn tác.
           </Typography>
         </DialogContent>
-        <DialogActions sx={dialogStyles.actions}> {/* Sử dụng dialogStyles.actions */}
+        <DialogActions sx={dialogStyles.actions}>
+          {" "}
+          {/* Sử dụng dialogStyles.actions */}
           <Button
             onClick={() => setIsDeleteDialogOpen(false)}
             sx={buttonStyles.outlined} // Sử dụng buttonStyles.outlined
