@@ -103,7 +103,7 @@ function Header({ logo, navLinks }) {
               style={{
                 height: 40,
                 borderRadius: theme.shape.borderRadius,
-                border: `1px solid ${theme.palette.divider || '#e5e5ea'}`,
+               
               }}
             />
           </Box>
