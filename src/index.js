@@ -1,27 +1,25 @@
-// src/index.jsx
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { ThemeProvider } from "@mui/material/styles";
-import { BrowserRouter } from "react-router-dom"; // 👉 THÊM DÒNG NÀY
-// import "./index.css";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import { BrowserRouter } from "react-router-dom";
 import App from "./App";
-// import "./styles/global.css";
-// import "./styles/antd-custom.css";
-// import theme from "./theme";
-// import reportWebVitals from "./reportWebVitals";
-
 import { AuthProvider } from "./contexts/AuthContext";
+import { theme } from "./styles/theme"; // Import theme tùy chỉnh của bạn
+import "antd/dist/reset.css";
+import "react-toastify/dist/ReactToastify.css";
+
+// Tạo MUI theme với theme tùy chỉnh
+const muiTheme = createTheme({
+  ...theme, // Spread theme tùy chỉnh vào MUI theme
+});
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-    <BrowserRouter> {/* 👉 BỌC App TRONG BrowserRouter */}
-      <AuthProvider>
+  <BrowserRouter>
+    <AuthProvider>
+      <ThemeProvider theme={muiTheme}>
         <App />
-      </AuthProvider>
-    </BrowserRouter>
+      </ThemeProvider>
+    </AuthProvider>
+  </BrowserRouter>
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-// reportWebVitals();

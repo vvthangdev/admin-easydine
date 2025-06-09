@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   Box,
@@ -9,20 +9,12 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-} from "@mui/material";
-import { Plus, RefreshCw, AlertTriangle } from "lucide-react";
-import VoucherFormModalView from "./VoucherFormModalView";
-import VoucherTable from "./VoucherTable";
-import VoucherScreenViewModel from "./VoucherScreenViewModel";
-import {
-  dialogStyles,
-  buttonStyles,
-  progressStyles,
-  typography,
-  colors,
-  boxStyles,
-  textStyles,
-} from "../../../styles"; // Import styles từ index.js
+} from '@mui/material';
+import { Plus, RefreshCw, AlertTriangle } from 'lucide-react';
+import VoucherFormModalView from './VoucherFormModalView';
+import VoucherTable from './VoucherTable';
+import VoucherScreenViewModel from './VoucherScreenViewModel';
+import { theme } from '../../../styles'; // Chỉ import theme cho colors
 
 const VoucherScreenView = ({
   selectedUsers,
@@ -51,23 +43,15 @@ const VoucherScreenView = ({
 
   return (
     <Box>
-      <Box sx={boxStyles.header}>
-        {" "}
-        {/* Sử dụng boxStyles.header */}
-        <Typography
-          variant="h6"
-          sx={{ color: colors.neutral[800], ...typography.h6 }}
-        >
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h6">
           Quản lý Voucher
         </Typography>
-        <Box sx={boxStyles.buttonGroup}>
-          {" "}
-          {/* Sử dụng boxStyles.buttonGroup */}
+        <Box sx={{ display: 'flex', gap: 2 }}>
           <Button
             variant="outlined"
             startIcon={<RefreshCw size={16} />}
             onClick={() => window.location.reload()}
-            sx={buttonStyles.outlinedPrimary} // Sử dụng buttonStyles.outlinedPrimary
           >
             Làm mới
           </Button>
@@ -75,7 +59,6 @@ const VoucherScreenView = ({
             variant="contained"
             startIcon={<Plus size={16} />}
             onClick={handleAdd}
-            sx={buttonStyles.primary} // Sử dụng buttonStyles.primary
           >
             Thêm voucher
           </Button>
@@ -83,9 +66,8 @@ const VoucherScreenView = ({
       </Box>
 
       {loading ? (
-        <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-          <CircularProgress sx={progressStyles.primary} />{" "}
-          {/* Sử dụng progressStyles.primary */}
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+          <CircularProgress size={24} />
         </Box>
       ) : (
         <VoucherTable
@@ -115,41 +97,26 @@ const VoucherScreenView = ({
       <Dialog
         open={isDeleteDialogOpen}
         onClose={cancelDelete}
-        PaperProps={{ sx: dialogStyles.paper }} // Sử dụng dialogStyles.paper
       >
-        <DialogTitle sx={dialogStyles.titleError}>
-          {" "}
-          {/* Sử dụng dialogStyles.titleError */}
-          <AlertTriangle size={20} color={colors.error.main} />
-          Xác nhận xóa Voucher
+        <DialogTitle>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <AlertTriangle size={20} color={theme.colors.error.main} />
+            <Typography variant="subtitle1">Xác nhận xóa Voucher</Typography>
+          </Box>
         </DialogTitle>
-        <DialogContent sx={dialogStyles.content}>
-          <Typography
-            variant="body1"
-            sx={{ color: colors.neutral[800], ...typography.body1 }}
-          >
-            Bạn có chắc chắn muốn xóa voucher{" "}
-            <strong>{voucherToDelete?.code}</strong> không?
+        <DialogContent>
+          <Typography variant="body1">
+            Bạn có chắc chắn muốn xóa voucher <strong>{voucherToDelete?.code}</strong> không?
           </Typography>
-          <Typography variant="body2" sx={textStyles.error}>
-            {" "}
-            {/* Sử dụng textStyles.error */}
+          <Typography variant="body2" sx={{ color: theme.colors.error.main, mt: 1 }}>
             Lưu ý: Hành động này không thể hoàn tác.
           </Typography>
         </DialogContent>
-        <DialogActions sx={dialogStyles.actions}>
-          <Button
-            onClick={cancelDelete}
-            sx={buttonStyles.outlined} // Sử dụng buttonStyles.outlined
-            variant="outlined"
-          >
+        <DialogActions>
+          <Button onClick={cancelDelete} variant="outlined">
             Hủy
           </Button>
-          <Button
-            onClick={executeDelete}
-            sx={buttonStyles.danger} // Sử dụng buttonStyles.danger
-            variant="contained"
-          >
+          <Button onClick={executeDelete} variant="contained" color="error">
             Xóa
           </Button>
         </DialogActions>

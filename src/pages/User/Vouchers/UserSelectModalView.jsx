@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   Dialog,
@@ -19,20 +19,10 @@ import {
   CircularProgress,
   InputAdornment,
   TextField,
-} from "@mui/material";
-import { Search, UserPlus } from "lucide-react";
-import UserSelectModalViewModel from "./UserSelectModalViewModel";
-import {
-  dialogStyles,
-  buttonStyles,
-  tableStyles,
-  inputStyles,
-  checkboxStyles,
-  progressStyles,
-  typography,
-  colors,
-  avatarStyles,
-} from "../../../styles/index"; // Import styles từ index.js
+} from '@mui/material';
+import { Search, UserPlus } from 'lucide-react';
+import UserSelectModalViewModel from './UserSelectModalViewModel';
+import { theme } from '../../../styles'; // Chỉ import theme cho colors và avatarStyles
 
 const UserSelectModalView = ({
   visible,
@@ -57,10 +47,10 @@ const UserSelectModalView = ({
   });
 
   const columns = [
-    { id: "select", label: "", width: "5%" },
-    { id: "avatar", label: "Ảnh", width: "10%" },
-    { id: "name", label: "Tên", width: "35%" },
-    { id: "username", label: "Tên người dùng", width: "50%" },
+    { id: 'select', label: '', width: '5%' },
+    { id: 'avatar', label: 'Ảnh', width: '10%' },
+    { id: 'name', label: 'Tên', width: '35%' },
+    { id: 'username', label: 'Tên người dùng', width: '50%' },
   ];
 
   return (
@@ -69,59 +59,46 @@ const UserSelectModalView = ({
       onClose={onCancel}
       maxWidth="sm"
       fullWidth
-      PaperProps={{ sx: dialogStyles.paper }} // Sử dụng dialogStyles.paper
     >
-      <DialogTitle sx={dialogStyles.title}>
-        <UserPlus size={20} color={colors.primary.main} />
-        Chọn người dùng
+      <DialogTitle>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <UserPlus size={20} color={theme.colors.primary.main} />
+          <Typography variant="subtitle1">Chọn người dùng</Typography>
+        </Box>
       </DialogTitle>
-      <DialogContent sx={dialogStyles.content}>
+      <DialogContent>
         <TextField
           placeholder="Tìm kiếm theo tên, số điện thoại hoặc ID"
           value={inputValue}
           onChange={(e) => handleSearch(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === "Enter") {
+            if (e.key === 'Enter') {
               handleEnterSearch(e.target.value);
             }
           }}
           fullWidth
           size="small"
           autoComplete="off"
-          sx={inputStyles.textField} // Sử dụng inputStyles.textField
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <Search size={18} color={colors.primary.main} />
+                <Search size={18} color={theme.colors.primary.main} />
               </InputAdornment>
             ),
           }}
         />
 
         {loading ? (
-          <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-            <CircularProgress sx={progressStyles.primary} />{" "}
-            {/* Sử dụng progressStyles.primary */}
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+            <CircularProgress size={24} />
           </Box>
         ) : (
-          <TableContainer
-            component={Paper}
-            sx={tableStyles.container} // Sử dụng tableStyles.container
-          >
-            <Table stickyHeader sx={{ tableLayout: "fixed" }}>
-              <TableHead sx={tableStyles.head}>
-                {" "}
-                {/* Sử dụng tableStyles.head */}
+          <TableContainer component={Paper}>
+            <Table stickyHeader sx={{ tableLayout: 'fixed' }}>
+              <TableHead>
                 <TableRow>
                   {columns.map((column) => (
-                    <TableCell
-                      key={column.id}
-                      sx={{
-                        ...tableStyles.cell, // Sử dụng tableStyles.cell
-                        width: column.width,
-                        fontWeight: 600, // Giữ fontWeight vì tableStyles.cell không có
-                      }}
-                    >
+                    <TableCell key={column.id} sx={{ width: column.width }}>
                       {column.label}
                     </TableCell>
                   ))}
@@ -130,57 +107,48 @@ const UserSelectModalView = ({
               <TableBody>
                 {filteredUsers.length > 0 ? (
                   filteredUsers.map((user) => (
-                    <TableRow
-                      key={user._id}
-                      sx={tableStyles.row} // Sử dụng tableStyles.row
-                    >
-                      <TableCell sx={tableStyles.cell}>
+                    <TableRow key={user._id}>
+                      <TableCell>
                         <Checkbox
                           checked={selectedUsers.includes(user._id)}
                           onChange={() => handleSelectUser(user._id)}
                           size="small"
-                          sx={checkboxStyles.default} // Sử dụng checkboxStyles.default
                         />
                       </TableCell>
-                      <TableCell sx={tableStyles.cell}>
-                        <Box sx={avatarStyles.userAvatar}>
-                          {" "}
-                          {/* Sử dụng avatarStyles.userAvatar */}
+                      <TableCell>
+                        <Box
+                          sx={{
+                            width: 24,
+                            height: 24,
+                            borderRadius: '50%',
+                            overflow: 'hidden',
+                            backgroundColor: theme.colors.neutral[100],
+                          }}
+                        >
                           <img
-                            src={
-                              user.avatar ||
-                              "/placeholder.svg?height=24&width=24"
-                            }
+                            src={user.avatar || '/placeholder.svg?height=24&width=24'}
                             alt={user.name}
                             style={{
-                              width: "100%",
-                              height: "100%",
-                              objectFit: "cover",
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover',
                             }}
                             onError={(e) => {
-                              e.target.src =
-                                "/placeholder.svg?height=24&width=24";
+                              e.target.src = '/placeholder.svg?height=24&width=24';
                             }}
                           />
                         </Box>
                       </TableCell>
-                      <TableCell sx={{ ...tableStyles.cell, fontWeight: 500 }}>
-                        {user.name}
-                      </TableCell>
-                      <TableCell
-                        sx={{ ...tableStyles.cell, color: colors.neutral[400] }}
-                      >
+                      <TableCell sx={{ fontWeight: 500 }}>{user.name}</TableCell>
+                      <TableCell sx={{ color: theme.colors.neutral[400] }}>
                         {user.username}
                       </TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell
-                      colSpan={4}
-                      sx={tableStyles.empty} // Sử dụng tableStyles.empty
-                    >
-                      {loading ? "Đang tải..." : "Không có dữ liệu"}
+                    <TableCell colSpan={4} align="center">
+                      {loading ? 'Đang tải...' : 'Không có dữ liệu'}
                     </TableCell>
                   </TableRow>
                 )}
@@ -189,35 +157,17 @@ const UserSelectModalView = ({
           </TableContainer>
         )}
 
-        <Box
-          sx={{
-            mt: 2,
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <Typography
-            variant="body2"
-            sx={{ color: colors.neutral[400], ...typography.body2 }}
-          >
+        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="body2">
             Đã chọn {selectedUsers.length} người dùng
           </Typography>
         </Box>
       </DialogContent>
-      <DialogActions sx={dialogStyles.actions}>
-        <Button
-          onClick={onCancel}
-          sx={buttonStyles.outlined} // Sử dụng buttonStyles.outlined
-          variant="outlined"
-        >
+      <DialogActions>
+        <Button onClick={onCancel} variant="outlined">
           Hủy
         </Button>
-        <Button
-          onClick={onOk}
-          sx={buttonStyles.primary} // Sử dụng buttonStyles.primary
-          variant="contained"
-        >
+        <Button onClick={onOk} variant="contained">
           Xác nhận
         </Button>
       </DialogActions>

@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   AreaChart,
   Area,
@@ -13,10 +13,11 @@ import {
   Legend,
   ResponsiveContainer,
   Cell,
-} from "recharts";
-import { Card, CardContent, Typography, Grid, Box } from "@mui/material";
+} from 'recharts';
+import { Card, CardContent, Typography, Grid, Box } from '@mui/material';
+import { theme } from '../../../styles/index';
 
-const COLORS = ["#0071e3", "#ff2d55", "#5856d6", "#34c759", "#ff9500"];
+const COLORS = ['#0071e3', '#ff2d55', '#5856d6', '#34c759', '#ff9500'];
 
 export default function OrderCharts({
   revenueData,
@@ -35,73 +36,70 @@ export default function OrderCharts({
   const safeItemCategories = Array.isArray(itemCategories) ? itemCategories : [];
 
   // Xử lý paymentMethods với giá trị null
-  const processedPaymentMethods = safePaymentMethods.map(item => ({
+  const processedPaymentMethods = safePaymentMethods.map((item) => ({
     ...item,
-    paymentMethod: item.paymentMethod || "Không xác định"
+    paymentMethod: item.paymentMethod || 'Không xác định',
   }));
 
-  // Xử lý cancelReasons với giá trị null (nếu cần)
-  const processedCancelReasons = safeCancelReasons.map(item => ({
+  // Xử lý cancelReasons với giá trị null
+  const processedCancelReasons = safeCancelReasons.map((item) => ({
     ...item,
-    cancelReason: item.cancelReason || "Không xác định"
+    cancelReason: item.cancelReason || 'Không xác định',
   }));
 
   // Thêm numOrders giả định nếu API không cung cấp
   const chartData = safeRevenueData.map((item) => ({
     ...item,
-    numOrders: item.numOrders || Math.floor(Math.random() * 10) + 1, // Thay bằng API thực nếu có
+    numOrders: item.numOrders || Math.floor(Math.random() * 10) + 1,
   }));
 
   return (
-    <Grid container spacing={3} sx={{ mt: 4, position: "relative", zIndex: 1 }}>
+    <Grid container spacing={theme.spacing[4]} sx={{ mt: theme.spacing[4], position: 'relative', zIndex: 1 }}>
       {/* Biểu đồ doanh thu theo ngày */}
       <Grid item xs={12} md={6}>
         <Card
           sx={{
-            borderRadius: 4,
-            background: "linear-gradient(145deg, #ffffff 0%, #f8f8fa 100%)",
-            border: "1px solid rgba(0, 0, 0, 0.05)",
-            boxShadow: "0 10px 20px rgba(0, 0, 0, 0.05)",
-            overflow: "hidden",
-            height: "100%",
+            ...theme.components.card.main,
+            minHeight: 400,
+            height: '100%',
           }}
         >
-          <CardContent sx={{ p: 3 }}>
-            <Typography variant="h6" color="#1d1d1f" fontWeight={600} gutterBottom>
+          <CardContent sx={{ p: theme.spacing[3] }}>
+            <Typography variant="h6" sx={theme.components.text.heading} gutterBottom>
               Doanh Thu Theo Ngày
             </Typography>
-            <Box sx={{ height: 300, mt: 2 }}>
+            <Box sx={{ height: 350, mt: theme.spacing[2] }}>
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                   <defs>
                     <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#0071e3" stopOpacity={0.8} />
-                      <stop offset="95%" stopColor="#0071e3" stopOpacity={0.1} />
+                      <stop offset="5%" stopColor={theme.colors.primary.main} stopOpacity={0.8} />
+                      <stop offset="95%" stopColor={theme.colors.primary.main} stopOpacity={0.1} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-                  <XAxis dataKey="date" tick={{ fill: "#86868b" }} />
-                  <YAxis tick={{ fill: "#86868b" }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={theme.colors.neutral[200]} />
+                  <XAxis dataKey="date" tick={{ fill: theme.colors.neutral[500] }} />
+                  <YAxis tick={{ fill: theme.colors.neutral[500] }} />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "#fff",
-                      borderRadius: 12,
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                      border: "none",
+                      backgroundColor: theme.colors.white,
+                      borderRadius: theme.borderRadius.md,
+                      boxShadow: theme.shadows.sm,
+                      border: 'none',
                     }}
-                    itemStyle={{ color: "#1d1d1f" }}
-                    cursor={{ strokeDasharray: "3 3" }}
+                    itemStyle={{ color: theme.colors.neutral[900] }}
+                    cursor={{ strokeDasharray: '3 3' }}
                   />
-                  <Legend wrapperStyle={{ color: "#86868b" }} />
+                  <Legend wrapperStyle={{ color: theme.colors.neutral[500] }} />
                   <Area
                     type="monotone"
                     dataKey="totalRevenue"
-                    stroke="#0071e3"
+                    stroke={theme.colors.primary.main}
                     fillOpacity={1}
                     fill="url(#colorRevenue)"
                     name="Doanh Thu"
-                    dot={{ stroke: "#0071e3", strokeWidth: 2, r: 4, fill: "#fff" }}
-                    activeDot={{ r: 6, stroke: "#0071e3", strokeWidth: 2, fill: "#fff" }}
+                    dot={{ stroke: theme.colors.primary.main, strokeWidth: 2, r: 4, fill: theme.colors.white }}
+                    activeDot={{ r: 6, stroke: theme.colors.primary.main, strokeWidth: 2, fill: theme.colors.white }}
                   />
                 </AreaChart>
               </ResponsiveContainer>
@@ -114,41 +112,38 @@ export default function OrderCharts({
       <Grid item xs={12} md={6}>
         <Card
           sx={{
-            borderRadius: 4,
-            background: "linear-gradient(145deg, #ffffff 0%, #f8f8fa 100%)",
-            border: "1px solid rgba(0, 0, 0, 0.05)",
-            boxShadow: "0 10px 20px rgba(0, 0, 0, 0.05)",
-            overflow: "hidden",
-            height: "100%",
+            ...theme.components.card.main,
+            minHeight: 400,
+            height: '100%',
           }}
         >
-          <CardContent sx={{ p: 3 }}>
-            <Typography variant="h6" color="#1d1d1f" fontWeight={600} gutterBottom>
+          <CardContent sx={{ p: theme.spacing[3] }}>
+            <Typography variant="h6" sx={theme.components.text.heading} gutterBottom>
               Số Lượng Đơn Hàng Theo Ngày
             </Typography>
-            <Box sx={{ height: 300, mt: 2 }}>
+            <Box sx={{ height: 350, mt: theme.spacing[2] }}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                   <defs>
                     <linearGradient id="colorOrders" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#0071e3" stopOpacity={0.8} />
-                      <stop offset="95%" stopColor="#0071e3" stopOpacity={0.4} />
+                      <stop offset="5%" stopColor={theme.colors.primary.main} stopOpacity={0.8} />
+                      <stop offset="95%" stopColor={theme.colors.primary.main} stopOpacity={0.4} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-                  <XAxis dataKey="date" tick={{ fill: "#86868b" }} />
-                  <YAxis tick={{ fill: "#86868b" }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={theme.colors.neutral[200]} />
+                  <XAxis dataKey="date" tick={{ fill: theme.colors.neutral[500] }} />
+                  <YAxis tick={{ fill: theme.colors.neutral[500] }} />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "#fff",
-                      borderRadius: 12,
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                      border: "none",
+                      backgroundColor: theme.colors.white,
+                      borderRadius: theme.borderRadius.md,
+                      boxShadow: theme.shadows.sm,
+                      border: 'none',
                     }}
-                    itemStyle={{ color: "#1d1d1f" }}
-                    cursor={{ fill: "rgba(0, 113, 227, 0.1)" }}
+                    itemStyle={{ color: theme.colors.neutral[900] }}
+                    cursor={{ fill: theme.colors.primary[50] }}
                   />
-                  <Legend wrapperStyle={{ color: "#86868b" }} />
+                  <Legend wrapperStyle={{ color: theme.colors.neutral[500] }} />
                   <Bar
                     dataKey="numOrders"
                     fill="url(#colorOrders)"
@@ -167,19 +162,16 @@ export default function OrderCharts({
       <Grid item xs={12} md={6}>
         <Card
           sx={{
-            borderRadius: 4,
-            background: "linear-gradient(145deg, #ffffff 0%, #f8f8fa 100%)",
-            border: "1px solid rgba(0, 0, 0, 0.05)",
-            boxShadow: "0 10px 20px rgba(0, 0, 0, 0.05)",
-            overflow: "hidden",
-            height: "100%",
+            ...theme.components.card.main,
+            minHeight: 400,
+            height: '100%',
           }}
         >
-          <CardContent sx={{ p: 3 }}>
-            <Typography variant="h6" color="#1d1d1f" fontWeight={600} gutterBottom>
+          <CardContent sx={{ p: theme.spacing[3] }}>
+            <Typography variant="h6" sx={theme.components.text.heading} gutterBottom>
               Phân Bố Trạng Thái Đơn Hàng
             </Typography>
-            <Box sx={{ height: 300, mt: 2 }}>
+            <Box sx={{ height: 350, mt: theme.spacing[2] }}>
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -197,14 +189,14 @@ export default function OrderCharts({
                   </Pie>
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "#fff",
-                      borderRadius: 12,
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                      border: "none",
+                      backgroundColor: theme.colors.white,
+                      borderRadius: theme.borderRadius.md,
+                      boxShadow: theme.shadows.sm,
+                      border: 'none',
                     }}
-                    itemStyle={{ color: "#1d1d1f" }}
+                    itemStyle={{ color: theme.colors.neutral[900] }}
                   />
-                  <Legend wrapperStyle={{ color: "#86868b" }} />
+                  <Legend wrapperStyle={{ color: theme.colors.neutral[500] }} />
                 </PieChart>
               </ResponsiveContainer>
             </Box>
@@ -216,19 +208,16 @@ export default function OrderCharts({
       <Grid item xs={12} md={6}>
         <Card
           sx={{
-            borderRadius: 4,
-            background: "linear-gradient(145deg, #ffffff 0%, #f8f8fa 100%)",
-            border: "1px solid rgba(0, 0, 0, 0.05)",
-            boxShadow: "0 10px 20px rgba(0, 0, 0, 0.05)",
-            overflow: "hidden",
-            height: "100%",
+            ...theme.components.card.main,
+            minHeight: 400,
+            height: '100%',
           }}
         >
-          <CardContent sx={{ p: 3 }}>
-            <Typography variant="h6" color="#1d1d1f" fontWeight={600} gutterBottom>
+          <CardContent sx={{ p: theme.spacing[3] }}>
+            <Typography variant="h6" sx={theme.components.text.heading} gutterBottom>
               Phân Bố Phương Thức Thanh Toán
             </Typography>
-            <Box sx={{ height: 300, mt: 2 }}>
+            <Box sx={{ height: 350, mt: theme.spacing[2] }}>
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -246,14 +235,14 @@ export default function OrderCharts({
                   </Pie>
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "#fff",
-                      borderRadius: 12,
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                      border: "none",
+                      backgroundColor: theme.colors.white,
+                      borderRadius: theme.borderRadius.md,
+                      boxShadow: theme.shadows.sm,
+                      border: 'none',
                     }}
-                    itemStyle={{ color: "#1d1d1f" }}
+                    itemStyle={{ color: theme.colors.neutral[900] }}
                   />
-                  <Legend wrapperStyle={{ color: "#86868b" }} />
+                  <Legend wrapperStyle={{ color: theme.colors.neutral[500] }} />
                 </PieChart>
               </ResponsiveContainer>
             </Box>
@@ -265,19 +254,16 @@ export default function OrderCharts({
       <Grid item xs={12} md={6}>
         <Card
           sx={{
-            borderRadius: 4,
-            background: "linear-gradient(145deg, #ffffff 0%, #f8f8fa 100%)",
-            border: "1px solid rgba(0, 0, 0, 0.05)",
-            boxShadow: "0 10px 20px rgba(0, 0, 0, 0.05)",
-            overflow: "hidden",
-            height: "100%",
+            ...theme.components.card.main,
+            minHeight: 400,
+            height: '100%',
           }}
         >
-          <CardContent sx={{ p: 3 }}>
-            <Typography variant="h6" color="#1d1d1f" fontWeight={600} gutterBottom>
+          <CardContent sx={{ p: theme.spacing[3] }}>
+            <Typography variant="h6" sx={theme.components.text.heading} gutterBottom>
               Phân Bố Lý Do Hủy
             </Typography>
-            <Box sx={{ height: 300, mt: 2 }}>
+            <Box sx={{ height: 350, mt: theme.spacing[2] }}>
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -295,14 +281,14 @@ export default function OrderCharts({
                   </Pie>
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "#fff",
-                      borderRadius: 12,
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                      border: "none",
+                      backgroundColor: theme.colors.white,
+                      borderRadius: theme.borderRadius.md,
+                      boxShadow: theme.shadows.sm,
+                      border: 'none',
                     }}
-                    itemStyle={{ color: "#1d1d1f" }}
+                    itemStyle={{ color: theme.colors.neutral[900] }}
                   />
-                  <Legend wrapperStyle={{ color: "#86868b" }} />
+                  <Legend wrapperStyle={{ color: theme.colors.neutral[500] }} />
                 </PieChart>
               </ResponsiveContainer>
             </Box>
@@ -314,38 +300,35 @@ export default function OrderCharts({
       <Grid item xs={12} md={6}>
         <Card
           sx={{
-            borderRadius: 4,
-            background: "linear-gradient(145deg, #ffffff 0%, #f8f8fa 100%)",
-            border: "1px solid rgba(0, 0, 0, 0.05)",
-            boxShadow: "0 10px 20px rgba(0, 0, 0, 0.05)",
-            overflow: "hidden",
-            height: "100%",
+            ...theme.components.card.main,
+            minHeight: 400,
+            height: '100%',
           }}
         >
-          <CardContent sx={{ p: 3 }}>
-            <Typography variant="h6" color="#1d1d1f" fontWeight={600} gutterBottom>
+          <CardContent sx={{ p: theme.spacing[3] }}>
+            <Typography variant="h6" sx={theme.components.text.heading} gutterBottom>
               Số Lượng Bán Theo Danh Mục
             </Typography>
-            <Box sx={{ height: 300, mt: 2 }}>
+            <Box sx={{ height: 350, mt: theme.spacing[2] }}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={safeItemSales} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-                  <XAxis dataKey="category" tick={{ fill: "#86868b" }} />
-                  <YAxis tick={{ fill: "#86868b" }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={theme.colors.neutral[200]} />
+                  <XAxis dataKey="category" tick={{ fill: theme.colors.neutral[500] }} />
+                  <YAxis tick={{ fill: theme.colors.neutral[500] }} />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "#fff",
-                      borderRadius: 12,
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                      border: "none",
+                      backgroundColor: theme.colors.white,
+                      borderRadius: theme.borderRadius.md,
+                      boxShadow: theme.shadows.sm,
+                      border: 'none',
                     }}
-                    itemStyle={{ color: "#1d1d1f" }}
-                    cursor={{ fill: "rgba(0, 113, 227, 0.1)" }}
+                    itemStyle={{ color: theme.colors.neutral[900] }}
+                    cursor={{ fill: theme.colors.primary[50] }}
                   />
-                  <Legend wrapperStyle={{ color: "#86868b" }} />
+                  <Legend wrapperStyle={{ color: theme.colors.neutral[500] }} />
                   <Bar
                     dataKey="totalQuantity"
-                    fill="#0071e3"
+                    fill={theme.colors.primary.main}
                     name="Số Lượng"
                     radius={[4, 4, 0, 0]}
                     barSize={30}
@@ -361,19 +344,16 @@ export default function OrderCharts({
       <Grid item xs={12} md={6}>
         <Card
           sx={{
-            borderRadius: 4,
-            background: "linear-gradient(145deg, #ffffff 0%, #f8f8fa 100%)",
-            border: "1px solid rgba(0, 0, 0, 0.05)",
-            boxShadow: "0 10px 20px rgba(0, 0, 0, 0.05)",
-            overflow: "hidden",
-            height: "100%",
+            ...theme.components.card.main,
+            minHeight: 400,
+            height: '100%',
           }}
         >
-          <CardContent sx={{ p: 3 }}>
-            <Typography variant="h6" color="#1d1d1f" fontWeight={600} gutterBottom>
+          <CardContent sx={{ p: theme.spacing[3] }}>
+            <Typography variant="h6" sx={theme.components.text.heading} gutterBottom>
               Phân Bố Danh Mục Món Ăn
             </Typography>
-            <Box sx={{ height: 300, mt: 2 }}>
+            <Box sx={{ height: 350, mt: theme.spacing[2] }}>
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -391,14 +371,14 @@ export default function OrderCharts({
                   </Pie>
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "#fff",
-                      borderRadius: 12,
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                      border: "none",
+                      backgroundColor: theme.colors.white,
+                      borderRadius: theme.borderRadius.md,
+                      boxShadow: theme.shadows.sm,
+                      border: 'none',
                     }}
-                    itemStyle={{ color: "#1d1d1f" }}
+                    itemStyle={{ color: theme.colors.neutral[900] }}
                   />
-                  <Legend wrapperStyle={{ color: "#86868b" }} />
+                  <Legend wrapperStyle={{ color: theme.colors.neutral[500] }} />
                 </PieChart>
               </ResponsiveContainer>
             </Box>

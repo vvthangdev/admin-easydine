@@ -1,0 +1,17 @@
+export const shadows = {
+  none: 'none',
+  xs: '0 1px 2px rgba(0, 0, 0, 0.05)',
+  sm: '0 2px 4px rgba(0, 0, 0, 0.06)',
+  md: '0 4px 8px rgba(0, 0, 0, 0.08)',
+  lg: '0 8px 16px rgba(0, 0, 0, 0.10)',
+  xl: '0 12px 24px rgba(0, 0, 0, 0.12)',
+  xxl: '0 20px 40px rgba(0, 0, 0, 0.15)',
+  primaryShadow: '0 4px 12px rgba(0, 113, 227, 0.2)',
+  primaryHover: '0 6px 16px rgba(0, 113, 227, 0.3)',
+  secondaryShadow: '0 4px 12px rgba(156, 39, 176, 0.2)',
+  secondaryHover: '0 6px 16px rgba(156, 39, 176, 0.3)',
+  errorShadow: '0 4px 12px rgba(255, 59, 48, 0.2)',
+  errorHover: '0 6px 16px rgba(255, 59, 48, 0.3)',
+  successShadow: '0 4px 12px rgba(52, 199, 89, 0.2)',
+  successHover: '0 6px 16px rgba(52, 199, 89, 0.3)',
+};

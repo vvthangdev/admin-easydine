@@ -1,3 +1,5 @@
+'use client';
+
 import {
   Table,
   TableBody,
@@ -16,20 +18,10 @@ import {
   Card,
   CardContent,
   TablePagination,
-} from "@mui/material";
-import { useState } from "react";
-import { Edit, Trash2, Eye, Tag, ImageIcon } from "lucide-react";
-import {
-  cardStyles,
-  buttonStyles,
-  imageStyles,
-  chipStyles,
-  tableStyles,
-  menuStyles,
-  avatarStyles,
-  typography,
-  colors,
-} from "../../styles";
+} from '@mui/material';
+import { useState } from 'react';
+import { Edit, Trash2, Eye, Tag, ImageIcon } from 'lucide-react';
+import { theme } from '../../styles/index';
 
 const ItemTable = ({
   menuItems,
@@ -65,89 +57,74 @@ const ItemTable = ({
 
   const itemColumns = [
     {
-      id: "image",
-      label: "Hình ảnh",
-      width: "10%",
+      id: 'image',
+      label: 'Hình ảnh',
+      width: '10%',
       render: (item) => {
         if (!item) return null;
         return (
-          item.image ? (
-            <Box style={imageStyles.container}>
-              <img
-                src={item.image || "/placeholder.svg"}
-                alt={item.name}
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              />
-              <Box style={imageStyles.overlay}>
-                <Eye size={20} color="#ffffff" />
-              </Box>
+          <Box sx={theme.components.image.container}>
+            <img
+              src={item.image || '/placeholder.svg'}
+              alt={item.name}
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+            <Box sx={theme.components.image.overlay}>
+              <Eye size={20} color={theme.colors.white} />
             </Box>
-          ) : (
-            <Box style={imageStyles.placeholder}>
-              <ImageIcon size={24} color={colors.neutral[400]} />
-            </Box>
-          )
-        );
-      },
-    },
-    {
-      id: "name",
-      label: "Tên món",
-      width: "20%",
-      render: (item) => {
-        if (!item) return null;
-        return <Typography style={typography.body1}>{item.name || "N/A"}</Typography>;
-      },
-    },
-    {
-      id: "price",
-      label: "Giá cơ bản",
-      width: "15%",
-      render: (item) => {
-        if (!item) return null;
-        return (
-          <Box
-            style={{
-              display: "inline-block",
-              px: 2,
-              py: 0.5,
-              borderRadius: 2,
-              background: colors.neutral[200],
-              border: `1px solid ${colors.success.main}33`,
-            }}
-          >
-            <Typography
-              style={{ ...typography.body2, color: colors.neutral[800] }}
-            >
-              {item.price?.toLocaleString() || "N/A"} VNĐ
-            </Typography>
           </Box>
         );
       },
     },
     {
-      id: "categories",
-      label: "Danh mục",
-      width: "20%",
+      id: 'name',
+      label: 'Tên món',
+      width: '20%',
       render: (item) => {
         if (!item) return null;
         return (
-          <Box style={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+          <Typography variant="body1" sx={theme.components.text.body}>
+            {item.name || 'N/A'}
+          </Typography>
+        );
+      },
+    },
+    {
+      id: 'price',
+      label: 'Giá cơ bản',
+      width: '15%',
+      render: (item) => {
+        if (!item) return null;
+        return (
+          <Typography variant="body2" sx={theme.components.text.bodyEmphasis}>
+            {item.price?.toLocaleString() || 'N/A'} VNĐ
+          </Typography>
+        );
+      },
+    },
+    {
+      id: 'categories',
+      label: 'Danh mục',
+      width: '20%',
+      render: (item) => {
+        if (!item) return null;
+        return (
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
             {Array.isArray(item.categories) && item.categories.length > 0 ? (
               item.categories.map((cat, index) => (
                 <Chip
                   key={index}
-                  label={cat.name || "N/A"}
-                  style={chipStyles.category}
+                  label={cat.name || 'N/A'}
                   size="small"
+                  sx={theme.components.chip.category}
                   icon={<Tag size={12} />}
                 />
               ))
             ) : (
               <Chip
                 label="Chưa phân loại"
-                style={chipStyles.empty}
                 size="small"
+                sx={theme.components.chip.empty}
               />
             )}
           </Box>
@@ -155,15 +132,13 @@ const ItemTable = ({
       },
     },
     {
-      id: "sizes",
-      label: "Kích cỡ",
-      width: "15%",
+      id: 'sizes',
+      label: 'Kích cỡ',
+      width: '15%',
       render: (item) => {
         if (!item) return null;
         if (!Array.isArray(item.sizes) || item.sizes.length === 0) {
-          return (
-            <Chip label="Không có" style={chipStyles.empty} size="small" />
-          );
+          return <Chip label="Không có" size="small" sx={theme.components.chip.empty} />;
         }
         return (
           <>
@@ -171,7 +146,7 @@ const ItemTable = ({
               variant="contained"
               size="small"
               onClick={(e) => handleSizeMenuOpen(e, item.sizes)}
-              style={buttonStyles.primary}
+              sx={theme.components.button.primary}
             >
               Xem {item.sizes.length} size
             </Button>
@@ -179,33 +154,16 @@ const ItemTable = ({
               anchorEl={anchorEl}
               open={Boolean(anchorEl)}
               onClose={handleSizeMenuClose}
-              PaperProps={{ style: menuStyles.paper }}
+              PaperProps={{ sx: theme.components.menu.paper }}
             >
               {selectedSizes?.map((size, index) => (
-                <MenuItem key={index} style={menuStyles.item}>
-                  <Box
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      width: "100%",
-                    }}
-                  >
-                    <Typography
-                      style={{
-                        ...typography.body2,
-                        color: colors.neutral[800],
-                      }}
-                    >
-                      {size.name || "N/A"}
+                <MenuItem key={index} sx={theme.components.menu.item}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+                    <Typography variant="body2" sx={theme.components.text.body}>
+                      {size.name || 'N/A'}
                     </Typography>
-                    <Typography
-                      style={{
-                        ...typography.body2,
-                        color: colors.success.main,
-                        ml: 2,
-                      }}
-                    >
-                      {size.price?.toLocaleString() || "N/A"} VNĐ
+                    <Typography variant="body2" sx={theme.components.text.success}>
+                      {size.price?.toLocaleString() || 'N/A'} VNĐ
                     </Typography>
                   </Box>
                 </MenuItem>
@@ -216,45 +174,42 @@ const ItemTable = ({
       },
     },
     {
-      id: "description",
-      label: "Mô tả",
-      width: "15%",
+      id: 'description',
+      label: 'Mô tả',
+      width: '15%',
       render: (item) => {
         if (!item) return null;
         return (
-          <Tooltip
-            title={item.description || "Không có mô tả"}
-            placement="top-start"
-          >
+          <Tooltip title={item.description || 'Không có mô tả'} placement="top-start">
             <Typography
-              style={{
-                ...typography.body2,
-                color: colors.neutral[400],
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
+              variant="body2"
+              sx={{
+                ...theme.components.text.caption,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
                 maxWidth: 150,
               }}
             >
-              {item.description || "Không có mô tả"}
+              {item.description || 'Không có mô tả'}
             </Typography>
           </Tooltip>
         );
       },
     },
     {
-      id: "actions",
-      label: "Thao tác",
-      width: "10%",
+      id: 'actions',
+      label: 'Thao tác',
+      width: '10%',
       render: (item) => {
         if (!item) return null;
         return (
-          <Box style={{ display: "flex", gap: 0.5 }}>
+          <Box sx={{ display: 'flex', gap: 0.5 }}>
             <Tooltip title="Chỉnh sửa">
               <IconButton
                 size="small"
                 onClick={() => onEdit(item)}
-                style={buttonStyles.iconButton}
+                sx={theme.components.button.iconButton}
               >
                 <Edit size={16} />
               </IconButton>
@@ -263,7 +218,7 @@ const ItemTable = ({
               <IconButton
                 size="small"
                 onClick={() => onDelete(item)}
-                style={buttonStyles.dangerIconButton}
+                sx={theme.components.button.dangerIconButton}
               >
                 <Trash2 size={16} />
               </IconButton>
@@ -276,36 +231,38 @@ const ItemTable = ({
 
   const categoryColumns = [
     {
-      id: "name",
-      label: "Tên danh mục",
-      width: "40%",
+      id: 'name',
+      label: 'Tên danh mục',
+      width: '40%',
       render: (category) => (
-        <Box style={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-          <Box style={avatarStyles.categoryIndicator} />
-          <Typography style={typography.body1}>{category.name}</Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Box sx={theme.components.avatar.categoryIndicator} />
+          <Typography variant="body1" sx={theme.components.text.body}>
+            {category.name}
+          </Typography>
         </Box>
       ),
     },
     {
-      id: "description",
-      label: "Mô tả",
-      width: "50%",
+      id: 'description',
+      label: 'Mô tả',
+      width: '50%',
       render: (category) => (
-        <Typography style={{ ...typography.body2, color: colors.neutral[400] }}>
-          {category.description || "Không có mô tả"}
+        <Typography variant="body2" sx={theme.components.text.caption}>
+          {category.description || 'Không có mô tả'}
         </Typography>
       ),
     },
     {
-      id: "actions",
-      label: "Thao tác",
-      width: "10%",
+      id: 'actions',
+      label: 'Thao tác',
+      width: '10%',
       render: (category) => (
         <Tooltip title="Xóa danh mục">
           <IconButton
             size="small"
             onClick={() => onDeleteCategory(category)}
-            style={buttonStyles.dangerIconButton}
+            sx={theme.components.button.dangerIconButton}
           >
             <Trash2 size={16} />
           </IconButton>
@@ -320,28 +277,38 @@ const ItemTable = ({
   );
 
   return (
-    <Box style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-      <Card style={cardStyles.main}>
-        <Box style={cardStyles.headerBlue}>
-          <Box style={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Box style={cardStyles.headerIcon}>
-              <ImageIcon size={20} color="#ffffff" />
-            </Box>
-            <Typography style={{ ...typography.h6, color: "#ffffff" }}>
-              Danh sách món ăn
-            </Typography>
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <Card sx={theme.components.card.main}>
+        <Box
+          sx={{
+            ...theme.components.card.header,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+          }}
+        >
+          <Box sx={{ p: 1, backgroundColor: 'rgba(255, 255, 255, 0.2)', borderRadius: theme.borderRadius.sm }}>
+            <ImageIcon size={20} color={theme.colors.white} />
           </Box>
+          <Typography variant="h6" sx={theme.components.text.heading}>
+            Danh sách món ăn
+          </Typography>
         </Box>
-        <CardContent style={{ p: 0 }}>
-          <TableContainer style={tableStyles.container}>
+        <CardContent sx={{ p: 0 }}>
+          <TableContainer sx={theme.components.table.container}>
             <Table>
-              <TableHead style={tableStyles.head}>
+              <TableHead
+                sx={{
+                  ...theme.components.table.head,
+                  position: 'sticky',
+                  top: 0,
+                  zIndex: 1,
+                  backgroundColor: theme.colors.white,
+                }}
+              >
                 <TableRow>
                   {itemColumns.map((column) => (
-                    <TableCell
-                      key={column.id}
-                      style={{ ...tableStyles.cell, width: column.width }}
-                    >
+                    <TableCell key={column.id} sx={{ width: column.width, ...theme.components.table.cell }}>
                       {column.label}
                     </TableCell>
                   ))}
@@ -350,11 +317,11 @@ const ItemTable = ({
               <TableBody>
                 {paginatedMenuItems.length > 0 ? (
                   paginatedMenuItems
-                    .filter((item) => item && item._id) // Lọc mục hợp lệ
+                    .filter((item) => item && item._id)
                     .map((item) => (
-                      <TableRow key={item._id} style={tableStyles.row}>
+                      <TableRow key={item._id} sx={theme.components.table.row}>
                         {itemColumns.map((column) => (
-                          <TableCell key={column.id} style={{ py: 2 }}>
+                          <TableCell key={column.id} sx={{ py: 2, ...theme.components.table.cell }}>
                             {column.render(item)}
                           </TableCell>
                         ))}
@@ -362,12 +329,9 @@ const ItemTable = ({
                     ))
                 ) : (
                   <TableRow>
-                    <TableCell
-                      colSpan={itemColumns.length}
-                      style={tableStyles.empty}
-                    >
-                      <Typography style={typography.body1}>
-                        {loading ? "Đang tải..." : "Không có món ăn nào"}
+                    <TableCell colSpan={itemColumns.length} align="center" sx={theme.components.table.empty}>
+                      <Typography variant="body1" sx={theme.components.text.body}>
+                        {loading ? 'Đang tải...' : 'Không có món ăn nào'}
                       </Typography>
                     </TableCell>
                   </TableRow>
@@ -383,41 +347,45 @@ const ItemTable = ({
             page={page}
             onPageChange={handleChangePage}
             onRowsPerPageChange={handleChangeRowsPerPage}
-            style={tableStyles.pagination}
             labelRowsPerPage="Số hàng mỗi trang:"
-            labelDisplayedRows={({ from, to, count }) =>
-              `${from}–${to} của ${count}`
-            }
+            labelDisplayedRows={({ from, to, count }) => `${from}–${to} của ${count}`}
+            sx={theme.components.chip.pagination}
           />
         </CardContent>
       </Card>
 
-      <Card style={cardStyles.main}>
-        <Box style={cardStyles.headerPink}>
-          <Box style={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Box style={cardStyles.headerIcon}>
-              <Tag size={20} color="#ffffff" />
-            </Box>
-            <Typography style={{ ...typography.h6, color: "#ffffff" }}>
-              Danh sách danh mục
-            </Typography>
+      <Card sx={theme.components.card.main}>
+        <Box
+          sx={{
+            ...theme.components.card.header,
+            background: theme.gradients.secondary,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+          }}
+        >
+          <Box sx={{ p: 1, backgroundColor: 'rgba(255, 255, 255, 0.2)', borderRadius: theme.borderRadius.sm }}>
+            <Tag size={20} color={theme.colors.white} />
           </Box>
+          <Typography variant="h6" sx={theme.components.text.heading}>
+            Danh sách danh mục
+          </Typography>
         </Box>
-        <CardContent style={{ p: 0 }}>
-          <TableContainer style={tableStyles.container}>
+        <CardContent sx={{ p: 0 }}>
+          <TableContainer sx={theme.components.table.container}>
             <Table>
               <TableHead
-                style={{
-                  ...tableStyles.head,
-                  ...tableStyles.head["&.category"],
+                sx={{
+                  ...theme.components.table.head,
+                  position: 'sticky',
+                  top: 0,
+                  zIndex: 1,
+                  backgroundColor: theme.colors.secondary[50],
                 }}
               >
                 <TableRow>
                   {categoryColumns.map((column) => (
-                    <TableCell
-                      key={column.id}
-                      style={{ ...tableStyles.cell, width: column.width }}
-                    >
+                    <TableCell key={column.id} sx={{ width: column.width, ...theme.components.table.cell }}>
                       {column.label}
                     </TableCell>
                   ))}
@@ -428,15 +396,9 @@ const ItemTable = ({
                   categories
                     .filter((cat) => cat && cat._id)
                     .map((category) => (
-                      <TableRow
-                        key={category._id}
-                        style={{
-                          ...tableStyles.row,
-                          ...tableStyles.row["&.category"],
-                        }}
-                      >
+                      <TableRow key={category._id} sx={theme.components.table.row}>
                         {categoryColumns.map((column) => (
-                          <TableCell key={column.id} style={{ py: 2 }}>
+                          <TableCell key={column.id} sx={{ py: 2, ...theme.components.table.cell }}>
                             {column.render(category)}
                           </TableCell>
                         ))}
@@ -444,11 +406,8 @@ const ItemTable = ({
                     ))
                 ) : (
                   <TableRow>
-                    <TableCell
-                      colSpan={categoryColumns.length}
-                      style={tableStyles.empty}
-                    >
-                      <Typography style={typography.body1}>
+                    <TableCell colSpan={categoryColumns.length} align="center" sx={theme.components.table.empty}>
+                      <Typography variant="body1" sx={theme.components.text.body}>
                         Không có danh mục nào
                       </Typography>
                     </TableCell>

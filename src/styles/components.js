@@ -1,9 +1,106 @@
-// ./src/styles/components.js
+import { colors, gradients, shadows, typography, animations, spacing, borderRadius } from './theme';
 
-import { colors, gradients, shadows, typography, animations } from "./themes";
+export const textStyles = {
+  heading: {
+    color: colors.neutral[900],
+    fontWeight: typography.fontWeight.bold,
+    fontFamily: typography.fontFamily.primary,
+  },
+  subheading: {
+    color: colors.neutral[800],
+    fontWeight: typography.fontWeight.semibold,
+    fontFamily: typography.fontFamily.primary,
+  },
+  body: {
+    color: colors.neutral[700],
+    fontWeight: typography.fontWeight.normal,
+    fontFamily: typography.fontFamily.secondary,
+  },
+  bodyEmphasis: {
+    color: colors.neutral[800],
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: typography.fontFamily.secondary,
+  },
+  caption: {
+    color: colors.neutral[600],
+    fontWeight: typography.fontWeight.normal,
+    fontFamily: typography.fontFamily.secondary,
+    fontSize: typography.fontSize.sm,
+  },
+  label: {
+    color: colors.neutral[700],
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: typography.fontFamily.secondary,
+    fontSize: typography.fontSize.sm,
+  },
+  primary: {
+    color: colors.primary.main,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: typography.fontFamily.secondary,
+  },
+  secondary: {
+    color: colors.secondary.main,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: typography.fontFamily.secondary,
+  },
+  success: {
+    color: colors.success.main,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: typography.fontFamily.secondary,
+  },
+  error: {
+    color: colors.error.main,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: typography.fontFamily.secondary,
+  },
+  warning: {
+    color: colors.warning.main,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: typography.fontFamily.secondary,
+  },
+  info: {
+    color: colors.info.main,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: typography.fontFamily.secondary,
+  },
+  disabled: {
+    color: colors.neutral[400],
+    fontWeight: typography.fontWeight.normal,
+    fontFamily: typography.fontFamily.secondary,
+  },
+  link: {
+    color: colors.primary.main,
+    fontWeight: typography.fontWeight.medium,
+    fontFamily: typography.fontFamily.secondary,
+    textDecoration: 'none',
+    cursor: 'pointer',
+    '&:hover': {
+      color: colors.primary.dark,
+      textDecoration: 'underline',
+    },
+  },
+};
 
-// Trong src/styles/components.js
+// Login styles
 export const loginStyles = {
+  container: {
+    minHeight: '100vh',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: gradients.neutral,
+    padding: spacing[4],
+  },
+  card: {
+    maxWidth: '400px',
+    width: '100%',
+    borderRadius: borderRadius.lg,
+    background: gradients.card,
+    boxShadow: shadows.xl,
+    border: `1px solid ${colors.neutral[200]}`,
+    overflow: 'hidden',
+    position: 'relative',
+  },
   logoContainer: {
     position: 'absolute',
     top: 0,
@@ -11,379 +108,487 @@ export const loginStyles = {
     transform: 'translateX(-50%)',
     width: 128,
     height: 128,
-    borderRadius: '50%',
+    borderRadius: borderRadius.full,
     bgcolor: colors.white,
-    p: 0.5,
-    boxShadow: shadows.medium,
+    padding: spacing[2],
+    boxShadow: shadows.lg,
     zIndex: 2,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   logoInner: {
     width: '100%',
     height: '100%',
-    borderRadius: '50%',
+    borderRadius: borderRadius.full,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'hidden', // Đảm bảo hình ảnh không tràn ra ngoài
+    overflow: 'hidden',
+  },
+  content: {
+    padding: `${spacing[20]} ${spacing[6]} ${spacing[6]}`,
+    textAlign: 'center',
+  },
+  title: {
+    ...typography.h4,
+    color: colors.neutral[900],
+    marginBottom: spacing[2],
+  },
+  subtitle: {
+    ...typography.body1,
+    color: colors.neutral[600],
+    marginBottom: spacing[8],
+  },
+  dividerContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: spacing[4],
+    margin: `${spacing[6]} 0`,
   },
   dividerLine: {
-    width: 48,
-    height: 1,
-    bgcolor: colors.primary.main,
+    flex: 1,
+    height: '1px',
+    backgroundColor: colors.neutral[300],
   },
-  linkButton: {
-    color: colors.primary.main,
-    fontWeight: 500,
-    textTransform: 'none',
-    '&:hover': {
-      color: colors.primary.dark,
-    },
-    transition: animations.transition,
+  dividerText: {
+    ...typography.caption,
+    color: colors.neutral[500],
+    textTransform: 'uppercase',
+    letterSpacing: '0.1em',
   },
   input: {
-    height: 40,
-    borderRadius: 2,
-    borderColor: colors.neutral[400],
-    background: colors.neutral[100],
-    '&:hover': {
-      borderColor: colors.primary.main,
+    marginBottom: spacing[4],
+    '& .MuiOutlinedInput-root': {
+      height: 48,
+      borderRadius: borderRadius.md,
+      backgroundColor: colors.neutral[50],
+      border: `1px solid ${colors.neutral[300]}`,
+      '&:hover': {
+        borderColor: colors.primary.main,
+        backgroundColor: colors.white,
+      },
+      '&:focus-within': {
+        borderColor: colors.primary.main,
+        backgroundColor: colors.white,
+        boxShadow: `0 0 0 3px ${colors.primary[100]}`,
+      },
+      '& input': {
+        ...typography.body2,
+        padding: `${spacing[3]} ${spacing[4]}`,
+      },
     },
-    '&:focus': {
-      borderColor: colors.primary.main,
-      borderWidth: 2,
+    '& .MuiInputLabel-root': {
+      ...typography.body2,
+      color: colors.neutral[600],
+      '&.Mui-focused': {
+        color: colors.primary.main,
+      },
+    },
+  },
+  button: {
+    width: '100%',
+    height: 48,
+    borderRadius: borderRadius.lg,
+    background: gradients.primary,
+    color: colors.white,
+    ...typography.subtitle2,
+    textTransform: 'none',
+    boxShadow: shadows.primaryShadow,
+    border: 'none',
+    cursor: 'pointer',
+    transition: animations.buttonHover,
+    '&:hover': {
+      background: gradients.primary,
+      boxShadow: shadows.primaryHover,
+      transform: 'translateY(-1px)',
+    },
+    '&:active': {
+      transform: 'translateY(0)',
+    },
+    '&:disabled': {
+      background: colors.neutral[300],
+      color: colors.neutral[500],
+      cursor: 'not-allowed',
+      transform: 'none',
+      boxShadow: 'none',
     },
   },
   googleButton: {
-    height: 40,
-    borderRadius: 28,
-    borderColor: colors.neutral[400],
-    color: colors.neutral[800],
-    background: colors.white,
+    width: '100%',
+    height: 48,
+    borderRadius: borderRadius.lg,
+    backgroundColor: colors.white,
+    border: `1px solid ${colors.neutral[300]}`,
+    color: colors.neutral[700],
+    ...typography.subtitle2,
+    textTransform: 'none',
+    cursor: 'pointer',
+    transition: animations.buttonHover,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
+    gap: spacing[3],
     '&:hover': {
       borderColor: colors.primary.main,
-      background: 'rgba(0, 113, 227, 0.05)',
+      backgroundColor: colors.primary[50],
+      color: colors.primary.main,
+    },
+  },
+  linkButton: {
+    color: colors.primary.main,
+    ...typography.subtitle2,
+    textTransform: 'none',
+    textDecoration: 'none',
+    cursor: 'pointer',
+    transition: animations.transition,
+    '&:hover': {
+      color: colors.primary.dark,
+      textDecoration: 'underline',
+    },
+  },
+  footer: {
+    marginTop: spacing[6],
+    padding: spacing[4],
+    textAlign: 'center',
+    borderTop: `1px solid ${colors.neutral[200]}`,
+    backgroundColor: colors.neutral[50],
+  },
+};
+
+// Avatar styles
+export const avatarStyles = {
+  small: {
+    width: 24,
+    height: 24,
+    borderRadius: borderRadius.full,
+    overflow: 'hidden',
+    backgroundColor: colors.neutral[200],
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...typography.caption,
+    fontWeight: typography.fontWeight.medium,
+  },
+  medium: {
+    width: 40,
+    height: 40,
+    borderRadius: borderRadius.full,
+    overflow: 'hidden',
+    backgroundColor: colors.neutral[200],
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...typography.body2,
+    fontWeight: typography.fontWeight.medium,
+  },
+  large: {
+    width: 64,
+    height: 64,
+    borderRadius: borderRadius.full,
+    overflow: 'hidden',
+    backgroundColor: colors.neutral[200],
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...typography.body1,
+    fontWeight: typography.fontWeight.medium,
+  },
+  categoryIndicator: {
+    width: 12,
+    height: 12,
+    borderRadius: borderRadius.full,
+    background: gradients.secondary,
+  },
+};
+
+// Menu styles
+export const menuStyles = {
+  paper: {
+    borderRadius: borderRadius.md,
+    boxShadow: shadows.lg,
+    border: `1px solid ${colors.neutral[200]}`,
+    overflow: 'hidden',
+  },
+  item: {
+    padding: `${spacing[2]} ${spacing[4]}`,
+    minWidth: 200,
+    '&:hover': {
+      backgroundColor: colors.primary[50],
     },
     transition: animations.transition,
   },
 };
 
-// Style cho avatar
-export const avatarStyles = {
-  categoryIndicator: {
-    width: 12,
-    height: 12,
-    borderRadius: "50%",
-    background: gradients.secondary,
-  },
-  userAvatar: {
-    width: 24,
-    height: 24,
-    borderRadius: "50%",
-    overflow: "hidden",
-    background: colors.neutral[100],
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-};
-
-// Style cho menu
-export const menuStyles = {
-  paper: {
-    borderRadius: 3,
-    boxShadow: shadows.large,
-    border: "1px solid rgba(0, 0, 0, 0.05)",
-    overflow: "hidden",
-  },
-  item: {
-    py: 1.5,
-    px: 2,
-    minWidth: 200,
-    "&:hover": {
-      backgroundColor: "rgba(0, 113, 227, 0.05)",
-    },
-  },
-};
-
-// Style cho button
+// Button styles
 export const buttonStyles = {
   primary: {
     background: gradients.primary,
     color: colors.white,
-    borderRadius: 28,
-    px: 3,
-    boxShadow: "0 4px 12px rgba(0, 113, 227, 0.2)",
-    textTransform: "none",
-    fontWeight: 500,
-    "&:hover": {
+    borderRadius: borderRadius.lg,
+    padding: `${spacing[2]} ${spacing[4]}`,
+    boxShadow: shadows.primaryShadow,
+    textTransform: 'none',
+    fontWeight: typography.fontWeight.medium,
+    ...typography.subtitle2,
+    '&:hover': {
       background: gradients.primary,
-      boxShadow: "0 6px 16px rgba(0, 113, 227, 0.3)",
-      transform: "translateY(-2px)",
+      boxShadow: shadows.primaryHover,
+      transform: 'translateY(-2px)',
     },
-    "&:disabled": {
-      background: "rgba(0, 113, 227, 0.3)",
-      color: colors.white,
-      cursor: "not-allowed",
+    '&:disabled': {
+      background: colors.neutral[300],
+      color: colors.neutral[500],
+      cursor: 'not-allowed',
     },
-    transition: animations.transition,
+    transition: animations.buttonHover,
   },
   outlined: {
     borderColor: colors.neutral[400],
-    color: colors.neutral[400],
-    borderRadius: 28,
-    px: 3,
-    textTransform: "none",
-    fontWeight: 500,
-    "&:hover": {
+    color: colors.neutral[700],
+    borderRadius: borderRadius.lg,
+    padding: `${spacing[2]} ${spacing[4]}`,
+    textTransform: 'none',
+    fontWeight: typography.fontWeight.medium,
+    ...typography.subtitle2,
+    '&:hover': {
       borderColor: colors.neutral[800],
       color: colors.neutral[800],
-      background: "rgba(0, 0, 0, 0.05)",
+      background: colors.neutral[50],
     },
-    "&:disabled": {
+    '&:disabled': {
       borderColor: colors.neutral[400],
       color: colors.neutral[400],
-      cursor: "not-allowed",
+      cursor: 'not-allowed',
     },
-    transition: animations.transition,
+    transition: animations.buttonHover,
   },
   outlinedPrimary: {
     borderColor: colors.primary.main,
     color: colors.primary.main,
-    borderRadius: 28,
-    px: 2,
-    py: 0.5,
-    textTransform: "none",
-    fontWeight: 500,
-    fontSize: "0.75rem",
-    "&:hover": {
+    borderRadius: borderRadius.lg,
+    padding: `${spacing[1]} ${spacing[3]}`,
+    textTransform: 'none',
+    fontWeight: typography.fontWeight.medium,
+    ...typography.caption,
+    '&:hover': {
       borderColor: colors.primary.main,
-      background: "rgba(0, 113, 227, 0.05)",
+      background: colors.primary[50],
     },
-    "&:disabled": {
+    '&:disabled': {
       borderColor: colors.neutral[400],
       color: colors.neutral[400],
-      cursor: "not-allowed",
+      cursor: 'not-allowed',
     },
-    transition: animations.transition,
+    transition: animations.buttonHover,
   },
   danger: {
     background: gradients.error,
     color: colors.white,
-    borderRadius: 28,
-    px: 3,
-    boxShadow: "0 4px 12px rgba(255, 59, 48, 0.2)",
-    textTransform: "none",
-    fontWeight: 500,
-    "&:hover": {
+    borderRadius: borderRadius.lg,
+    padding: `${spacing[2]} ${spacing[4]}`,
+    boxShadow: shadows.errorShadow,
+    textTransform: 'none',
+    fontWeight: typography.fontWeight.medium,
+    ...typography.subtitle2,
+    '&:hover': {
       background: gradients.error,
-      boxShadow: "0 6px 16px rgba(255, 59, 48, 0.3)",
-      transform: "translateY(-2px)",
+      boxShadow: shadows.errorHover,
+      transform: 'translateY(-2px)',
     },
-    transition: animations.transition,
+    transition: animations.buttonHover,
   },
   iconButton: {
     color: colors.primary.main,
-    "&:hover": {
-      backgroundColor: "rgba(0, 113, 227, 0.1)",
+    '&:hover': {
+      backgroundColor: colors.primary[50],
     },
+    transition: animations.buttonHover,
   },
   dangerIconButton: {
     color: colors.error.main,
-    "&:hover": {
-      backgroundColor: "rgba(255, 59, 48, 0.1)",
+    '&:hover': {
+      backgroundColor: colors.error[50],
     },
-    "&:disabled": {
+    '&:disabled': {
       color: colors.neutral[400],
-      cursor: "not-allowed",
+      cursor: 'not-allowed',
     },
+    transition: animations.buttonHover,
   },
 };
 
-// Style cho card
+// Card styles
 export const cardStyles = {
   main: {
-    borderRadius: 4,
-    boxShadow: shadows.large,
-    border: "1px solid rgba(0, 0, 0, 0.05)",
-    overflow: "hidden",
+    borderRadius: borderRadius.lg,
+    boxShadow: shadows.lg,
+    border: `1px solid ${colors.neutral[200]}`,
+    overflow: 'hidden',
+    background: gradients.card,
   },
   login: {
-    borderRadius: 4,
-    boxShadow: shadows.large,
-    border: '1px solid rgba(0, 0, 0, 0.05)',
+    borderRadius: borderRadius.lg,
+    boxShadow: shadows.xl,
+    border: `1px solid ${colors.neutral[200]}`,
+    background: gradients.card,
   },
-  headerBlue: {
-    p: 3,
-    background: gradients.headerBlue,
-    borderBottom: "1px solid rgba(0, 0, 0, 0.05)",
-  },
-  headerPink: {
-    p: 3,
-    background: gradients.headerPink,
-    borderBottom: "1px solid rgba(0, 0, 0, 0.05)",
-  },
-  headerIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 2,
-    background: "rgba(255, 255, 255, 0.2)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
+  header: {
+    padding: spacing[4],
+    background: gradients.primary,
+    borderBottom: `1px solid ${colors.neutral[200]}`,
+    color: colors.white,
+    ...typography.h6,
   },
 };
 
-// Style cho hình ảnh
+// Image styles
 export const imageStyles = {
   container: {
-    position: "relative",
+    position: 'relative',
     width: 64,
     height: 64,
-    borderRadius: 3,
-    overflow: "hidden",
-    border: "1px solid rgba(0, 0, 0, 0.05)",
-    boxShadow: shadows.medium,
+    borderRadius: borderRadius.md,
+    overflow: 'hidden',
+    border: `1px solid ${colors.neutral[200]}`,
+    boxShadow: shadows.md,
     transition: animations.transition,
-    "&:hover": {
-      transform: "scale(1.05)",
-      boxShadow: shadows.hover,
+    '&:hover': {
+      transform: 'scale(1.05)',
+      boxShadow: shadows.lg,
     },
   },
   placeholder: {
     width: 64,
     height: 64,
-    borderRadius: 3,
+    borderRadius: borderRadius.md,
     background: gradients.neutral,
-    border: "1px solid rgba(0, 0, 0, 0.05)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
+    border: `1px solid ${colors.neutral[200]}`,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   overlay: {
-    position: "absolute",
+    position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    background: "rgba(0, 0, 0, 0)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
+    background: 'rgba(0, 0, 0, 0)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     opacity: 0,
     transition: animations.transition,
-    "&:hover": {
-      background: "rgba(0, 0, 0, 0.2)",
+    '&:hover': {
+      background: 'rgba(0, 0, 0, 0.2)',
       opacity: 1,
     },
   },
 };
 
-// Style cho table
+// Table styles
 export const tableStyles = {
   container: {
-    backgroundColor: "transparent",
-    boxShadow: "none",
-    border: `1px solid rgba(0, 0, 0, 0.05)`,
-    borderRadius: 3,
-    overflow: "auto",
+    backgroundColor: 'transparent',
+    boxShadow: 'none',
+    border: `1px solid ${colors.neutral[200]}`,
+    borderRadius: borderRadius.md,
+    overflow: 'auto',
     maxHeight: 800,
-    "&::-webkit-scrollbar": {
-      width: "6px",
+    '&::-webkit-scrollbar': {
+      width: '6px',
     },
-    "&::-webkit-scrollbar-track": {
-      background: "rgba(0, 0, 0, 0.05)",
-      borderRadius: "3px",
+    '&::-webkit-scrollbar-track': {
+      background: colors.neutral[100],
+      borderRadius: borderRadius.sm,
     },
-    "&::-webkit-scrollbar-thumb": {
-      background: "rgba(0, 113, 227, 0.3)",
-      borderRadius: "3px",
-      "&:hover": {
-        background: "rgba(0, 113, 227, 0.5)",
+    '&::-webkit-scrollbar-thumb': {
+      background: colors.primary[300],
+      borderRadius: borderRadius.sm,
+      '&:hover': {
+        background: colors.primary[500],
       },
     },
   },
   head: {
-    backgroundColor: "rgba(0, 113, 227, 0.05)",
-    "&.category": {
-      backgroundColor: "rgba(156, 39, 176, 0.05)",
+    backgroundColor: colors.primary[50],
+    '&.category': {
+      backgroundColor: colors.secondary[50],
     },
-    "& .MuiTableCell-root": {
-      fontWeight: 600,
+    '& .MuiTableCell-root': {
+      fontWeight: typography.fontWeight.semibold,
       color: colors.neutral[800],
-      py: 1.5,
-      fontSize: "0.75rem",
-      position: "sticky",
+      padding: spacing[3],
+      fontSize: typography.fontSize.sm,
+      position: 'sticky',
       top: 0,
       zIndex: 1,
     },
   },
   cell: {
-    py: 1,
-    fontSize: "0.75rem",
+    padding: spacing[2],
+    fontSize: typography.fontSize.sm,
     color: colors.neutral[800],
-    fontWeight: 500,
+    fontWeight: typography.fontWeight.medium,
   },
   row: {
-    "&:hover": {
-      backgroundColor: "rgba(0, 113, 227, 0.05)",
+    '&:hover': {
+      backgroundColor: colors.primary[50],
     },
     transition: animations.tableHover,
   },
   empty: {
-    py: 4,
-    textAlign: "center",
+    padding: spacing[6],
+    textAlign: 'center',
     color: colors.neutral[400],
-    fontSize: "0.875rem",
+    fontSize: typography.fontSize.sm,
   },
 };
 
-// Style cho chip
+// Chip styles
 export const chipStyles = {
   category: {
     height: 24,
-    fontSize: "0.75rem",
-    backgroundColor: "rgba(156, 39, 176, 0.1)",
+    fontSize: typography.fontSize.xs,
+    backgroundColor: colors.secondary[50],
     color: colors.secondary.main,
-    fontWeight: 500,
-    borderRadius: 2,
-    "& .MuiChip-label": { px: 1 },
+    fontWeight: typography.fontWeight.medium,
+    borderRadius: borderRadius.sm,
+    '& .MuiChip-label': { padding: `0 ${spacing[2]}` },
   },
   empty: {
     height: 24,
-    fontSize: "0.75rem",
-    backgroundColor: "rgba(142, 142, 147, 0.1)",
+    fontSize: typography.fontSize.xs,
+    backgroundColor: colors.neutral[100],
     color: colors.neutral[400],
-    fontWeight: 500,
-    borderRadius: 2,
+    fontWeight: typography.fontWeight.medium,
+    borderRadius: borderRadius.sm,
   },
   voucherStatus: {
     height: 24,
-    fontSize: "0.7rem",
-    fontWeight: 500,
-    borderRadius: 4,
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.medium,
+    borderRadius: borderRadius.sm,
   },
   pagination: {
     color: colors.neutral[800],
-    fontSize: "0.875rem",
-    "& .MuiTablePagination-selectLabel": {
+    fontSize: typography.fontSize.sm,
+    '& .MuiTablePagination-selectLabel': {
       fontFamily: typography.body2.fontFamily,
-      fontWeight: 500,
+      fontWeight: typography.fontWeight.medium,
     },
-    "& .MuiTablePagination-displayedRows": {
+    '& .MuiTablePagination-displayedRows': {
       fontFamily: typography.body2.fontFamily,
-      fontWeight: 500,
+      fontWeight: typography.fontWeight.medium,
     },
-    "& .MuiTablePagination-actions": {
-      "& .MuiIconButton-root": {
+    '& .MuiTablePagination-actions': {
+      '& .MuiIconButton-root': {
         color: colors.primary.main,
-        "&:hover": {
-          backgroundColor: "rgba(0, 113, 227, 0.1)",
+        '&:hover': {
+          backgroundColor: colors.primary[50],
         },
-        "&.Mui-disabled": {
+        '&.Mui-disabled': {
           color: colors.neutral[400],
         },
       },
@@ -391,113 +596,119 @@ export const chipStyles = {
   },
 };
 
-// Style cho dialog
+// Dialog styles
 export const dialogStyles = {
   paper: {
-    borderRadius: 4,
-    boxShadow: shadows.large,
+    borderRadius: borderRadius.lg,
+    boxShadow: shadows.xl,
     background: gradients.dialog,
-    overflow: "hidden",
+    overflow: 'hidden',
     maxWidth: 400,
-    width: "100%",
+    width: '100%',
   },
   title: {
-    p: 3,
+    padding: spacing[4],
     background: gradients.dialogHeader,
     color: colors.neutral[800],
-    fontWeight: 600,
+    fontWeight: typography.fontWeight.semibold,
     fontFamily: typography.h6.fontFamily,
-    fontSize: "1.1rem",
-    borderBottom: `1px solid rgba(0, 0, 0, 0.05)`,
-    display: "flex",
-    alignItems: "center",
-    gap: 1.5,
+    fontSize: typography.fontSize.lg,
+    borderBottom: `1px solid ${colors.neutral[200]}`,
+    display: 'flex',
+    alignItems: 'center',
+    gap: spacing[2],
   },
   titleError: {
-    p: 3,
+    padding: spacing[4],
     background: gradients.dialogHeaderError,
     color: colors.neutral[800],
-    fontWeight: 600,
+    fontWeight: typography.fontWeight.semibold,
     fontFamily: typography.h6.fontFamily,
-    fontSize: "1.1rem",
-    borderBottom: `1px solid rgba(0, 0, 0, 0.05)`,
-    display: "flex",
-    alignItems: "center",
-    gap: 1.5,
+    fontSize: typography.fontSize.lg,
+    borderBottom: `1px solid ${colors.neutral[200]}`,
+    display: 'flex',
+    alignItems: 'center',
+    gap: spacing[2],
   },
   content: {
-    p: 3,
-    mt: 2,
+    padding: spacing[4],
+    marginTop: spacing[2],
   },
   actions: {
-    p: 3,
-    borderTop: `1px solid rgba(0, 0, 0, 0.05)`,
+    padding: spacing[4],
+    borderTop: `1px solid ${colors.neutral[200]}`,
   },
 };
 
-// Style cho input
+// Input styles
 export const inputStyles = {
   textField: {
-    mb: 2,
-    "& .MuiOutlinedInput-root": {
-      borderRadius: 2,
+    '& .MuiOutlinedInput-root': {
+      borderRadius: borderRadius.md,
       height: 40,
-      "&:hover .MuiOutlinedInput-notchedOutline": {
+      display: 'flex',
+      alignItems: 'center', // canh giữa nội dung theo chiều dọc
+      '& input': {
+        padding: '10px 14px', // canh giữa chữ gợi ý (hint text)
+        height: '100%',
+        boxSizing: 'border-box',
+      },
+      '&:hover .MuiOutlinedInput-notchedOutline': {
         borderColor: colors.primary.main,
       },
-      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
         borderColor: colors.primary.main,
         borderWidth: 2,
       },
-      "& .MuiInputBase-input": {
-        fontSize: "0.875rem",
-      },
     },
-    "& .MuiInputLabel-root.Mui-focused": {
+    '& .MuiInputLabel-root': {
+      top: '-5px', // điều chỉnh label mặc định
+    },
+    '& .MuiInputLabel-root.Mui-focused': {
       color: colors.primary.main,
     },
   },
+  // giữ nguyên các phần còn lại
   select: {
-    mb: 2,
-    "& .MuiOutlinedInput-root": {
-      borderRadius: 2,
-      "&:hover .MuiOutlinedInput-notchedOutline": {
-        borderColor: colors.primary.main,
-      },
-      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-        borderColor: colors.primary.main,
-        borderWidth: 2,
+    textField: {
+      '& .MuiInputBase-root': {
+        height: '40px',
       },
     },
-    "& .MuiInputLabel-root.Mui-focused": {
-      color: colors.primary.main,
+    '& .MuiInputBase-root': {
+      height: '40px',
+    },
+    '& .MuiInputLabel-root': {
+      lineHeight: '1.2',
+      top: '-2px',
     },
   },
   datePicker: {
-    mb: 2,
-    "& .MuiOutlinedInput-root": {
-      borderRadius: 2,
-      "&:hover .MuiOutlinedInput-notchedOutline": {
+    marginBottom: spacing[4],
+    '& .MuiOutlinedInput-root': {
+      borderRadius: borderRadius.md,
+      '&:hover .MuiOutlinedInput-notchedOutline': {
         borderColor: colors.primary.main,
       },
-      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
         borderColor: colors.primary.main,
         borderWidth: 2,
       },
     },
-    "& .MuiInputLabel-root.Mui-focused": {
+    '& .MuiInputLabel-root.Mui-focused': {
       color: colors.primary.main,
     },
   },
   disabled: {
-    "& .MuiOutlinedInput-root": {
-      borderRadius: 2,
-      backgroundColor: "rgba(0, 0, 0, 0.03)",
+    '& .MuiOutlinedInput-root': {
+      borderRadius: borderRadius.md,
+      backgroundColor: colors.neutral[100],
     },
   },
 };
 
-// Style cho progress indicator
+
+// Progress styles
 export const progressStyles = {
   primary: {
     color: colors.primary.main,
@@ -507,58 +718,57 @@ export const progressStyles = {
   },
 };
 
-// Style cho switch
+// Switch styles
 export const switchStyles = {
   default: {
-    "& .MuiSwitch-switchBase.Mui-checked": {
+    '& .MuiSwitch-switchBase.Mui-checked': {
       color: colors.primary.main,
-      "&:hover": {
-        backgroundColor: "rgba(0, 113, 227, 0.08)",
+      '&:hover': {
+        backgroundColor: colors.primary[50],
       },
     },
-    "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
+    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
       backgroundColor: colors.primary.main,
     },
   },
 };
 
-// Style cho checkbox
+// Checkbox styles
 export const checkboxStyles = {
   default: {
     color: colors.primary.main,
-    "&.Mui-checked": {
+    '&.Mui-checked': {
       color: colors.primary.main,
     },
   },
 };
 
-// Thêm vào cuối file ./src/styles/components.js
-
+// Box styles
 export const boxStyles = {
   header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    mb: 3,
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing[4],
   },
   buttonGroup: {
-    display: "flex",
-    gap: 2,
+    display: 'flex',
+    gap: spacing[2],
   },
   section: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 3,
-    mb: 3,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: spacing[4],
+    marginBottom: spacing[4],
   },
   sizeContainer: {
-    display: "flex",
-    gap: 2,
-    alignItems: "center",
-    mb: 2,
-    p: 2,
-    borderRadius: 2,
-    background: "rgba(0, 113, 227, 0.05)",
-    border: "1px solid rgba(0, 0, 0, 0.05)",
+    display: 'flex',
+    gap: spacing[2],
+    alignItems: 'center',
+    marginBottom: spacing[3],
+    padding: spacing[3],
+    borderRadius: borderRadius.md,
+    background: colors.primary[50],
+    border: `1px solid ${colors.neutral[200]}`,
   },
 };

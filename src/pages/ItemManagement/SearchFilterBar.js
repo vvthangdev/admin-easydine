@@ -58,77 +58,75 @@ const SearchFilterBar = ({
       >
         Quản lý menu món ăn
       </Typography>
-      <Grid container spacing={3} alignItems="center">
-        <Grid item xs={12} sm={6} md={3}>
-          <TextField
-            fullWidth
-            placeholder="Tìm món theo tên"
-            onChange={handleSearchChange}
-            size="small"
-            sx={inputStyles.textField}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search size={20} color="#0071e3" />
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <FormControl fullWidth size="small" sx={inputStyles.select}>
-            <InputLabel>Lọc theo danh mục</InputLabel>
-            <Select
-              label="Lọc theo danh mục"
-              onChange={handleCategoryChange}
-              defaultValue="all"
-              startAdornment={
-                <InputAdornment position="start">
-                  <Tag
-                    size={16}
-                    color="#0071e3"
-                    style={{ marginLeft: -4, marginRight: 8 }}
-                  />
-                </InputAdornment>
-              }
-            >
-              <MenuItem value="all">Tất cả</MenuItem>
-              {categories
-                .filter((cat) => cat && cat._id)
-                .map((cat) => (
-                  <MenuItem key={cat._id} value={cat._id}>
-                    {cat.name}
-                  </MenuItem>
-                ))}
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid item xs={12} sm={12} md={6}>
-          <Box
-            sx={{
-              ...boxStyles.buttonGroup,
-              justifyContent: { xs: "flex-start", md: "flex-end" },
-            }}
-          >
-            <Button
-              variant="outlined"
-              startIcon={<Tag size={18} />}
-              onClick={onAddCategory}
-              sx={buttonStyles.outlinedPrimary}
-            >
-              Thêm danh mục
-            </Button>
-            <Button
-              variant="contained"
-              startIcon={<Plus size={18} />}
-              onClick={onAddItem}
-              sx={buttonStyles.primary}
-            >
-              Thêm món ăn mới
-            </Button>
-          </Box>
-        </Grid>
-      </Grid>
+      <Grid container spacing={2} alignItems="center">
+  <Grid item xs={12} sm={6} md={4} sx={{ display: 'flex', alignItems: 'center' }}>
+    <TextField
+      fullWidth
+      placeholder="Tìm món theo tên"
+      onChange={handleSearchChange}
+      size="small"
+      sx={inputStyles.textField}
+      InputProps={{
+        startAdornment: (
+          <InputAdornment position="start">
+            <Search size={20} color="#0071e3" />
+          </InputAdornment>
+        ),
+      }}
+    />
+  </Grid>
+  <Grid item xs={12} sm={6} md={4} sx={{ display: 'flex', alignItems: 'center' }}>
+    <FormControl fullWidth size="small" sx={inputStyles.select}>
+      <InputLabel>Lọc theo danh mục</InputLabel>
+      <Select
+        label="Lọc theo danh mục"
+        onChange={handleCategoryChange}
+        defaultValue="all"
+        startAdornment={
+          <InputAdornment position="start">
+            <Tag size={20} color="#0071e3" style={{ marginRight: 8 }} />
+          </InputAdornment>
+        }
+      >
+        <MenuItem value="all">Tất cả</MenuItem>
+        {categories
+          .filter((cat) => cat && cat._id)
+          .map((cat) => (
+            <MenuItem key={cat._id} value={cat._id}>
+              {cat.name}
+            </MenuItem>
+          ))}
+      </Select>
+    </FormControl>
+  </Grid>
+  <Grid item xs={12} md={4} sx={{ display: 'flex', alignItems: 'center' }}>
+    <Box
+      sx={{
+        ...boxStyles.buttonGroup,
+        justifyContent: { xs: 'flex-start', md: 'flex-end' },
+        display: 'flex',
+        gap: 1,
+      }}
+    >
+      <Button
+        variant="outlined"
+        startIcon={<Tag size={18} />}
+        onClick={onAddCategory}
+        sx={buttonStyles.outlinedPrimary}
+      >
+        Thêm danh mục
+      </Button>
+      <Button
+        variant="contained"
+        startIcon={<Plus size={18} />}
+        onClick={onAddItem}
+        sx={buttonStyles.primary}
+      >
+        Thêm món ăn mới
+      </Button>
+    </Box>
+  </Grid>
+</Grid>
     </Box>
   );
 };
