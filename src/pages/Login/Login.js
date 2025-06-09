@@ -1,5 +1,3 @@
-"use client";
-
 import { Form, Input, Button, Card, Checkbox, message } from "antd";
 import {
   LockOutlined,
@@ -12,10 +10,11 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { Box, Typography, Button as MuiButton } from "@mui/material";
-import * as styles from "../../styles";
+import { useAppleStyles } from "../../theme/theme-hooks";
 import LogoImage from "../../assets/images/logo2.png";
 
 export default function Login() {
+  const styles = useAppleStyles();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -98,68 +97,75 @@ export default function Login() {
   return (
     <Box
       sx={{
-        ...styles.boxStyles.section,
         minHeight: "100vh",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: styles.gradients.dialog,
+        background: styles.gradients?.dialog || 'linear-gradient(145deg, #ffffff 0%, #f8f8fa 100%)',
       }}
     >
-      {/* Home Button */}
       <Box sx={{ position: "absolute", top: 16, left: 16, zIndex: 10 }}>
         <MuiButton
           variant="outlined"
           startIcon={<HomeOutlined />}
           onClick={() => navigate("/")}
-          sx={styles.buttonStyles.iconButton}
+          sx={styles.button('outline')}
         />
       </Box>
 
       <Box sx={{ maxWidth: 400, width: "100%", mx: 2, position: "relative" }}>
-        <Card style={styles.cardStyles.login}>
-          {/* Logo Circle */}
+        <Card sx={{
+          borderRadius: styles.rounded('lg'),
+          boxShadow: styles.shadows?.lg,
+          p: styles.spacing(3),
+          position: 'relative',
+        }}>
           <Box
             sx={{
-              ...styles.loginStyles.logoContainer,
-              top: -64, // Nhô nửa ngoài Card
+              position: 'absolute',
+              top: -64,
+              left: '50%',
+              transform: 'translateX(-50%)',
               zIndex: 2,
+              width: 128,
+              height: 128,
+              borderRadius: '50%',
+              backgroundColor: styles.colors?.background?.paper || '#fff',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: styles.shadows?.md,
             }}
           >
-            <Box sx={styles.loginStyles.logoInner}>
-              <img
-                src={LogoImage}
-                alt="Logo"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "contain",
-                  borderRadius: "50%",
-                }}
-                onError={() => console.error("Failed to load logo2.png")} // Debug lỗi tải ảnh
-              />
-            </Box>
+            <img
+              src={LogoImage}
+              alt="Logo"
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "contain",
+                borderRadius: "50%",
+              }}
+              onError={() => console.error("Failed to load logo2.png")}
+            />
           </Box>
 
-          {/* Title and Subtitle */}
           <Box sx={{ textAlign: "center", mt: 10, mb: 4 }}>
-            <Typography variant="h5" sx={styles.textStyles.blackBold}>
+            <Typography variant="h5" sx={{ color: styles.colors?.text?.primary || '#1d1d1f', fontWeight: 600 }}>
               Chào mừng!
             </Typography>
-            <Box sx={styles.boxStyles.buttonGroup}>
-              <Box sx={styles.loginStyles.dividerLine} />
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: styles.spacing(2), mt: styles.spacing(2) }}>
+              <Box sx={{ flex: 1, height: 1, backgroundColor: styles.colors?.neutral?.[200] || '#e0e0e0' }} />
               <Typography
                 variant="body2"
-                sx={styles.textStyles.grayLight}
-                fontStyle="italic"
+                sx={{ color: styles.colors?.text?.secondary || '#86868b', fontStyle: 'italic' }}
               >
                 Trải nghiệm ẩm thực tuyệt vời
               </Typography>
-              <Box sx={styles.loginStyles.dividerLine} />
+              <Box sx={{ flex: 1, height: 1, backgroundColor: styles.colors?.neutral?.[200] || '#e0e0e0' }} />
             </Box>
           </Box>
 
-          {/* Form */}
           <Form
             form={form}
             name="login"
@@ -176,11 +182,14 @@ export default function Login() {
             >
               <Input
                 prefix={
-                  <MailOutlined style={{ color: styles.colors.primary.main }} />
+                  <MailOutlined style={{ color: styles.colors?.primary?.main || '#0071e3' }} />
                 }
                 placeholder="Email"
                 size="large"
-                style={styles.loginStyles.input}
+                style={{
+                  borderRadius: styles.rounded('md'),
+                  padding: styles.spacing(1),
+                }}
               />
             </Form.Item>
 
@@ -193,24 +202,27 @@ export default function Login() {
             >
               <Input.Password
                 prefix={
-                  <LockOutlined style={{ color: styles.colors.primary.main }} />
+                  <LockOutlined style={{ color: styles.colors?.primary?.main || '#0071e3' }} />
                 }
                 placeholder="Mật khẩu"
                 size="large"
-                style={styles.loginStyles.input}
+                style={{
+                  borderRadius: styles.rounded('md'),
+                  padding: styles.spacing(1),
+                }}
               />
             </Form.Item>
 
-            <Box sx={styles.boxStyles.header}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: styles.spacing(2) }}>
               <Form.Item name="remember" valuePropName="checked" noStyle>
-                <Checkbox style={styles.checkboxStyles.default}>
-                  Ghi nhớ tôi
+                <Checkbox style={{ color: styles.colors?.text?.primary || '#1d1d1f' }}>
+                  Ghi nhận
                 </Checkbox>
               </Form.Item>
               <MuiButton
                 component={Link}
                 to="/forgot-password"
-                sx={styles.loginStyles.linkButton}
+                sx={{ color: styles.colors?.primary?.main || '#0071e3', textTransform: 'none' }}
               >
                 Quên mật khẩu?
               </MuiButton>
@@ -223,7 +235,11 @@ export default function Login() {
                 size="large"
                 block
                 loading={loading}
-                style={styles.buttonStyles.primary}
+                style={{
+                  backgroundColor: styles.colors?.primary?.main || '#0071e3',
+                  borderRadius: styles.rounded('md'),
+                  height: 40,
+                }}
               >
                 Đăng nhập
               </Button>
@@ -236,38 +252,45 @@ export default function Login() {
                 block
                 onClick={handleGoogleLogin}
                 loading={googleLoading}
-                style={styles.loginStyles.googleButton}
+                style={{
+                  borderRadius: styles.rounded('md'),
+                  borderColor: styles.colors?.neutral?.[200] || '#e0e0e0',
+                  color: styles.colors?.text?.primary || '#333',
+                  height: 40,
+                }}
               >
                 <GoogleOutlined style={{ color: "#db4437" }} />
                 Đăng nhập bằng Google
               </Button>
             </Form.Item>
 
-            <Box sx={{ textAlign: "center" }}>
-              <Typography variant="body2" sx={styles.textStyles.grayLight}>
+            <Box sx={{ textAlign: 'center' }}>
+              <Typography variant="body2"
+                sx={{ color: styles.colors?.text?.secondary || '#757575' }}
+              >
                 Bạn chưa có tài khoản?{" "}
                 <MuiButton
                   component={Link}
                   to="/register"
-                  sx={styles.loginStyles.linkButton}
+                  sx={{ color: styles.colors?.primary?.main || '#0071e3', textTransform: 'none' }}
                 >
                   Đăng ký ngay
                 </MuiButton>
               </Typography>
             </Box>
 
-            <Box
-              sx={{
-                ...styles.boxStyles.buttonGroup,
-                pt: 4,
-                justifyContent: "center",
-              }}
-            >
-              <Box sx={styles.loginStyles.dividerLine} />
-              <Typography variant="body2" sx={styles.textStyles.grayLight}>
+            <Box sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: styles.spacing(2),
+              pt: styles.spacing(4),
+              justifyContent: 'center'
+            }}>
+              <Box sx={{ flex: 1, height: 1, backgroundColor: styles.colors?.neutral?.[200] || '#e0e0e0' }} />
+              <Typography variant="body2" sx={{ color: styles.colors?.text?.secondary || '#757575' }}>
                 ✦
               </Typography>
-              <Box sx={styles.loginStyles.dividerLine} />
+              <Box sx={{ flex: 1, height: 1, backgroundColor: styles.colors?.neutral?.[200] || '#e0e0e0' }} />
             </Box>
           </Form>
         </Card>

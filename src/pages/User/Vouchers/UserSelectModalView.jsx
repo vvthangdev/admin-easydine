@@ -1,5 +1,3 @@
-'use client';
-
 import {
   Dialog,
   DialogTitle,
@@ -22,7 +20,7 @@ import {
 } from '@mui/material';
 import { Search, UserPlus } from 'lucide-react';
 import UserSelectModalViewModel from './UserSelectModalViewModel';
-import { theme } from '../../../styles'; // Chỉ import theme cho colors và avatarStyles
+import { useAppleStyles } from '../../../theme/theme-hooks';
 
 const UserSelectModalView = ({
   visible,
@@ -32,6 +30,7 @@ const UserSelectModalView = ({
   setSelectedUsers,
   setSnackbar,
 }) => {
+  const styles = useAppleStyles();
   const {
     filteredUsers,
     loading,
@@ -59,14 +58,15 @@ const UserSelectModalView = ({
       onClose={onCancel}
       maxWidth="sm"
       fullWidth
+      PaperProps={{ sx: styles.modal?.paper }}
     >
-      <DialogTitle>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <UserPlus size={20} color={theme.colors.primary.main} />
+      <DialogTitle sx={styles.modal?.title}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: styles.spacing(2) }}>
+          <UserPlus size={20} color={styles.colors?.primary?.main || '#0071e3'} />
           <Typography variant="subtitle1">Chọn người dùng</Typography>
         </Box>
       </DialogTitle>
-      <DialogContent>
+      <DialogContent sx={styles.modal?.content}>
         <TextField
           placeholder="Tìm kiếm theo tên, số điện thoại hoặc ID"
           value={inputValue}
@@ -79,26 +79,27 @@ const UserSelectModalView = ({
           fullWidth
           size="small"
           autoComplete="off"
+          sx={styles.input('default')}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <Search size={18} color={theme.colors.primary.main} />
+                <Search size={18} color={styles.colors?.primary?.main || '#0071e3'} />
               </InputAdornment>
             ),
           }}
         />
 
         {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-            <CircularProgress size={24} />
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: styles.spacing(4) }}>
+            <CircularProgress size={24} sx={{ color: styles.colors?.primary?.main || '#0071e3' }} />
           </Box>
         ) : (
-          <TableContainer component={Paper}>
+          <TableContainer component={Paper} sx={styles.components?.table?.container}>
             <Table stickyHeader sx={{ tableLayout: 'fixed' }}>
-              <TableHead>
+              <TableHead sx={styles.components?.table?.head}>
                 <TableRow>
                   {columns.map((column) => (
-                    <TableCell key={column.id} sx={{ width: column.width }}>
+                    <TableCell key={column.id} sx={{ ...styles.components?.table?.cell, width: column.width }}>
                       {column.label}
                     </TableCell>
                   ))}
@@ -107,7 +108,7 @@ const UserSelectModalView = ({
               <TableBody>
                 {filteredUsers.length > 0 ? (
                   filteredUsers.map((user) => (
-                    <TableRow key={user._id}>
+                    <TableRow key={user._id} sx={styles.components?.table?.row}>
                       <TableCell>
                         <Checkbox
                           checked={selectedUsers.includes(user._id)}
@@ -122,7 +123,7 @@ const UserSelectModalView = ({
                             height: 24,
                             borderRadius: '50%',
                             overflow: 'hidden',
-                            backgroundColor: theme.colors.neutral[100],
+                            backgroundColor: styles.colors?.neutral?.[100] || '#f5f5f5',
                           }}
                         >
                           <img
@@ -140,7 +141,7 @@ const UserSelectModalView = ({
                         </Box>
                       </TableCell>
                       <TableCell sx={{ fontWeight: 500 }}>{user.name}</TableCell>
-                      <TableCell sx={{ color: theme.colors.neutral[400] }}>
+                      <TableCell sx={{ color: styles.colors?.neutral?.[400] || '#9e9e9e' }}>
                         {user.username}
                       </TableCell>
                     </TableRow>
@@ -157,17 +158,17 @@ const UserSelectModalView = ({
           </TableContainer>
         )}
 
-        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box sx={{ mt: styles.spacing(2), display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="body2">
             Đã chọn {selectedUsers.length} người dùng
           </Typography>
         </Box>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={onCancel} variant="outlined">
+      <DialogActions sx={styles.modal?.actions}>
+        <Button onClick={onCancel} variant="outlined" sx={styles.button('outline')}>
           Hủy
         </Button>
-        <Button onClick={onOk} variant="contained">
+        <Button onClick={onOk} variant="contained" sx={styles.button('primary')}>
           Xác nhận
         </Button>
       </DialogActions>

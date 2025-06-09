@@ -1,5 +1,3 @@
-'use client';
-
 import {
   Box,
   Button,
@@ -14,13 +12,14 @@ import { Plus, RefreshCw, AlertTriangle } from 'lucide-react';
 import VoucherFormModalView from './VoucherFormModalView';
 import VoucherTable from './VoucherTable';
 import VoucherScreenViewModel from './VoucherScreenViewModel';
-import { theme } from '../../../styles'; // Chỉ import theme cho colors
+import { useAppleStyles } from '../../../theme/theme-hooks';
 
 const VoucherScreenView = ({
   selectedUsers,
   setSelectedUsers,
   setSnackbar,
 }) => {
+  const styles = useAppleStyles();
   const {
     vouchers,
     isModalVisible,
@@ -43,15 +42,16 @@ const VoucherScreenView = ({
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h6">
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: styles.spacing(3) }}>
+        <Typography variant="h6" sx={{ color: styles.colors?.neutral?.[800] || '#333', ...styles.components?.text?.heading }}>
           Quản lý Voucher
         </Typography>
-        <Box sx={{ display: 'flex', gap: 2 }}>
+        <Box sx={{ display: 'flex', gap: styles.spacing(2) }}>
           <Button
             variant="outlined"
             startIcon={<RefreshCw size={16} />}
             onClick={() => window.location.reload()}
+            sx={styles.button('outline')}
           >
             Làm mới
           </Button>
@@ -59,6 +59,7 @@ const VoucherScreenView = ({
             variant="contained"
             startIcon={<Plus size={16} />}
             onClick={handleAdd}
+            sx={styles.button('primary')}
           >
             Thêm voucher
           </Button>
@@ -66,8 +67,8 @@ const VoucherScreenView = ({
       </Box>
 
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-          <CircularProgress size={24} />
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: styles.spacing(4) }}>
+          <CircularProgress size={24} sx={{ color: styles.colors?.primary?.main || '#0071e3' }} />
         </Box>
       ) : (
         <VoucherTable
@@ -97,26 +98,27 @@ const VoucherScreenView = ({
       <Dialog
         open={isDeleteDialogOpen}
         onClose={cancelDelete}
+        PaperProps={{ sx: styles.modal?.paper }}
       >
-        <DialogTitle>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <AlertTriangle size={20} color={theme.colors.error.main} />
+        <DialogTitle sx={{ ...styles.modal?.title, color: styles.colors?.error?.main || '#ff2d55' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: styles.spacing(2) }}>
+            <AlertTriangle size={20} color={styles.colors?.error?.main || '#ff2d55'} />
             <Typography variant="subtitle1">Xác nhận xóa Voucher</Typography>
           </Box>
         </DialogTitle>
-        <DialogContent>
-          <Typography variant="body1">
+        <DialogContent sx={styles.modal?.content}>
+          <Typography variant="body1" sx={{ color: styles.colors?.neutral?.[800] || '#333', ...styles.components?.text?.body1 }}>
             Bạn có chắc chắn muốn xóa voucher <strong>{voucherToDelete?.code}</strong> không?
           </Typography>
-          <Typography variant="body2" sx={{ color: theme.colors.error.main, mt: 1 }}>
+          <Typography variant="body2" sx={{ color: styles.colors?.error?.main || '#ff2d55', mt: 1, ...styles.components?.text?.body2 }}>
             Lưu ý: Hành động này không thể hoàn tác.
           </Typography>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={cancelDelete} variant="outlined">
+        <DialogActions sx={styles.modal?.actions}>
+          <Button onClick={cancelDelete} variant="outlined" sx={styles.button('outline')}>
             Hủy
           </Button>
-          <Button onClick={executeDelete} variant="contained" color="error">
+          <Button onClick={executeDelete} variant="contained" sx={{ ...styles.button('primary'), backgroundColor: styles.colors?.error?.main || '#ff2d55' }}>
             Xóa
           </Button>
         </DialogActions>

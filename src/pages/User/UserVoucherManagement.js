@@ -1,12 +1,11 @@
-'use client';
-
 import { Box, Tabs, Tab, Snackbar, Alert } from '@mui/material';
 import UserScreen from './Users/UserScreenView';
 import VoucherScreenView from './Vouchers/VoucherScreenView';
 import UserVoucherManagementViewModel from './UserVoucherManagementViewModel';
-import { theme } from '../../styles'; // Chỉ import theme cho colors và shadows
+import { useAppleStyles } from '../../theme/theme-hooks';
 
 const UserVoucherManagementView = () => {
+  const styles = useAppleStyles();
   const {
     activeTab,
     selectedUsers,
@@ -18,25 +17,25 @@ const UserVoucherManagementView = () => {
 
   return (
     <Box sx={{
-  backgroundColor: theme.colors.neutral[50], // Thêm nền
-  position: 'relative',
-  minHeight: '100vh', // Đảm bảo chiều cao
-}}>
+      backgroundColor: styles.colors?.neutral?.[50] || '#f5f5f5',
+      position: 'relative',
+      minHeight: '100vh',
+    }}>
       <Box sx={{ position: 'relative', zIndex: 1 }}>
         <Tabs
           value={activeTab}
           onChange={handleTabChange}
           sx={{
-            mb: 3,
+            mb: styles.spacing(3),
             '& .MuiTabs-indicator': {
-              backgroundColor: theme.colors.primary.main,
+              backgroundColor: styles.colors?.primary?.main || '#0071e3',
             },
             '& .MuiTab-root': {
               textTransform: 'none',
               fontWeight: 500,
-              color: theme.colors.neutral[400],
+              color: styles.colors?.neutral?.[400] || '#9e9e9e',
               '&.Mui-selected': {
-                color: theme.colors.primary.main,
+                color: styles.colors?.primary?.main || '#0071e3',
                 fontWeight: 600,
               },
             },
@@ -46,7 +45,7 @@ const UserVoucherManagementView = () => {
           <Tab label="Voucher" />
         </Tabs>
 
-        <Box sx={{ borderRadius: 4, p: 3 }}>
+        <Box sx={{ borderRadius: styles.rounded('lg'), p: styles.spacing(3) }}>
           {activeTab === 0 && (
             <UserScreen
               selectedUsers={selectedUsers}
@@ -74,17 +73,17 @@ const UserVoucherManagementView = () => {
           severity={snackbar.severity}
           onClose={() => setSnackbar({ ...snackbar, open: false })}
           sx={{
-            borderRadius: 2,
-            boxShadow: theme.shadows.medium,
+            borderRadius: styles.rounded('md'),
+            boxShadow: styles.shadows?.medium,
             '& .MuiAlert-icon': {
               color:
                 snackbar.severity === 'success'
-                  ? theme.colors.success.main
+                  ? styles.colors?.success?.main || '#4caf50'
                   : snackbar.severity === 'error'
-                  ? theme.colors.error.main
+                  ? styles.colors?.error?.main || '#ff2d55'
                   : snackbar.severity === 'warning'
-                  ? theme.colors.warning.main
-                  : theme.colors.primary.main,
+                  ? styles.colors?.warning?.main || '#ff9800'
+                  : styles.colors?.primary?.main || '#0071e3',
             },
           }}
         >

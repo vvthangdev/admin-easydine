@@ -1,5 +1,3 @@
-'use client';
-
 import {
   Table,
   TableBody,
@@ -14,9 +12,10 @@ import {
   Tooltip,
 } from '@mui/material';
 import { Edit, Trash2, Percent, Calendar, Tag, DollarSign } from 'lucide-react';
-import { theme } from '../../../styles'; // Chỉ import theme cho colors
+import { useAppleStyles } from '../../../theme/theme-hooks';
 
 const VoucherTable = ({ vouchers, loading, onEdit, onDelete }) => {
+  const styles = useAppleStyles();
   const columns = [
     { id: 'code', label: 'Mã', width: '15%' },
     { id: 'discount', label: 'Giảm giá', width: '15%' },
@@ -33,15 +32,15 @@ const VoucherTable = ({ vouchers, loading, onEdit, onDelete }) => {
     const endDate = voucher.endDate ? new Date(voucher.endDate) : null;
 
     if (!voucher.isActive) {
-      return { bg: theme.colors.neutral[50], color: theme.colors.neutral[500] };
+      return { bg: styles.colors?.neutral?.[50] || '#f5f5f5', color: styles.colors?.neutral?.[500] || '#757575' };
     }
     if (startDate && now < startDate) {
-      return { bg: theme.colors.warning[50], color: theme.colors.warning.main };
+      return { bg: styles.colors?.warning?.[50] || '#fff4e5', color: styles.colors?.warning?.main || '#ff9800' };
     }
     if (endDate && now > endDate) {
-      return { bg: theme.colors.error[50], color: theme.colors.error.main };
+      return { bg: styles.colors?.error?.[50] || '#ffebee', color: styles.colors?.error?.main || '#ff2d55' };
     }
-    return { bg: theme.colors.success[50], color: theme.colors.success.main };
+    return { bg: styles.colors?.success?.[50] || '#e8f5e9', color: styles.colors?.success?.main || '#4caf50' };
   };
 
   const getStatusLabel = (voucher) => {
@@ -62,14 +61,15 @@ const VoucherTable = ({ vouchers, loading, onEdit, onDelete }) => {
   };
 
   return (
-    <TableContainer component={Paper}>
+    <TableContainer component={Paper} sx={styles.components?.table?.container}>
       <Table sx={{ minWidth: 650 }} size="small">
-        <TableHead>
+        <TableHead sx={styles.components?.table?.head}>
           <TableRow>
             {columns.map((column) => (
               <TableCell
                 key={column.id}
                 sx={{
+                  ...styles.components?.table?.cell,
                   width: column.width,
                   display: column.hideOnMobile ? { xs: 'none', md: 'table-cell' } : 'table-cell',
                 }}
@@ -82,19 +82,19 @@ const VoucherTable = ({ vouchers, loading, onEdit, onDelete }) => {
         <TableBody>
           {Array.isArray(vouchers) && vouchers.length > 0 ? (
             vouchers.map((voucher) => (
-              <TableRow key={voucher._id}>
+              <TableRow key={voucher._id} sx={styles.components?.table?.row}>
                 <TableCell sx={{ fontWeight: 500 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Tag size={14} color={theme.colors.primary.main} />
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: styles.spacing(1) }}>
+                    <Tag size={14} color={styles.colors?.primary?.main || '#0071e3'} />
                     {voucher.code}
                   </Box>
                 </TableCell>
                 <TableCell>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: styles.spacing(1) }}>
                     {voucher.discountType === 'percentage' ? (
-                      <Percent size={14} color={theme.colors.primary.main} />
+                      <Percent size={14} color={styles.colors?.primary?.main || '#0071e3'} />
                     ) : (
-                      <DollarSign size={14} color={theme.colors.primary.main} />
+                      <DollarSign size={14} color={styles.colors?.primary?.main || '#0071e3'} />
                     )}
                     <span>
                       {voucher.discount}
@@ -109,11 +109,11 @@ const VoucherTable = ({ vouchers, loading, onEdit, onDelete }) => {
                   {voucher.minOrderValue.toLocaleString()} VNĐ
                 </TableCell>
                 <TableCell>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Calendar size={14} color={theme.colors.primary.main} />
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: styles.spacing(1) }}>
+                    <Calendar size={14} color={styles.colors?.primary?.main || '#0071e3'} />
                     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                       <span>{new Date(voucher.startDate).toLocaleDateString('vi-VN')}</span>
-                      <span style={{ color: theme.colors.neutral[400] }}>
+                      <span style={{ color: styles.colors?.neutral?.[400] || '#9e9e9e' }}>
                         → {new Date(voucher.endDate).toLocaleDateString('vi-VN')}
                       </span>
                     </Box>
@@ -140,7 +140,7 @@ const VoucherTable = ({ vouchers, loading, onEdit, onDelete }) => {
                       <IconButton
                         size="small"
                         onClick={() => onDelete(voucher)}
-                        color="error"
+                        sx={{ color: styles.colors?.error?.main || '#ff2d55' }}
                       >
                         <Trash2 size={16} />
                       </IconButton>

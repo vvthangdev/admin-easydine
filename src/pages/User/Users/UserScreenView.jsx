@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Dialog,
   DialogTitle,
@@ -16,17 +14,10 @@ import UserFormModalView from "./UserFormModalView";
 import UserFormModalViewModel from "./UserFormModalViewModel";
 import UserSearch from "./UserSearch";
 import UserScreenViewModel from "./UserScreenViewModel";
-import {
-  dialogStyles,
-  buttonStyles,
-  progressStyles,
-  typography,
-  colors,
-  boxStyles,
-  textStyles,
-} from "../../../styles"; // Import styles từ index.js
+import { useAppleStyles } from "../../../theme/theme-hooks";
 
 const UserScreenView = ({ setSnackbar }) => {
+  const styles = useAppleStyles();
   const {
     users,
     filteredUsers,
@@ -86,23 +77,19 @@ const UserScreenView = ({ setSnackbar }) => {
 
   return (
     <Box>
-      <Box sx={boxStyles.header}>
-        {" "}
-        {/* Sử dụng boxStyles.header */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: styles.spacing(3) }}>
         <Typography
           variant="h6"
-          sx={{ color: colors.neutral[800], ...typography.h6 }}
+          sx={{ color: styles.colors?.neutral?.[800] || '#333', ...styles.components?.text?.heading }}
         >
           Danh sách người dùng
         </Typography>
-        <Box sx={boxStyles.buttonGroup}>
-          {" "}
-          {/* Sử dụng boxStyles.buttonGroup */}
+        <Box sx={{ display: 'flex', gap: styles.spacing(2) }}>
           <Button
             variant="outlined"
             startIcon={<RefreshCw size={16} />}
             onClick={fetchUsers}
-            sx={buttonStyles.outlinedPrimary} // Sử dụng buttonStyles.outlinedPrimary
+            sx={styles.button('outline')}
           >
             Làm mới
           </Button>
@@ -113,14 +100,14 @@ const UserScreenView = ({ setSnackbar }) => {
               handleEdit(null);
               setIsModalVisible(true);
             }}
-            sx={buttonStyles.primary} // Sử dụng buttonStyles.primary
+            sx={styles.button('primary')}
           >
             Thêm người dùng
           </Button>
         </Box>
       </Box>
 
-      <Box sx={{ mb: 3 }}>
+      <Box sx={{ mb: styles.spacing(3) }}>
         <UserSearch
           searchTerm={searchTerm}
           onSearch={handleSearch}
@@ -129,9 +116,8 @@ const UserScreenView = ({ setSnackbar }) => {
       </Box>
 
       {loading ? (
-        <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-          <CircularProgress sx={progressStyles.primary} />{" "}
-          {/* Sử dụng progressStyles.primary */}
+        <Box sx={{ display: "flex", justifyContent: "center", py: styles.spacing(4) }}>
+          <CircularProgress sx={{ color: styles.colors?.primary?.main || '#0071e3' }} />
         </Box>
       ) : (
         <UserTable
@@ -162,42 +148,37 @@ const UserScreenView = ({ setSnackbar }) => {
       <Dialog
         open={isDeleteDialogOpen}
         onClose={() => setIsDeleteDialogOpen(false)}
-        PaperProps={{ sx: dialogStyles.paper }} // Sử dụng dialogStyles.paper
+        PaperProps={{ sx: styles.modal?.paper }}
       >
-        <DialogTitle sx={dialogStyles.titleError}>
-          {" "}
-          {/* Sử dụng dialogStyles.titleError */}
+        <DialogTitle sx={{ ...styles.modal?.title, color: styles.colors?.error?.main || '#ff2d55' }}>
           Xác nhận xóa người dùng
         </DialogTitle>
-        <DialogContent sx={dialogStyles.content}>
-          {" "}
-          {/* Sử dụng dialogStyles.content */}
+        <DialogContent sx={styles.modal?.content}>
           <Typography
             variant="body1"
-            sx={{ color: colors.neutral[800], ...typography.body1 }}
+            sx={{ color: styles.colors?.neutral?.[800] || '#333', ...styles.components?.text?.body1 }}
           >
             Bạn có chắc chắn muốn xóa người dùng{" "}
             <strong>{userToDelete?.name}</strong> không?
           </Typography>
-          <Typography variant="body2" sx={textStyles.error}>
-            {" "}
-            {/* Sử dụng textStyles.error */}
+          <Typography
+            variant="body2"
+            sx={{ color: styles.colors?.error?.main || '#ff2d55', ...styles.components?.text?.body2, mt: 1 }}
+          >
             Lưu ý: Hành động này không thể hoàn tác.
           </Typography>
         </DialogContent>
-        <DialogActions sx={dialogStyles.actions}>
-          {" "}
-          {/* Sử dụng dialogStyles.actions */}
+        <DialogActions sx={styles.modal?.actions}>
           <Button
             onClick={() => setIsDeleteDialogOpen(false)}
-            sx={buttonStyles.outlined} // Sử dụng buttonStyles.outlined
+            sx={styles.button('outline')}
             variant="outlined"
           >
             Hủy
           </Button>
           <Button
             onClick={confirmDelete}
-            sx={buttonStyles.danger} // Sử dụng buttonStyles.danger
+            sx={{ ...styles.button('primary'), backgroundColor: styles.colors?.error?.main || '#ff2d55' }}
             variant="contained"
           >
             Xóa
