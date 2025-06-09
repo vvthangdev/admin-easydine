@@ -1,5 +1,3 @@
-'use client';
-
 import {
   Dialog,
   DialogTitle,
@@ -18,7 +16,7 @@ import {
 import { Upload, Button as AntButton } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import { User, Mail, AtSign, Phone, Home, Shield, Lock } from 'lucide-react';
-import { useTheme } from '@mui/material/styles';
+import { useAppleStyles } from '../../../theme/theme-hooks';
 
 const UserFormModalView = ({
   visible,
@@ -32,31 +30,31 @@ const UserFormModalView = ({
   handleRoleChange,
   errors,
 }) => {
-  const theme = useTheme();
+  const styles = useAppleStyles();
 
   return (
     <Dialog
       open={visible}
       onClose={onCancel}
-      PaperProps={{ sx: theme.components.dialog.paper }}
+      PaperProps={{ sx: styles.modal?.paper }}
     >
-      <DialogTitle sx={theme.components.dialog.title}>
+      <DialogTitle sx={styles.modal?.title}>
         {editingUser ? 'Sửa thông tin người dùng' : 'Thêm người dùng mới'}
       </DialogTitle>
-      <DialogContent sx={theme.components.dialog.content}>
-        <Box sx={{ mb: 3 }}>
+      <DialogContent sx={styles.modal?.content}>
+        <Box sx={{ mb: styles.spacing(3) }}>
           <Box
             sx={{
-              ...theme.components.box.buttonGroup,
+              display: 'flex',
               alignItems: 'center',
-              mb: 2,
-              gap: 2,
+              mb: styles.spacing(2),
+              gap: styles.spacing(2),
             }}
           >
-            <User size={20} color={theme.colors.primary.main} />
+            <User size={20} color={styles.colors?.primary?.main || '#0071e3'} />
             <Typography
               variant="subtitle1"
-              sx={{ color: theme.colors.neutral[800], ...theme.typography.subtitle1 }}
+              sx={{ color: styles.colors?.neutral?.[800] || '#333', ...styles.components?.text?.subtitle1 }}
             >
               Thông tin cá nhân
             </Typography>
@@ -73,10 +71,10 @@ const UserFormModalView = ({
             size="small"
             error={!!errors.name}
             helperText={errors.name || ''}
-            sx={theme.components.input.textField}
+            sx={styles.input('default')}
             InputProps={{
               startAdornment: (
-                <User size={16} color={theme.colors.primary.main} style={{ marginRight: 8 }} />
+                <User size={16} color={styles.colors?.primary?.main || '#0071e3'} style={{ marginRight: 8 }} />
               ),
             }}
           />
@@ -93,10 +91,10 @@ const UserFormModalView = ({
             size="small"
             error={!!errors.email}
             helperText={errors.email || ''}
-            sx={theme.components.input.textField}
+            sx={styles.input('default')}
             InputProps={{
               startAdornment: (
-                <Mail size={16} color={theme.colors.primary.main} style={{ marginRight: 8 }} />
+                <Mail size={16} color={styles.colors?.primary?.main || '#0071e3'} style={{ marginRight: 8 }} />
               ),
             }}
           />
@@ -112,27 +110,27 @@ const UserFormModalView = ({
             size="small"
             error={!!errors.username}
             helperText={errors.username || ''}
-            sx={theme.components.input.textField}
+            sx={styles.input('default')}
             InputProps={{
               startAdornment: (
-                <AtSign size={16} color={theme.colors.primary.main} style={{ marginRight: 8 }} />
+                <AtSign size={16} color={styles.colors?.primary?.main || '#0071e3'} style={{ marginRight: 8 }} />
               ),
             }}
           />
         </Box>
-        <Box sx={{ mb: 3 }}>
+        <Box sx={{ mb: styles.spacing(3) }}>
           <Box
             sx={{
-              ...theme.components.box.buttonGroup,
+              display: 'flex',
               alignItems: 'center',
-              mb: 2,
-              gap: 2,
+              mb: styles.spacing(2),
+              gap: styles.spacing(2),
             }}
           >
-            <Phone size={20} color={theme.colors.primary.main} />
+            <Phone size={20} color={styles.colors?.primary?.main || '#0071e3'} />
             <Typography
               variant="subtitle1"
-              sx={{ color: theme.colors.neutral[800], ...theme.typography.subtitle1 }}
+              sx={{ color: styles.colors?.neutral?.[800] || '#333', ...styles.components?.text?.subtitle1 }}
             >
               Thông tin liên hệ
             </Typography>
@@ -148,10 +146,10 @@ const UserFormModalView = ({
             size="small"
             error={!!errors.phone}
             helperText={errors.phone || ''}
-            sx={theme.components.input.textField}
+            sx={styles.input('default')}
             InputProps={{
               startAdornment: (
-                <Phone size={16} color={theme.colors.primary.main} style={{ marginRight: 8 }} />
+                <Phone size={16} color={styles.colors?.primary?.main || '#0071e3'} style={{ marginRight: 8 }} />
               ),
             }}
           />
@@ -164,27 +162,27 @@ const UserFormModalView = ({
             onChange={handleFieldChange}
             margin="dense"
             size="small"
-            sx={theme.components.input.textField}
+            sx={styles.input('default')}
             InputProps={{
               startAdornment: (
-                <Home size={16} color={theme.colors.primary.main} style={{ marginRight: 8 }} />
+                <Home size={16} color={styles.colors?.primary?.main || '#0071e3'} style={{ marginRight: 8 }} />
               ),
             }}
           />
         </Box>
-        <Box sx={{ mb: 3 }}>
+        <Box sx={{ mb: styles.spacing(3) }}>
           <Box
             sx={{
-              ...theme.components.box.buttonGroup,
+              display: 'flex',
               alignItems: 'center',
-              mb: 2,
-              gap: 2,
+              mb: styles.spacing(2),
+              gap: styles.spacing(2),
             }}
           >
-            <Shield size={20} color={theme.colors.primary.main} />
+            <Shield size={20} color={styles.colors?.primary?.main || '#0071e3'} />
             <Typography
               variant="subtitle1"
-              sx={{ color: theme.colors.neutral[800], ...theme.typography.subtitle1 }}
+              sx={{ color: styles.colors?.neutral?.[800] || '#333', ...styles.components?.text?.subtitle1 }}
             >
               Quyền hạn và bảo mật
             </Typography>
@@ -196,20 +194,13 @@ const UserFormModalView = ({
             size="small"
             required
             error={!!errors.role}
-            sx={theme.components.input.select}
+            sx={styles.input('default')}
           >
             <InputLabel>Vai trò</InputLabel>
             <Select
               name="role"
               value={form.role || ''}
               onChange={handleRoleChange}
-              startAdornment={
-                <Shield
-                  size={16}
-                  color={theme.colors.primary.main}
-                  style={{ marginRight: 8, marginLeft: -4 }}
-                />
-              }
               label="Vai trò"
             >
               <MenuItem value="CUSTOMER">Khách hàng</MenuItem>
@@ -219,10 +210,10 @@ const UserFormModalView = ({
             {errors.role && <FormHelperText error>{errors.role}</FormHelperText>}
           </FormControl>
 
-          <Box sx={{ mb: 2 }}>
+          <Box sx={{ mb: styles.spacing(2) }}>
             <Typography
               variant="body2"
-              sx={{ mb: 1, color: theme.colors.neutral[800], ...theme.typography.body2 }}
+              sx={{ mb: 1, color: styles.colors?.neutral?.[800] || '#333', ...styles.components?.text?.body2 }}
             >
               Ảnh đại diện
             </Typography>
@@ -237,9 +228,9 @@ const UserFormModalView = ({
                 icon={<UploadOutlined />}
                 style={{
                   height: 36,
-                  borderRadius: theme.borderRadius.lg,
-                  borderColor: theme.colors.primary.main,
-                  color: theme.colors.primary.main,
+                  borderRadius: styles.rounded('lg'),
+                  borderColor: styles.colors?.primary?.main || '#0071e3',
+                  color: styles.colors?.primary?.main || '#0071e3',
                 }}
               >
                 Tải lên ảnh đại diện
@@ -259,26 +250,26 @@ const UserFormModalView = ({
             size="small"
             error={!!errors.password}
             helperText={errors.password || ''}
-            sx={theme.components.input.textField}
+            sx={styles.input('default')}
             InputProps={{
               startAdornment: (
-                <Lock size={16} color={theme.colors.primary.main} style={{ marginRight: 8 }} />
+                <Lock size={16} color={styles.colors?.primary?.main || '#0071e3'} style={{ marginRight: 8 }} />
               ),
             }}
           />
         </Box>
       </DialogContent>
-      <DialogActions sx={theme.components.dialog.actions}>
+      <DialogActions sx={styles.modal?.actions}>
         <Button
           onClick={onCancel}
-          sx={theme.components.button.outlined}
+          sx={styles.button('outline')}
           variant="outlined"
         >
           Hủy
         </Button>
         <Button
           onClick={onOk}
-          sx={theme.components.button.primary}
+          sx={styles.button('primary')}
           variant="contained"
         >
           {editingUser ? 'Cập nhật' : 'Thêm mới'}

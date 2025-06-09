@@ -1,5 +1,3 @@
-'use client';
-
 import { memo } from 'react';
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
@@ -15,12 +13,12 @@ import {
   Alert,
 } from '@mui/material';
 import { ExpandMore } from '@mui/icons-material';
-import { useTheme } from '@mui/material/styles';
+import { useAppleStyles } from '../../theme/theme-hooks';
 import { userAPI } from '../../services/apis/User';
 import { useAuth } from '../../contexts/AuthContext';
 
 function Header({ logo, navLinks }) {
-  const theme = useTheme();
+  const styles = useAppleStyles();
   const { user, loading: authLoading, logout } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [profile, setProfile] = useState(null);
@@ -78,45 +76,43 @@ function Header({ logo, navLinks }) {
     setSnackbarOpen(false);
   };
 
+  const primaryColor = styles.colors?.primary?.main || '#0071e3';
+
   return (
     <>
       <Box
         component="header"
         sx={{
+          ...styles.header("primary"),
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          p: theme.spacing.md,
-          backgroundColor: theme.palette.background.paper,
-          boxShadow: theme.shadows.sm,
-          position: 'sticky',
+          position: 'fixed',
           top: 0,
-          zIndex: theme.zIndex.appBar,
-          width: '100%',
+          left: 0,
+          right: 0,
+          zIndex: 1100,
+          paddingY: 1,
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: theme.spacing.md }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: styles.spacing(4) }}>
           <Box>
             <img
               src={logo}
               alt="Restaurant Logo"
               style={{
                 height: 40,
-                borderRadius: theme.shape.borderRadius,
-               
+                borderRadius: styles.rounded("md"),
               }}
             />
           </Box>
-          <Box sx={{ display: 'flex', gap: theme.spacing.lg }}>
+          <Box sx={{ display: 'flex', gap: styles.spacing(4) }}>
             {navLinks.map((link, index) => (
               <Button
                 key={index}
                 component={Link}
                 to={link.path}
-                sx={{
-                  color: theme.palette.text.primary,
-                  '&:hover': { color: theme.palette.primary.main },
-                }}
+                sx={styles.button("ghost")}
               >
                 {link.label}
               </Button>
@@ -124,9 +120,9 @@ function Header({ logo, navLinks }) {
           </Box>
         </Box>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: theme.spacing.md }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: styles.spacing(4) }}>
           {authLoading || loading ? (
-            <Typography variant="body2" color={theme.palette.text.disabled}>
+            <Typography variant="body2" sx={{ color: styles.colors?.text?.disabled || '#c7c7cc' }}>
               Đang tải...
             </Typography>
           ) : (
@@ -135,10 +131,7 @@ function Header({ logo, navLinks }) {
                 <Button
                   component={Link}
                   to="/overview"
-                  sx={{
-                    color: theme.palette.primary.main,
-                    '&:hover': { color: theme.palette.primary.dark },
-                  }}
+                  sx={styles.button("primary")}
                 >
                   Dashboard
                 </Button>
@@ -150,14 +143,14 @@ function Header({ logo, navLinks }) {
                       alt="Profile"
                       src={profile?.avatar || '/path/to/default/avatar.png'}
                       sx={{
-                        border: `2px solid ${theme.palette.primary.main}`,
+                        border: `2px solid ${primaryColor}`,
                       }}
                     />
                     <Typography
                       sx={{
                         ml: 1,
-                        color: theme.palette.text.primary,
-                        fontWeight: theme.typography.fontWeightMedium || 500,
+                        color: styles.colors?.text?.primary || '#1d1d1f',
+                        fontWeight: 500,
                       }}
                     >
                       {user.name}
@@ -165,8 +158,8 @@ function Header({ logo, navLinks }) {
                     <ExpandMore
                       sx={{
                         ml: 1,
-                        color: theme.palette.text.disabled,
-                        transition: theme.transitions.create('transform'),
+                        color: styles.colors?.text?.disabled || '#c7c7cc',
+                        transition: 'transform 0.3s',
                         transform: isDropdownOpen ? 'rotate(180deg)' : 'none',
                       }}
                     />
@@ -178,15 +171,16 @@ function Header({ logo, navLinks }) {
                     onClose={handleMenuClose}
                     anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
                     transformOrigin={{ vertical: 'top', horizontal: 'center' }}
+                    sx={styles.modal?.content}
                   >
                     <MenuItem
                       component={Link}
                       to="/profile"
                       onClick={handleMenuClose}
                       sx={{
-                        color: theme.palette.text.primary,
+                        color: styles.colors?.text?.primary || '#1d1d1f',
                         '&:hover': {
-                          backgroundColor: theme.palette.background.default,
+                          backgroundColor: styles.colors?.background?.default || '#f5f5f7',
                         },
                       }}
                     >
@@ -197,9 +191,9 @@ function Header({ logo, navLinks }) {
                       to="/orders"
                       onClick={handleMenuClose}
                       sx={{
-                        color: theme.palette.text.primary,
+                        color: styles.colors?.text?.primary || '#1d1d1f',
                         '&:hover': {
-                          backgroundColor: theme.palette.background.default,
+                          backgroundColor: styles.colors?.background?.default || '#f5f5f7',
                         },
                       }}
                     >
@@ -208,9 +202,9 @@ function Header({ logo, navLinks }) {
                     <MenuItem
                       onClick={handleLogout}
                       sx={{
-                        color: theme.palette.error.main,
+                        color: styles.colors?.error?.main || '#ff2d55',
                         '&:hover': {
-                          backgroundColor: theme.palette.background.default,
+                          backgroundColor: styles.colors?.background?.default || '#f5f5f7',
                         },
                       }}
                     >
@@ -223,32 +217,14 @@ function Header({ logo, navLinks }) {
                   <Button
                     component={Link}
                     to="/login"
-                    variant="outlined"
-                    sx={{
-                      borderColor: theme.palette.primary.main,
-                      color: theme.palette.primary.main,
-                      borderRadius: theme.shape.borderRadius,
-                      '&:hover': {
-                        backgroundColor: theme.palette.primary[50],
-                        color: theme.palette.primary.dark,
-                      },
-                    }}
+                    sx={styles.button("outline")}
                   >
                     Đăng nhập
                   </Button>
                   <Button
                     component={Link}
                     to="/register"
-                    variant="contained"
-                    sx={{
-                      backgroundColor: theme.palette.primary.main,
-                      color: theme.palette.primary.contrastText,
-                      borderRadius: theme.shape.borderRadius,
-                      '&:hover': {
-                        backgroundColor: theme.palette.primary.dark,
-                        color: theme.palette.primary.contrastText,
-                      },
-                    }}
+                    sx={styles.button("primary")}
                   >
                     Đăng ký
                   </Button>
@@ -260,16 +236,13 @@ function Header({ logo, navLinks }) {
       </Box>
       <Snackbar
         open={snackbarOpen}
-        autoHideDuration={theme.transitions.duration.short}
+        autoHideDuration={3000}
         onClose={handleSnackbarClose}
       >
         <Alert
           severity="error"
           onClose={handleSnackbarClose}
-          sx={{
-            backgroundColor: theme.palette.error.main,
-            color: theme.palette.error.contrastText,
-          }}
+          sx={styles.status("error")}
         >
           {snackbarMessage}
         </Alert>

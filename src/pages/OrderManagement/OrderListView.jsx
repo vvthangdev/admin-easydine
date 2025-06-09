@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useState, useCallback, useRef } from "react";
 import {
   Box,
@@ -23,8 +21,10 @@ import { adminAPI } from "../../services/apis/Admin";
 import OrderFormModal from "../OrderFormModal/OrderFormModalView";
 import OrderTable from "./OrderTable";
 import { message } from "antd";
+import { useAppleStyles } from "../../theme/theme-hooks";
 
 const OrderListView = ({ selectedCustomer, onClearFilter }) => {
+  const styles = useAppleStyles();
   const [orders, setOrders] = useState({ takeaway: [], reservation: [] });
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingOrder, setEditingOrder] = useState(null);
@@ -241,34 +241,33 @@ const OrderListView = ({ selectedCustomer, onClearFilter }) => {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          mb: 3,
+          mb: styles.spacing(3),
         }}
       >
         <Typography
           variant="h5"
           sx={{
-            color: "#1d1d1f",
-            fontWeight: 700,
-            fontFamily: '"SF Pro Display", Roboto, sans-serif',
+            ...styles.components?.text?.heading,
+            color: styles.colors?.text?.primary || "#1d1d1f",
           }}
         >
           Danh sách đơn hàng
         </Typography>
-        <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+        <Box sx={{ display: "flex", gap: styles.spacing(2), alignItems: "center" }}>
           {selectedCustomer && (
             <Box
               sx={{
                 display: "flex",
                 alignItems: "center",
-                gap: 1,
-                p: 1,
-                px: 2,
-                borderRadius: 2,
-                background: "rgba(0, 113, 227, 0.05)",
-                border: "1px solid rgba(0, 0, 0, 0.05)",
+                gap: styles.spacing(1),
+                p: styles.spacing(1),
+                px: styles.spacing(2),
+                borderRadius: styles.rounded("md"),
+                background: styles.colors?.primary?.[50] || "rgba(0, 113, 227, 0.05)",
+                border: `1px solid ${styles.colors?.neutral?.[100] || "rgba(0, 0, 0, 0.05)"}`,
               }}
             >
-              <Typography variant="body2" sx={{ color: "#1d1d1f" }}>
+              <Typography variant="body2" sx={{ color: styles.colors?.text?.primary || "#1d1d1f" }}>
                 Đang hiển thị đơn hàng của:{" "}
                 <strong>{selectedCustomer.name}</strong> -{" "}
                 {selectedCustomer.phone}
@@ -280,17 +279,10 @@ const OrderListView = ({ selectedCustomer, onClearFilter }) => {
                 onClick={onClearFilter}
                 disabled={loading}
                 sx={{
-                  ml: 1,
-                  borderColor: "#86868b",
-                  color: "#86868b",
-                  borderRadius: 28,
-                  textTransform: "none",
-                  fontWeight: 500,
-                  "&:hover": {
-                    borderColor: "#1d1d1f",
-                    color: "#1d1d1f",
-                    background: "rgba(0, 0, 0, 0.05)",
-                  },
+                  ...styles.button("outline"),
+                  borderRadius: styles.rounded("full"),
+                  color: styles.colors?.text?.secondary || "#86868b",
+                  borderColor: styles.colors?.neutral?.[200] || "#86868b",
                 }}
               >
                 Xóa bộ lọc
@@ -303,15 +295,10 @@ const OrderListView = ({ selectedCustomer, onClearFilter }) => {
             onClick={() => fetchOrders(selectedCustomer?._id)}
             disabled={loading}
             sx={{
-              borderColor: "#0071e3",
-              color: "#0071e3",
-              borderRadius: 28,
-              textTransform: "none",
-              fontWeight: 500,
-              "&:hover": {
-                borderColor: "#0071e3",
-                background: "rgba(0, 113, 227, 0.05)",
-              },
+              ...styles.button("outline"),
+              borderRadius: styles.rounded("full"),
+              color: styles.colors?.primary?.main || "#0071e3",
+              borderColor: styles.colors?.primary?.main || "#0071e3",
             }}
           >
             Làm mới
@@ -322,18 +309,9 @@ const OrderListView = ({ selectedCustomer, onClearFilter }) => {
             onClick={handleAdd}
             disabled={loading}
             sx={{
-              background: "linear-gradient(145deg, #0071e3 0%, #42a5f5 100%)",
-              color: "#ffffff",
-              borderRadius: 28,
-              boxShadow: "0 4px 12px rgba(0, 113, 227, 0.2)",
-              textTransform: "none",
-              fontWeight: 500,
-              "&:hover": {
-                background: "linear-gradient(145deg, #0071e3 0%, #42a5f5 100%)",
-                boxShadow: "0 6px 16px rgba(0, 113, 227, 0.3)",
-                transform: "translateY(-2px)",
-              },
-              transition: "all 0.3s ease",
+              ...styles.button("primary"),
+              borderRadius: styles.rounded("full"),
+              boxShadow: styles.shadows?.sm,
             }}
           >
             Thêm đơn hàng mới
@@ -344,10 +322,10 @@ const OrderListView = ({ selectedCustomer, onClearFilter }) => {
       <Box
         sx={{
           flex: 1,
-          borderRadius: 4,
-          background: "linear-gradient(145deg, #ffffff 0%, #f8f8fa 100%)",
-          boxShadow: "0 5px 15px rgba(0, 0, 0, 0.05)",
-          border: "1px solid rgba(0, 0, 0, 0.05)",
+          borderRadius: styles.rounded("lg"),
+          background: styles.gradients?.light || "linear-gradient(145deg, #ffffff 0%, #f8f8fa 100%)",
+          boxShadow: styles.shadows?.sm,
+          border: `1px solid ${styles.colors?.neutral?.[100] || "rgba(0, 0, 0, 0.05)"}`,
           overflow: "hidden",
           display: "flex",
           flexDirection: "column",
@@ -357,16 +335,16 @@ const OrderListView = ({ selectedCustomer, onClearFilter }) => {
           value={activeTab}
           onChange={(e, newValue) => setActiveTab(newValue)}
           sx={{
-            borderBottom: "1px solid rgba(0, 0, 0, 0.05)",
+            borderBottom: `1px solid ${styles.colors?.neutral?.[100] || "rgba(0, 0, 0, 0.05)"}`,
             "& .MuiTabs-indicator": {
-              backgroundColor: "#0071e3",
+              backgroundColor: styles.colors?.primary?.main || "#0071e3",
             },
             "& .MuiTab-root": {
               textTransform: "none",
               fontWeight: 500,
-              color: "#86868b",
+              color: styles.colors?.text?.secondary || "#86868b",
               "&.Mui-selected": {
-                color: "#0071e3",
+                color: styles.colors?.primary?.main || "#0071e3",
                 fontWeight: 600,
               },
             },
@@ -377,14 +355,14 @@ const OrderListView = ({ selectedCustomer, onClearFilter }) => {
             iconPosition="start"
             label="Đơn hàng đặt chỗ"
             value="reservation"
-            sx={{ px: 3 }}
+            sx={{ px: styles.spacing(3) }}
           />
           <Tab
             icon={<Package size={16} />}
             iconPosition="start"
             label="Đơn hàng giao hàng"
             value="takeaway"
-            sx={{ px: 3 }}
+            sx={{ px: styles.spacing(3) }}
           />
         </Tabs>
 
@@ -415,9 +393,9 @@ const OrderListView = ({ selectedCustomer, onClearFilter }) => {
         onClose={() => setCustomerModalVisible(false)}
         PaperProps={{
           sx: {
-            borderRadius: 4,
-            boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
-            background: "linear-gradient(145deg, #ffffff 0%, #f8f8fa 100%)",
+            borderRadius: styles.rounded("lg"),
+            boxShadow: styles.shadows?.lg,
+            background: styles.gradients?.light || "linear-gradient(145deg, #ffffff 0%, #f8f8fa 100%)",
             overflow: "hidden",
             maxWidth: 400,
             width: "100%",
@@ -426,21 +404,19 @@ const OrderListView = ({ selectedCustomer, onClearFilter }) => {
       >
         <DialogTitle
           sx={{
-            p: 3,
-            background:
-              "linear-gradient(145deg, rgba(0, 113, 227, 0.05) 0%, rgba(0, 113, 227, 0.1) 100%)",
-            color: "#1d1d1f",
+            p: styles.spacing(3),
+            background: styles.colors?.primary?.[50] || "rgba(0, 113, 227, 0.05)",
+            color: styles.colors?.text?.primary || "#1d1d1f",
             fontWeight: 600,
-            fontFamily: '"SF Pro Display", Roboto, sans-serif',
-            borderBottom: "1px solid rgba(0, 0, 0, 0.05)",
+            borderBottom: `1px solid ${styles.colors?.neutral?.[100] || "rgba(0, 0, 0, 0.05)"}`,
           }}
         >
           Thông tin khách hàng
         </DialogTitle>
-        <DialogContent sx={{ p: 3, mt: 2 }}>
+        <DialogContent sx={{ p: styles.spacing(3), mt: styles.spacing(2) }}>
           {customerDetails ? (
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: styles.spacing(2) }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: styles.spacing(3) }}>
                 <Avatar
                   src={
                     customerDetails.avatar || "https://via.placeholder.com/80"
@@ -449,19 +425,19 @@ const OrderListView = ({ selectedCustomer, onClearFilter }) => {
                   sx={{
                     width: 80,
                     height: 80,
-                    borderRadius: 2,
-                    border: "1px solid rgba(0, 0, 0, 0.05)",
-                    boxShadow: "0 5px 15px rgba(0, 0, 0, 0.05)",
+                    borderRadius: styles.rounded("md"),
+                    border: `1px solid ${styles.colors?.neutral?.[100] || "rgba(0, 0, 0, 0.05)"}`,
+                    boxShadow: styles.shadows?.sm,
                   }}
                 />
                 <Box>
                   <Typography
                     variant="h6"
-                    sx={{ color: "#1d1d1f", fontWeight: 600 }}
+                    sx={{ color: styles.colors?.text?.primary || "#1d1d1f", fontWeight: 600 }}
                   >
                     {customerDetails.name}
                   </Typography>
-                  <Typography variant="body2" sx={{ color: "#86868b" }}>
+                  <Typography variant="body2" sx={{ color: styles.colors?.text?.secondary || "#86868b" }}>
                     {customerDetails.username || "Chưa cung cấp"}
                   </Typography>
                 </Box>
@@ -469,50 +445,43 @@ const OrderListView = ({ selectedCustomer, onClearFilter }) => {
 
               <Box
                 sx={{
-                  mt: 2,
-                  p: 2,
-                  borderRadius: 3,
-                  background: "rgba(0, 113, 227, 0.05)",
-                  border: "1px solid rgba(0, 0, 0, 0.05)",
+                  mt: styles.spacing(2),
+                  p: styles.spacing(2),
+                  borderRadius: styles.rounded("md"),
+                  background: styles.colors?.primary?.[50] || "rgba(0, 113, 227, 0.05)",
+                  border: `1px solid ${styles.colors?.neutral?.[100] || "rgba(0, 0, 0, 0.05)"}`,
                 }}
               >
-                <Typography variant="body2" sx={{ color: "#1d1d1f", mb: 1 }}>
+                <Typography variant="body2" sx={{ color: styles.colors?.text?.primary || "#1d1d1f", mb: styles.spacing(1) }}>
                   <strong>Địa chỉ:</strong>{" "}
                   {customerDetails.address || "Chưa cung cấp"}
                 </Typography>
-                <Typography variant="body2" sx={{ color: "#1d1d1f", mb: 1 }}>
+                <Typography variant="body2" sx={{ color: styles.colors?.text?.primary || "#1d1d1f", mb: styles.spacing(1) }}>
                   <strong>Email:</strong>{" "}
                   {customerDetails.email || "Chưa cung cấp"}
                 </Typography>
-                <Typography variant="body2" sx={{ color: "#1d1d1f" }}>
+                <Typography variant="body2" sx={{ color: styles.colors?.text?.primary || "#1d1d1f" }}>
                   <strong>Số điện thoại:</strong>{" "}
                   {customerDetails.phone || "Chưa cung cấp"}
                 </Typography>
               </Box>
             </Box>
           ) : (
-            <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-              <CircularProgress sx={{ color: "#0071e3" }} />
+            <Box sx={{ display: "flex", justifyContent: "center", py: styles.spacing(4) }}>
+              <CircularProgress sx={{ color: styles.colors?.primary?.main || "#0071e3" }} />
             </Box>
           )}
         </DialogContent>
         <DialogActions
-          sx={{ p: 3, borderTop: "1px solid rgba(0, 0, 0, 0.05)" }}
+          sx={{ p: styles.spacing(3), borderTop: `1px solid ${styles.colors?.neutral?.[100] || "rgba(0, 0, 0, 0.05)"}` }}
         >
           <Button
             onClick={() => setCustomerModalVisible(false)}
             sx={{
-              borderColor: "#86868b",
-              color: "#86868b",
-              borderRadius: 28,
-              px: 3,
-              textTransform: "none",
-              fontWeight: 500,
-              "&:hover": {
-                borderColor: "#1d1d1f",
-                color: "#1d1d1f",
-                background: "rgba(0, 0, 0, 0.05)",
-              },
+              ...styles.button("outline"),
+              borderRadius: styles.rounded("full"),
+              color: styles.colors?.text?.secondary || "#86868b",
+              borderColor: styles.colors?.neutral?.[200] || "#86868b",
             }}
             variant="outlined"
           >
@@ -529,7 +498,7 @@ const OrderListView = ({ selectedCustomer, onClearFilter }) => {
         <Alert
           onClose={handleCloseSnackbar}
           severity="success"
-          sx={{ width: "100%", borderRadius: 2 }}
+          sx={{ width: "100%", borderRadius: styles.rounded("md") }}
         >
           Đã sao chép mã đơn hàng!
         </Alert>

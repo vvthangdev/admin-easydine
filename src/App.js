@@ -1,27 +1,32 @@
 import React from "react";
+import { Box, Typography } from "@mui/material";
 import AppRoutes from "./routes";
 import Notification from "./components/Notification";
-import "antd/dist/reset.css";
 import { ToastContainer } from "react-toastify";
+import "antd/dist/reset.css";
 import "react-toastify/dist/ReactToastify.css";
 import { useAuth } from "./contexts/AuthContext";
+import { useAppleStyles } from "./theme/theme-hooks";
 import { Buffer } from "buffer";
 
 window.Buffer = Buffer;
 
 function App() {
   const { user, socketInitialized, loading } = useAuth();
-
-  console.log("[App.js] user:", user ? { username: user.username, role: user.role, _id: user._id } : "null");
-  console.log("[App.js] socketInitialized:", socketInitialized);
-  console.log("[App.js] loading:", loading);
+  const styles = useAppleStyles();
 
   if (loading) {
-    return <div>Đang tải...</div>;
+    return (
+      <Box sx={styles.card("main")}>
+        <Typography variant="h6" sx={{ p: 4 }}>
+          Đang tải...
+        </Typography>
+      </Box>
+    );
   }
 
   return (
-    <div className="App" style={{ textAlign: "center" }}>
+    <Box className="App" sx={{ textAlign: "center", p: styles.spacing(4) }}>
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -34,12 +39,14 @@ function App() {
         pauseOnHover
         theme="light"
       />
-      <AppRoutes />
+      <AppRoutes /> {/* Header đã được render trong AppRoutes */}
       <Notification />
-      {/* <div style={{ color: user && socketInitialized ? "green" : "red" }}>
-        Notification status: {user ? (socketInitialized ? "Rendered with socket" : "No socket connection") : "User not logged in"}
-      </div> */}
-    </div>
+      <Box sx={styles.status(user && socketInitialized ? "success" : "error")}>
+        <Typography variant="caption">
+          {user ? (socketInitialized ? "Kết nối socket thành công" : "Không có kết nối socket") : "Người dùng chưa đăng nhập"}
+        </Typography>
+      </Box>
+    </Box>
   );
 }
 

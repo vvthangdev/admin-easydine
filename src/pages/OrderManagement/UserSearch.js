@@ -1,5 +1,3 @@
-'use client';
-
 import { useState, useMemo } from 'react';
 import {
   Box,
@@ -19,13 +17,13 @@ import {
 import { Search, User, Phone, Home } from 'lucide-react';
 import debounce from 'lodash.debounce';
 import { userAPI } from '../../services/apis/User';
-import { useTheme } from '@mui/material/styles';
+import { useAppleStyles } from '../../theme/theme-hooks'; // Import Apple styles
 
 const UserSearch = ({ onSelectCustomer }) => {
-  const theme = useTheme();
-  console.log('Theme structure:', theme); // Debug theme
-  console.log('Components:', theme.components); // Sửa: không dùng spread
-  console.log('Text:', theme.components.text); // Sửa: không dùng spread
+  const styles = useAppleStyles();
+  console.log('Apple styles:', styles); // Debug Apple styles
+  console.log('Components:', styles.components); // Debug components
+  console.log('Text:', styles.components?.text); // Debug text styles
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -62,13 +60,20 @@ const UserSearch = ({ onSelectCustomer }) => {
     onSelectCustomer(customer);
   };
 
+  // Fallback colors
+  const primaryColor = styles.colors?.primary?.main ;
+  const primaryLight = styles.colors?.primary?.[50] ;
+  const textPrimary = styles.colors?.text?.primary ;
+  const textSecondary = styles.colors?.text?.secondary ;
+  const neutral900 = styles.colors?.neutral?.[900] ;
+
   return (
     <Box sx={{ height: '100%', overflowY: 'auto' }}>
       <Typography
         variant="h6"
         sx={{
-          ...theme.components.text.heading, // Sửa: thêm spread operator
-          mb: theme.spacing(4),
+          ...styles.components?.text?.heading,
+          mb: styles.spacing(4),
         }}
       >
         Tìm kiếm khách hàng
@@ -80,12 +85,13 @@ const UserSearch = ({ onSelectCustomer }) => {
         onChange={handleSearch}
         variant="outlined"
         sx={{
-          mb: theme.spacing(4),
+          mb: styles.spacing(4),
+          ...styles.input("default"), // Áp dụng style input từ Apple theme
         }}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
-              <Search size={20} color={theme.colors?.primary?.main || theme.palette.primary.main} />
+              <Search size={20} color={primaryColor} />
             </InputAdornment>
           ),
           endAdornment: loading && (
@@ -93,7 +99,7 @@ const UserSearch = ({ onSelectCustomer }) => {
               <CircularProgress
                 size={20}
                 sx={{
-                  color: theme.colors?.primary?.second || theme.palette.primary.main,
+                  color: primaryColor,
                 }}
               />
             </InputAdornment>
@@ -104,51 +110,51 @@ const UserSearch = ({ onSelectCustomer }) => {
         <TableContainer
           component={Paper}
           sx={{
-            ...theme.components.table.container,
-            background: theme.components.card.main.background,
-            boxShadow: theme.shadows.sm, // Sửa: sử dụng shadow từ theme
+            ...styles.components?.table?.container,
+            background: styles.components?.card?.main?.background || '#ffffff',
+            boxShadow: styles.shadows?.sm,
           }}
         >
           <Table size="small">
-            <TableHead sx={theme.components.table.head}>
+            <TableHead sx={styles.components?.table?.head}>
               <TableRow>
                 <TableCell
                   sx={{
-                    ...theme.components.table.cell,
-                    fontWeight: theme.typography.fontWeight?.semibold || 600,
+                    ...styles.components?.table?.cell,
+                    fontWeight: 600,
                   }}
                 >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: theme.spacing(1) }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: styles.spacing(1) }}>
                     <User size={16} />
                     Tên
                   </Box>
                 </TableCell>
                 <TableCell
                   sx={{
-                    ...theme.components.table.cell,
-                    fontWeight: theme.typography.fontWeight?.semibold || 600,
+                    ...styles.components?.table?.cell,
+                    fontWeight: 600,
                   }}
                 >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: theme.spacing(1) }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: styles.spacing(1) }}>
                     <Phone size={16} />
                     Số điện thoại
                   </Box>
                 </TableCell>
                 <TableCell
                   sx={{
-                    ...theme.components.table.cell,
-                    fontWeight: theme.typography.fontWeight?.semibold || 600,
+                    ...styles.components?.table?.cell,
+                    fontWeight: 600,
                   }}
                 >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: theme.spacing(1) }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: styles.spacing(1) }}>
                     <Home size={16} />
                     Địa chỉ
                   </Box>
                 </TableCell>
                 <TableCell
                   sx={{
-                    ...theme.components.table.cell,
-                    fontWeight: theme.typography.fontWeight?.semibold || 600,
+                    ...styles.components?.table?.cell,
+                    fontWeight: 600,
                   }}
                 >
                   Hành động
@@ -160,33 +166,32 @@ const UserSearch = ({ onSelectCustomer }) => {
                 <TableRow
                   key={record._id}
                   sx={{
-                    ...theme.components.table.row,
+                    ...styles.components?.table?.row,
                     '&:hover': {
-                      backgroundColor:
-                        theme.colors?.primary?.[50] || theme.palette.primary.light || '#e6f3ff',
+                      backgroundColor: primaryLight,
                     },
                   }}
                 >
                   <TableCell
                     sx={{
-                      ...theme.components.table.cell,
-                      color: theme.colors?.neutral?.[900] || theme.palette.text.primary,
+                      ...styles.components?.table?.cell,
+                      color: neutral900,
                     }}
                   >
                     {record.name}
                   </TableCell>
                   <TableCell
                     sx={{
-                      ...theme.components.table.cell,
-                      color: theme.colors?.neutral?.[900] || theme.palette.text.primary,
+                      ...styles.components?.table?.cell,
+                      color: neutral900,
                     }}
                   >
                     {record.phone}
                   </TableCell>
                   <TableCell
                     sx={{
-                      ...theme.components.table.cell,
-                      color: theme.colors?.neutral?.[900] || theme.palette.text.primary,
+                      ...styles.components?.table?.cell,
+                      color: neutral900,
                     }}
                   >
                     {record.address}
@@ -196,9 +201,9 @@ const UserSearch = ({ onSelectCustomer }) => {
                       variant="contained"
                       onClick={() => handleSelectCustomer(record)}
                       sx={{
-                        ...theme.components.button.primary,
-                        px: theme.spacing(2),
-                        py: theme.spacing(0.5),
+                        ...styles.button("primary"), // Sử dụng button primary từ Apple theme
+                        px: styles.spacing(2),
+                        py: styles.spacing(0.5),
                         minWidth: 0,
                       }}
                     >

@@ -1,5 +1,4 @@
-"use client";
-
+import { useState } from 'react';
 import {
   Box,
   Typography,
@@ -16,9 +15,10 @@ import {
   FormControl,
   Chip,
   CircularProgress,
-} from "@mui/material";
-import { Edit, Trash2, User, Calendar, Eye } from "lucide-react";
-import moment from "moment";
+} from '@mui/material';
+import { Edit, Trash2, User, Calendar, Eye } from 'lucide-react';
+import moment from 'moment';
+import { useAppleStyles } from '../../theme/theme-hooks';
 
 const OrderTable = ({
   orders,
@@ -30,31 +30,33 @@ const OrderTable = ({
   onDelete,
   handleCopyOrderId,
 }) => {
+  const styles = useAppleStyles();
+
   const getStatusColor = (status) => {
     switch (status) {
-      case "pending":
-        return { bg: "#fff3e0", color: "#ff9800" };
-      case "confirmed":
-        return { bg: "#e0f2f1", color: "#009688" };
-      case "completed":
-        return { bg: "#e8f5e9", color: "#4caf50" };
-      case "canceled":
-        return { bg: "#ffebee", color: "#f44336" };
+      case 'pending':
+        return { bg: styles.colors?.warning?.[50] || '#fff3e0', color: styles.colors?.warning?.main || '#ff9500' };
+      case 'confirmed':
+        return { bg: styles.colors?.success?.[50] || '#e0f2f1', color: styles.colors?.success?.main || '#34c759' };
+      case 'completed':
+        return { bg: styles.colors?.success?.[100] || '#e8f5e9', color: styles.colors?.success?.main || '#4caf50' };
+      case 'canceled':
+        return { bg: styles.colors?.error?.[50] || '#ffebee', color: styles.colors?.error?.main || '#ff2d55' };
       default:
-        return { bg: "#f5f5f5", color: "#9e9e9e" };
+        return { bg: styles.colors?.neutral?.[50] || '#f5f5f5', color: styles.colors?.neutral?.[500] || '#9e9e9e' };
     }
   };
 
   const getStatusLabel = (status) => {
     switch (status) {
-      case "pending":
-        return "Chờ xử lý";
-      case "confirmed":
-        return "Đã xác nhận";
-      case "completed":
-        return "Hoàn thành";
-      case "canceled":
-        return "Đã hủy";
+      case 'pending':
+        return 'Chờ xử lý';
+      case 'confirmed':
+        return 'Đã xác nhận';
+      case 'completed':
+        return 'Hoàn thành';
+      case 'canceled':
+        return 'Đã hủy';
       default:
         return status;
     }
@@ -62,10 +64,10 @@ const OrderTable = ({
 
   const getOrderTypeLabel = (type) => {
     switch (type) {
-      case "reservation":
-        return "Đặt bàn";
-      case "takeaway":
-        return "Giao hàng";
+      case 'reservation':
+        return 'Đặt bàn';
+      case 'takeaway':
+        return 'Giao hàng';
       default:
         return type;
     }
@@ -73,15 +75,8 @@ const OrderTable = ({
 
   if (loading) {
     return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: 300,
-        }}
-      >
-        <CircularProgress sx={{ color: "#0071e3" }} />
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 300 }}>
+        <CircularProgress sx={{ color: styles.colors?.primary?.main || '#0071e3' }} />
       </Box>
     );
   }
@@ -90,80 +85,38 @@ const OrderTable = ({
     <TableContainer
       component={Paper}
       sx={{
-        borderRadius: 4,
-        background: "linear-gradient(145deg, #ffffff 0%, #f8f8fa 100%)",
-        boxShadow: "0 5px 15px rgba(0, 0, 0, 0.05)",
-        border: "1px solid rgba(0, 0, 0, 0.05)",
-        overflow: "hidden",
+        ...styles.components?.table?.container,
+        background: styles.gradients?.light || 'linear-gradient(145deg, #ffffff 0%, #f8f8fa 100%)',
+        boxShadow: styles.shadows?.sm,
+        border: `1px solid ${styles.colors?.neutral?.[100] || 'rgba(0, 0, 0, 0.05)'}`,
+        borderRadius: styles.rounded('lg'),
       }}
     >
       <Table stickyHeader>
-        <TableHead>
+        <TableHead sx={styles.components?.table?.head}>
           <TableRow>
-            <TableCell
-              sx={{
-                fontWeight: 600,
-                color: "#1d1d1f",
-                backgroundColor: "rgba(0, 113, 227, 0.05)",
-                py: 2,
-              }}
-            >
+            <TableCell sx={{ ...styles.components?.table?.cell, fontWeight: 600, backgroundColor: styles.colors?.primary?.[50] || 'rgba(0, 113, 227, 0.05)' }}>
               Mã đơn hàng
             </TableCell>
-            <TableCell
-              sx={{
-                fontWeight: 600,
-                color: "#1d1d1f",
-                backgroundColor: "rgba(0, 113, 227, 0.05)",
-                py: 2,
-              }}
-            >
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <TableCell sx={{ ...styles.components?.table?.cell, fontWeight: 600, backgroundColor: styles.colors?.primary?.[50] || 'rgba(0, 113, 227, 0.05)' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: styles.spacing(1) }}>
                 <User size={16} />
                 Khách hàng
               </Box>
             </TableCell>
-            <TableCell
-              sx={{
-                fontWeight: 600,
-                color: "#1d1d1f",
-                backgroundColor: "rgba(0, 113, 227, 0.05)",
-                py: 2,
-              }}
-            >
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <TableCell sx={{ ...styles.components?.table?.cell, fontWeight: 600, backgroundColor: styles.colors?.primary?.[50] || 'rgba(0, 113, 227, 0.05)' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: styles.spacing(1) }}>
                 <Calendar size={16} />
                 Ngày
               </Box>
             </TableCell>
-            <TableCell
-              sx={{
-                fontWeight: 600,
-                color: "#1d1d1f",
-                backgroundColor: "rgba(0, 113, 227, 0.05)",
-                py: 2,
-              }}
-            >
+            <TableCell sx={{ ...styles.components?.table?.cell, fontWeight: 600, backgroundColor: styles.colors?.primary?.[50] || 'rgba(0, 113, 227, 0.05)' }}>
               Trạng thái
             </TableCell>
-            <TableCell
-              sx={{
-                fontWeight: 600,
-                color: "#1d1d1f",
-                backgroundColor: "rgba(0, 113, 227, 0.05)",
-                py: 2,
-              }}
-            >
+            <TableCell sx={{ ...styles.components?.table?.cell, fontWeight: 600, backgroundColor: styles.colors?.primary?.[50] || 'rgba(0, 113, 227, 0.05)' }}>
               Loại đơn hàng
             </TableCell>
-            <TableCell
-              sx={{
-                fontWeight: 600,
-                color: "#1d1d1f",
-                backgroundColor: "rgba(0, 113, 227, 0.05)",
-                py: 2,
-              }}
-            >
+            <TableCell sx={{ ...styles.components?.table?.cell, fontWeight: 600, backgroundColor: styles.colors?.primary?.[50] || 'rgba(0, 113, 227, 0.05)' }}>
               Hành động
             </TableCell>
           </TableRow>
@@ -174,40 +127,33 @@ const OrderTable = ({
               <TableRow
                 key={record.id}
                 sx={{
-                  "&:hover": { backgroundColor: "rgba(0, 113, 227, 0.05)" },
-                  transition: "background-color 0.2s",
+                  ...styles.components?.table?.row,
+                  '&:hover': { backgroundColor: styles.colors?.primary?.[50] || 'rgba(0, 113, 227, 0.05)' },
                 }}
               >
                 <TableCell
                   sx={{
-                    color: "#1d1d1f",
+                    ...styles.components?.table?.cell,
+                    color: styles.colors?.text?.primary || '#1d1d1f',
                     fontWeight: 500,
-                    cursor: "pointer",
-                    userSelect: "none",
-                    "&:hover": {
-                      color: "#0071e3",
-                      textDecoration: "underline",
-                    },
+                    cursor: 'pointer',
+                    '&:hover': { color: styles.colors?.primary?.main || '#0071e3', textDecoration: 'underline' },
                   }}
                   onClick={() => handleCopyOrderId(record.id)}
                   title={`Sao chép mã: ${record.id}`}
                 >
                   #{record.id.slice(-4)}
                 </TableCell>
-
                 <TableCell>
                   <Button
                     sx={{
-                      textTransform: "none",
-                      color: "#0071e3",
-                      fontWeight: 500,
-                      "&:hover": {
-                        background: "rgba(0, 113, 227, 0.05)",
-                      },
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 1,
-                      px: 1,
+                      ...styles.button('ghost'),
+                      color: styles.colors?.primary?.main || '#0071e3',
+                      '&:hover': { background: styles.colors?.primary?.[50] || 'rgba(0, 113, 227, 0.05)' },
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: styles.spacing(1),
+                      px: styles.spacing(1),
                     }}
                     onClick={() => onViewCustomerDetails(record.customerId)}
                   >
@@ -215,71 +161,42 @@ const OrderTable = ({
                     {`${record.customerName} - ${record.customerPhone}`}
                   </Button>
                 </TableCell>
-                <TableCell sx={{ color: "#1d1d1f" }}>
-                  {record.time
-                    ? moment.utc(record.time).local().format("HH:mm, DD/MM/YY")
-                    : "N/A"}
+                <TableCell sx={{ color: styles.colors?.text?.primary || '#1d1d1f' }}>
+                  {record.time ? moment.utc(record.time).local().format('HH:mm, DD/MM/YY') : 'N/A'}
                 </TableCell>
                 <TableCell>
                   <FormControl size="small" sx={{ minWidth: 150 }}>
                     <Select
                       value={record.status}
-                      onChange={(e) =>
-                        onStatusChange(record.id, e.target.value)
-                      }
+                      onChange={(e) => onStatusChange(record.id, e.target.value)}
                       sx={{
+                        ...styles.input('default'),
                         height: 36,
-                        borderRadius: 4,
                         backgroundColor: getStatusColor(record.status).bg,
                         color: getStatusColor(record.status).color,
                         fontWeight: 500,
-                        "& .MuiOutlinedInput-notchedOutline": {
-                          borderColor: "transparent",
-                        },
-                        "&:hover .MuiOutlinedInput-notchedOutline": {
-                          borderColor: getStatusColor(record.status).color,
-                        },
-                        "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                          borderColor: getStatusColor(record.status).color,
-                        },
-                        "& .MuiSelect-select": {
-                          py: 0.5,
-                          px: 1.5,
-                        },
                       }}
                       disabled={loading}
                       MenuProps={{
                         PaperProps: {
                           sx: {
-                            borderRadius: 2,
-                            boxShadow: "0 5px 15px rgba(0, 0, 0, 0.1)",
+                            borderRadius: styles.rounded('sm'),
+                            boxShadow: styles.shadows?.md,
                           },
                         },
                       }}
                     >
-                      <MenuItem
-                        value="pending"
-                        sx={{ color: getStatusColor("pending").color }}
-                      >
-                        {getStatusLabel("pending")}
+                      <MenuItem value="pending" sx={{ color: getStatusColor('pending').color }}>
+                        {getStatusLabel('pending')}
                       </MenuItem>
-                      <MenuItem
-                        value="confirmed"
-                        sx={{ color: getStatusColor("confirmed").color }}
-                      >
-                        {getStatusLabel("confirmed")}
+                      <MenuItem value="confirmed" sx={{ color: getStatusColor('confirmed').color }}>
+                        {getStatusLabel('confirmed')}
                       </MenuItem>
-                      <MenuItem
-                        value="completed"
-                        sx={{ color: getStatusColor("completed").color }}
-                      >
-                        {getStatusLabel("completed")}
+                      <MenuItem value="completed" sx={{ color: getStatusColor('completed').color }}>
+                        {getStatusLabel('completed')}
                       </MenuItem>
-                      <MenuItem
-                        value="canceled"
-                        sx={{ color: getStatusColor("canceled").color }}
-                      >
-                        {getStatusLabel("canceled")}
+                      <MenuItem value="canceled" sx={{ color: getStatusColor('canceled').color }}>
+                        {getStatusLabel('canceled')}
                       </MenuItem>
                     </Select>
                   </FormControl>
@@ -288,20 +205,16 @@ const OrderTable = ({
                   <Chip
                     label={getOrderTypeLabel(record.type)}
                     sx={{
-                      bgcolor:
-                        record.type === "reservation"
-                          ? "rgba(0, 113, 227, 0.1)"
-                          : "rgba(156, 39, 176, 0.1)",
-                      color:
-                        record.type === "reservation" ? "#0071e3" : "#9c27b0",
+                      bgcolor: record.type === 'reservation' ? styles.colors?.primary?.[50] || 'rgba(0, 113, 227, 0.1)' : styles.colors?.secondary?.[50] || 'rgba(156, 39, 176, 0.1)',
+                      color: record.type === 'reservation' ? styles.colors?.primary?.main || '#0071e3' : styles.colors?.secondary?.main || '#9c27b0',
                       fontWeight: 500,
-                      borderRadius: 4,
+                      borderRadius: styles.rounded('sm'),
                     }}
                     size="small"
                   />
                 </TableCell>
                 <TableCell>
-                  <Box sx={{ display: "flex", gap: 1 }}>
+                  <Box sx={{ display: 'flex', gap: styles.spacing(1) }}>
                     <Button
                       variant="contained"
                       size="small"
@@ -309,20 +222,9 @@ const OrderTable = ({
                       onClick={() => onEdit(record)}
                       disabled={loading}
                       sx={{
-                        background:
-                          "linear-gradient(145deg, #0071e3 0%, #42a5f5 100%)",
-                        color: "#ffffff",
-                        borderRadius: 28,
-                        boxShadow: "0 4px 12px rgba(0, 113, 227, 0.2)",
-                        textTransform: "none",
-                        fontWeight: 500,
-                        "&:hover": {
-                          background:
-                            "linear-gradient(145deg, #0071e3 0%, #42a5f5 100%)",
-                          boxShadow: "0 6px 16px rgba(0, 113, 227, 0.3)",
-                          transform: "translateY(-2px)",
-                        },
-                        transition: "all 0.3s ease",
+                        ...styles.button('primary'),
+                        borderRadius: styles.rounded('full'),
+                        boxShadow: styles.shadows?.sm,
                       }}
                     >
                       Sửa
@@ -335,16 +237,10 @@ const OrderTable = ({
                         onClick={() => onViewDetails(record.id)}
                         disabled={loading}
                         sx={{
-                          borderColor: "#86868b",
-                          color: "#86868b",
-                          borderRadius: 28,
-                          textTransform: "none",
-                          fontWeight: 500,
-                          "&:hover": {
-                            borderColor: "#1d1d1f",
-                            color: "#1d1d1f",
-                            background: "rgba(0, 0, 0, 0.05)",
-                          },
+                          ...styles.button('outline'),
+                          borderRadius: styles.rounded('full'),
+                          color: styles.colors?.text?.secondary || '#86868b',
+                          borderColor: styles.colors?.neutral?.[200] || '#86868b',
                         }}
                       >
                         Chi tiết
@@ -357,15 +253,10 @@ const OrderTable = ({
                       onClick={() => onDelete(record)}
                       disabled={loading}
                       sx={{
-                        borderColor: "#ff3b30",
-                        color: "#ff3b30",
-                        borderRadius: 28,
-                        textTransform: "none",
-                        fontWeight: 500,
-                        "&:hover": {
-                          borderColor: "#ff3b30",
-                          background: "rgba(255, 59, 48, 0.05)",
-                        },
+                        ...styles.button('outline'),
+                        borderRadius: styles.rounded('full'),
+                        color: styles.colors?.error?.main || '#ff2d55',
+                        borderColor: styles.colors?.error?.main || '#ff2d55',
                       }}
                     >
                       Xóa
@@ -376,8 +267,8 @@ const OrderTable = ({
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={6} align="center" sx={{ py: 6 }}>
-                <Typography variant="body1" sx={{ color: "#86868b" }}>
+              <TableCell colSpan={6} align="center" sx={{ py: styles.spacing(6) }}>
+                <Typography variant="body1" sx={{ color: styles.colors?.text?.secondary || '#86868b' }}>
                   Không có đơn hàng nào
                 </Typography>
               </TableCell>
