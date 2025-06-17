@@ -55,6 +55,31 @@ npm start
 1. Mở trình duyệt, truy cập `http://localhost:3000`.  
 2. Kiểm tra console trình duyệt (F12 > Console) hoặc terminal để xem log lỗi.
 
+## Demo Screenshots
+
+Here are some screenshots showcasing EasyDine's features:
+
+### Admin Dashboard
+![ui-admin (1)](https://github.com/user-attachments/assets/bad081f6-8a60-4921-9541-ae63e68dcac5)
+![ui-admin (2)](https://github.com/user-attachments/assets/bbd40a95-6371-4a42-b524-689772ad561d)
+
+*The main administration dashboard with an overview of restaurant operations*
+
+### Order Management
+![ui-admin (3)](https://github.com/user-attachments/assets/b1dcda50-35b5-46d2-b132-287bf87fbd56)
+![ui-admin (11)](https://github.com/user-attachments/assets/ff83ebb2-a739-46b2-a852-14baf0a6ce19)
+
+*Interface for managing and tracking customer orders*
+
+### Menu Management
+![ui-admin (12)](https://github.com/user-attachments/assets/a6931a45-e65c-484b-8fb6-cb050255b61e)
+
+*Tool for creating and updating restaurant menu items*
+
+### User Management
+![ui-admin (13)](https://github.com/user-attachments/assets/a2fea456-e196-40e3-aca5-73b4a03c3ac2)
+
+
 ## Lưu Ý
 - **Backend**: Đảm bảo backend EasyDine chạy trước trên `http://localhost:8080`.
 - **Mạng**: Kiểm tra kết nối đến MinIO server (`128.199.246.55:3001`) nếu dùng.
