@@ -1,93 +1,67 @@
-# EasyDine - Installation Guide
+# EasyDine Admin Frontend
 
-## Overview
-EasyDine is a restaurant management system with separate admin interface and backend components. This guide will help you set up both components for local development.
+![React](https://img.shields.io/badge/React-18.x-blue)
+![Node.js](https://img.shields.io/badge/Node.js-20.17.0-green)
+![License](https://img.shields.io/badge/license-MIT-blue)
 
-## Step 1: Clone the Repository
+**EasyDine Admin Frontend** là giao diện quản trị viên cho ứng dụng EasyDine, được xây dựng bằng **React**. Hướng dẫn này giúp bạn cài đặt và chạy Admin Frontend trên máy local (Windows, macOS, hoặc Linux) mà không cần Docker. Mã nguồn được giả định đã giải nén từ file zip.
 
-First, download the project source code from GitHub to your local machine. Use the following command to clone both the Admin Web interface and Backend:
+## Mục Lục
+- [Yêu Cầu Hệ Thống](#yêu-cầu-hệ-thống)
+- [Cài Đặt](#cài-đặt)
+- [Chạy Ứng Dụng](#chạy-ứng-dụng)
+- [Kiểm Tra Kết Quả](#kiểm-tra-kết-quả)
+- [Lưu Ý](#lưu-ý)
+- [Khắc Phục Lỗi](#khắc-phục-lỗi)
 
-```bash
-git clone https://github.com/vvthangdev/EasyDine
-```
+## Yêu Cầu Hệ Thống
+- **Hệ điều hành**: Windows, macOS, hoặc Linux
+- **Node.js**: Phiên bản 20.17.0
+- **npm**: Đi kèm với Node.js
+- **Trình chỉnh sửa văn bản**: VS Code hoặc tương tự
 
-This command will copy the entire source code into a new directory named "EasyDine" on your machine.
+## Cài Đặt
 
-## Step 2: Install and Run Admin Web Interface
+1. **Cài Đặt Node.js**  
+   Tải Node.js phiên bản 20.17.0 từ [nodejs.org](https://nodejs.org/dist/v20.17.0/) (chọn đúng phiên bản).  
+   Kiểm tra phiên bản bằng lệnh:  
+   node --version  
+   npm --version  
+   Đảm bảo Node.js phiên bản 20.17.0.
 
-Navigate to the Admin Web directory:
+2. **Chuẩn Bị Mã Nguồn**  
+   Giải nén file zip chứa mã nguồn vào một thư mục, ví dụ: `C:\admin-easydine` (Windows) hoặc `~/admin-easydine` (macOS/Linux).  
+   Mở terminal và di chuyển vào thư mục:  
+   cd /đường/dẫn/đến/admin-easydine
 
-```bash
-cd EasyDine/admin-EasyDine
-```
+3. **Cài Đặt Phụ Thuộc**  
+   Chạy lệnh để cài đặt các thư viện cần thiết (React, React-DOM, v.v.):  
+   npm install
 
-Install the necessary dependencies for the Admin Web project:
+4. **Thiết Lập Biến Môi Trường**  
+   Tạo file `.env` trong thư mục gốc (`admin-easydine`) và sao chép nội dung sau:  
+   REACT_APP_BACKEND_URL=http://localhost:8080  
+   REACT_APP_MINIO_API_URL=http://128.199.246.55:3001/upload  
+   REACT_APP_QRCODE=https://img.vietqr.io/image/TIMO-0376688910-compact2.png  
+   - Đảm bảo backend EasyDine đang chạy trên `http://localhost:8080` (theo hướng dẫn backend).  
+   - `REACT_APP_MINIO_API_URL` sử dụng server từ xa (`128.199.246.55:3001`). Kiểm tra kết nối bằng lệnh `curl http://128.199.246.55:3001` hoặc trình duyệt.
 
-```bash
-npm install
-```
+## Chạy Ứng Dụng
+Trong terminal, tại thư mục dự án, chạy:  
+npm start  
+Ứng dụng sẽ chạy trên `http://localhost:3000`.
 
-After installation is complete, start the Admin Web application:
+## Kiểm Tra Kết Quả
+1. Mở trình duyệt, truy cập `http://localhost:3000`.  
+2. Kiểm tra console trình duyệt (F12 > Console) hoặc terminal để xem log lỗi.
 
-```bash
-npm start
-```
+## Lưu Ý
+- **Backend**: Đảm bảo backend EasyDine chạy trước trên `http://localhost:8080`.
+- **Mạng**: Kiểm tra kết nối đến MinIO server (`128.199.246.55:3001`) nếu dùng.
+- **Script**: Kiểm tra file `package.json` để xác nhận script `start` tồn tại. Nếu không, thử `npm run dev`.
+- **Lỗi phụ thuộc**: Nếu lỗi khi chạy `npm install`, xóa thư mục `node_modules` và file `package-lock.json`, rồi chạy lại.
 
-The Admin Web interface will launch in your default browser at [http://localhost:3000](http://localhost:3000). You can access the system's administration dashboard through this URL.
-
-## Step 3: Install and Run Backend Server
-
-Open a new terminal window and navigate to the Backend directory:
-
-```bash
-cd EasyDine/backend-EasyDine
-```
-
-Install the necessary dependencies for the Backend project:
-
-```bash
-npm install
-```
-
-After installation is complete, start the Backend server in development mode:
-
-```bash
-npm run dev
-```
-
-This command will start the Backend server, making all API endpoints available for the system. By default, the server runs at [http://localhost:8080](http://localhost:8080).
-
-## Demo Screenshots
-![image](https://github.com/user-attachments/assets/5fe15d04-4708-440f-97aa-a6801df82910)
-
-Here are some screenshots showcasing EasyDine's features:
-
-### Admin Dashboard
-![image](https://github.com/user-attachments/assets/eadf5ce3-b9a0-454c-a4a6-b7a4a9569520)
-
-*The main administration dashboard with an overview of restaurant operations*
-
-### Order Management
-![image](https://github.com/user-attachments/assets/ba4775b1-28aa-4745-bc01-380af4920b7b)
-
-*Interface for managing and tracking customer orders*
-
-### Menu Editor
-![image](https://github.com/user-attachments/assets/b8b9785c-3b78-43a6-944f-cfe9b1c64201)
-
-*Tool for creating and updating restaurant menu items*
-
-### Customer Analytics
-![image](https://github.com/user-attachments/assets/dca29050-a7bc-4337-bfdd-cb6c1471f568)
-
-*Visualization of customer data*
-
-## Requirements
-
-- Node.js (v14 or newer recommended)
-- npm (v6 or newer)
-- Git
-
-## Additional Information
-
-For any issues or questions, please open an issue in the GitHub repository or contact the repository maintainer.
+## Khắc Phục Lỗi
+- **Lỗi kết nối backend**: Đảm bảo backend chạy trên `http://localhost:8080`.
+- **Lỗi MinIO**: Kiểm tra server `128.199.246.55:3001` hoạt động bằng `curl` hoặc trình duyệt.
+- **Lỗi khác**: Cung cấp log lỗi từ console hoặc terminal để được hỗ trợ chi tiết.
