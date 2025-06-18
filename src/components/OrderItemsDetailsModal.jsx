@@ -1,10 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography, Table, TableBody, TableCell, TableHead, TableRow, TableContainer, Paper, Stack } from '@mui/material';
-import { orderAPI } from '../services/apis/Order';
-import { adminAPI } from '../services/apis/Admin';
-import { toast } from 'react-toastify';
+import React, { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  TableContainer,
+  Paper,
+  Stack,
+} from "@mui/material";
+import { orderAPI } from "../services/apis/Order";
+import { adminAPI } from "../services/apis/Admin";
+import { toast } from "react-toastify";
 
-export default function OrderDetailsModal({ open, onClose, notificationData }) {
+export default function OrderItemsDetailsModal({ open, onClose, notificationData }) {
   const [orderInfo, setOrderInfo] = useState(null);
   const [customerName, setCustomerName] = useState(null);
   const [staffName, setStaffName] = useState(null);
@@ -13,7 +28,10 @@ export default function OrderDetailsModal({ open, onClose, notificationData }) {
   const [error, setError] = useState(null);
 
   // Log dữ liệu thông báo
-  console.log("[OrderDetailsModal] Dữ liệu thông báo nhận được:", JSON.stringify(notificationData, null, 2));
+  console.log(
+    "[OrderItemsDetailsModal] Dữ liệu thông báo nhận được:",
+    JSON.stringify(notificationData, null, 2)
+  );
 
   // Gọi API getOrderInfo và getCustomerDetails
   useEffect(() => {
@@ -24,37 +42,36 @@ export default function OrderDetailsModal({ open, onClose, notificationData }) {
         .getOrderInfo({ id: notificationData.data.orderId })
         .then(async (response) => {
           setOrderInfo(response);
-          // Gọi API lấy thông tin người dùng
           try {
             if (response.order?.customer_id) {
               const customer = await adminAPI.getCustomerDetails(response.order.customer_id);
-              setCustomerName(customer.name || 'N/A');
+              setCustomerName(customer.name || "N/A");
             } else {
-              setCustomerName('N/A');
+              setCustomerName("N/A");
             }
             if (response.order?.staff_id) {
               const staff = await adminAPI.getCustomerDetails(response.order.staff_id);
-              setStaffName(staff.name || 'N/A');
+              setStaffName(staff.name || "N/A");
             } else {
-              setStaffName('N/A');
+              setStaffName("N/A");
             }
             if (response.order?.cashier_id) {
               const cashier = await adminAPI.getCustomerDetails(response.order.cashier_id);
-              setCashierName(cashier.name || 'N/A');
+              setCashierName(cashier.name || "N/A");
             } else {
-              setCashierName('Không có');
+              setCashierName("Không có");
             }
           } catch (userError) {
-            console.error("[OrderDetailsModal] Lỗi khi lấy thông tin người dùng:", userError);
+            console.error("[OrderItemsDetailsModal] Lỗi khi lấy thông tin người dùng:", userError);
             toast.error("Không thể tải thông tin người dùng");
-            setCustomerName('N/A');
-            setStaffName('N/A');
-            setCashierName('Không có');
+            setCustomerName("N/A");
+            setStaffName("N/A");
+            setCashierName("Không có");
           }
           setLoading(false);
         })
         .catch((error) => {
-          console.error("[OrderDetailsModal] Lỗi khi lấy thông tin đơn hàng:", error);
+          console.error("[OrderItemsDetailsModal] Lỗi khi lấy thông tin đơn hàng:", error);
           setError("Không thể tải thông tin đơn hàng");
           toast.error("Không thể tải thông tin đơn hàng");
           setLoading(false);
@@ -64,8 +81,9 @@ export default function OrderDetailsModal({ open, onClose, notificationData }) {
 
   // Format dữ liệu hiển thị
   const displayData = {
-    title: notificationData?.message || "Thông báo đơn hàng",
-    tables: orderInfo?.reservedTables?.map(t => `${t.table_number} (${t.area})`).join(", ") || "N/A",
+    title: notificationData?.message || "Cập nhật món ăn",
+    tables:
+      orderInfo?.reservedTables?.map((t) => `${t.table_number} (${t.area})`).join(", ") || "N/A",
     timestamp: orderInfo?.order?.time
       ? new Date(orderInfo.order.time).toLocaleString("vi-VN", {
           hour: "2-digit",
@@ -76,20 +94,13 @@ export default function OrderDetailsModal({ open, onClose, notificationData }) {
           year: "numeric",
         }).replace(",", "")
       : "N/A",
-    items: orderInfo?.itemOrders?.map(item => ({
-      itemName: item.itemName,
-      quantity: item.quantity,
-      note: item.note || "-",
-      size: item.size || "-",
-      price: item.itemPrice ? `${item.itemPrice.toLocaleString("vi-VN")} VND` : "N/A",
-      total: item.itemPrice && item.quantity
-        ? `${(item.itemPrice * item.quantity).toLocaleString("vi-VN")} VND`
-        : "N/A",
-    })) || [],
-    order: orderInfo?.order ? {
-      type: orderInfo.order.type || "N/A",
-      status: orderInfo.order.status || "N/A",
-    } : { type: "N/A", status: "N/A" },
+    items: notificationData?.data?.addedItems || notificationData?.data?.canceledItems || [],
+    order: orderInfo?.order
+      ? {
+          type: orderInfo.order.type || "N/A",
+          status: orderInfo.order.status || "N/A",
+        }
+      : { type: "N/A", status: "N/A" },
     total_amount: orderInfo?.order?.final_amount
       ? `${orderInfo.order.final_amount.toLocaleString("vi-VN")} VND`
       : "N/A",
@@ -98,14 +109,14 @@ export default function OrderDetailsModal({ open, onClose, notificationData }) {
     cashier: cashierName || "Không có",
   };
 
-  console.log("[OrderDetailsModal] Dữ liệu orderInfo:", orderInfo);
+  console.log("[OrderItemsDetailsModal] Dữ liệu orderInfo:", orderInfo);
 
   // Hàm in phiếu
   const handlePrint = () => {
     const printContent = `
       <html>
         <head>
-          <title>Phiếu gọi món</title>
+          <title>Phiếu cập nhật món</title>
           <style>
             body { font-family: Arial, sans-serif; margin: 10mm; font-size: 12px; }
             .print-container { width: 80mm; }
@@ -147,22 +158,30 @@ export default function OrderDetailsModal({ open, onClose, notificationData }) {
                 </tr>
               </thead>
               <tbody>
-                ${displayData.items.map(item => `
+                ${displayData.items
+                  .map(
+                    (item) => `
                   <tr>
                     <td>${item.itemName}</td>
                     <td style="text-align: center;">${item.quantity}</td>
-                    <td>${item.size}</td>
-                    <td>${item.note}</td>
-                    <td style="text-align: right;">${item.total}</td>
+                    <td>${item.size || "-"}</td>
+                    <td>${item.note || "-"}</td>
+                    <td style="text-align: right;">${
+                      item.itemPrice
+                        ? (item.itemPrice * item.quantity).toLocaleString("vi-VN")
+                        : "N/A"
+                    }</td>
                   </tr>
-                `).join('')}
+                `
+                  )
+                  .join("")}
               </tbody>
             </table>
           </div>
         </body>
       </html>
     `;
-    const printWindow = window.open('', '_blank');
+    const printWindow = window.open("", "_blank");
     printWindow.document.write(printContent);
     printWindow.document.close();
     printWindow.focus();
@@ -197,25 +216,33 @@ export default function OrderDetailsModal({ open, onClose, notificationData }) {
               <strong>Bàn:</strong> {displayData.tables}
             </Typography>
             {displayData.items.length > 0 && (
-              <TableContainer component={Paper} sx={{ boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
+              <TableContainer component={Paper} sx={{ boxShadow: "0 2px 4px rgba(0,0,0,0.1)" }}>
                 <Table sx={{ minWidth: 500 }} size="small">
                   <TableHead>
                     <TableRow>
                       <TableCell sx={{ fontWeight: 600 }}>Món</TableCell>
-                      <TableCell sx={{ fontWeight: 600, textAlign: 'center' }}>Số lượng</TableCell>
+                      <TableCell sx={{ fontWeight: 600, textAlign: "center" }}>
+                        Số lượng
+                      </TableCell>
                       <TableCell sx={{ fontWeight: 600 }}>Kích cỡ</TableCell>
                       <TableCell sx={{ fontWeight: 600 }}>Ghi chú</TableCell>
-                      <TableCell sx={{ fontWeight: 600, textAlign: 'right' }}>Giá (VND)</TableCell>
+                      <TableCell sx={{ fontWeight: 600, textAlign: "right" }}>
+                        Giá (VND)
+                      </TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {displayData.items.map((item, index) => (
                       <TableRow key={index}>
                         <TableCell>{item.itemName}</TableCell>
-                        <TableCell sx={{ textAlign: 'center' }}>{item.quantity}</TableCell>
-                        <TableCell>{item.size}</TableCell>
-                        <TableCell>{item.note}</TableCell>
-                        <TableCell sx={{ textAlign: 'right' }}>{item.total}</TableCell>
+                        <TableCell sx={{ textAlign: "center" }}>{item.quantity}</TableCell>
+                        <TableCell>{item.size || "-"}</TableCell>
+                        <TableCell>{item.note || "-"}</TableCell>
+                        <TableCell sx={{ textAlign: "right" }}>
+                          {item.itemPrice
+                            ? (item.itemPrice * item.quantity).toLocaleString("vi-VN")
+                            : "N/A"}
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -250,11 +277,16 @@ export default function OrderDetailsModal({ open, onClose, notificationData }) {
         <Button
           onClick={onClose}
           variant="outlined"
-          sx={{ borderRadius: 20, textTransform: "none", borderColor: "#d1d1d6", color: "#1c1c1e" }}
+          sx={{
+            borderRadius: 20,
+            textTransform: "none",
+            borderColor: "#d1d1d6",
+            color: "#1c1c1e",
+          }}
         >
           Đóng
         </Button>
       </DialogActions>
     </Dialog>
   );
-};
+}

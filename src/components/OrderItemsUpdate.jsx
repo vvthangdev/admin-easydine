@@ -1,23 +1,28 @@
 import React, { useState, useEffect } from "react";
-import { Box, Paper, Typography, IconButton, Stack, Button } from "@mui/material";
+import {
+  Box,
+  Paper,
+  Typography,
+  IconButton,
+  Stack,
+  Button,
+  List,
+  ListItem,
+  ListItemText,
+} from "@mui/material";
 import { Package, X } from "lucide-react";
-import OrderDetailsModal from "./OrderDetailsModal";
+import OrderItemsDetailsModal from "./OrderItemsDetailsModal";
 import { orderAPI } from "../services/apis/Order";
 import { toast } from "react-toastify";
 
-export default function OrderNotification({
-  id,
-  message,
-  data,
-  onClose,
-}) {
+export default function OrderItemsUpdate({ id, message, data, onClose }) {
   const [openModal, setOpenModal] = useState(false);
   const [orderInfo, setOrderInfo] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   // Log dữ liệu props
-  console.log("[OrderNotification] Dữ liệu props nhận được:", {
+  console.log("[OrderItemsUpdate] Dữ liệu props nhận được:", {
     id,
     message,
     data,
@@ -34,7 +39,10 @@ export default function OrderNotification({
           setLoading(false);
         })
         .catch((err) => {
-          console.error("[OrderNotification] Lỗi khi lấy thông tin đơn hàng:", err);
+          console.error(
+            "[OrderItemsUpdate] Lỗi khi lấy thông tin đơn hàng:",
+            err
+          );
           setError("Không thể tải thông tin đơn hàng");
           toast.error("Không thể tải thông tin đơn hàng");
           setLoading(false);
@@ -45,17 +53,21 @@ export default function OrderNotification({
   // Format dữ liệu hiển thị
   const displayData = {
     message: message || "Không có nội dung",
-    status: orderInfo?.order?.status || "N/A",
+    status: orderInfo?.order?.status || data?.status || "N/A",
     time: orderInfo?.order?.time
-      ? new Date(orderInfo.order.time).toLocaleString("vi-VN", {
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-        }).replace(",", "")
-      : "N/A",
+      ? new Date(orderInfo.order.time)
+          .toLocaleString("vi-VN", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          })
+          .replace(",", "")
+      : data?.time || "N/A",
+    table: data?.table || "N/A",
+    items: data?.addedItems || data?.canceledItems || [], // Lấy danh sách món ăn (thêm hoặc hủy)
   };
 
   const handleViewDetails = () => {
@@ -101,7 +113,11 @@ export default function OrderNotification({
               {displayData.message}
             </Typography>
           </Stack>
-          <IconButton size="small" onClick={onClose} sx={{ color: "#6e6e73" }}>
+          <IconButton
+            size="small"
+            onClick={onClose}
+            sx={{ color: "#6e6e73" }}
+          >
             <X size={16} />
           </IconButton>
         </Stack>
@@ -116,11 +132,43 @@ export default function OrderNotification({
           ) : (
             <>
               <Typography variant="body2" color="text.secondary">
+                <strong>Bàn:</strong> {displayData.table}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
                 <strong>Trạng thái:</strong> {displayData.status}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 <strong>Thời gian:</strong> {displayData.time}
               </Typography>
+              {displayData.items.length > 0 && (
+                <>
+                  <Typography variant="body2" color="text.secondary" fontWeight={600}>
+                    {data.addedItems ? "Món đã thêm:" : "Món đã hủy:"}
+                  </Typography>
+                  <List dense sx={{ pl: 1 }}>
+                    {displayData.items.map((item, index) => (
+                      <ListItem key={index} disablePadding>
+                        <ListItemText
+                          primary={
+                            <Typography variant="body2" color="text.primary">
+                              {`${item.quantity} x ${item.itemName}${
+                                item.size ? ` (${item.size})` : ""
+                              }`}
+                            </Typography>
+                          }
+                          secondary={
+                            item.cancel_reason ? (
+                              <Typography variant="caption" color="text.secondary">
+                                Lý do hủy: {item.cancel_reason}
+                              </Typography>
+                            ) : null
+                          }
+                        />
+                      </ListItem>
+                    ))}
+                  </List>
+                </>
+              )}
             </>
           )}
         </Stack>
@@ -149,7 +197,7 @@ export default function OrderNotification({
         </Box>
       </Paper>
 
-      <OrderDetailsModal
+      <OrderItemsDetailsModal
         open={openModal}
         onClose={handleCloseAll}
         notificationData={{ id, message, data }}

@@ -1,33 +1,46 @@
 import React, { useState } from "react";
 import { Box, Paper, Typography, IconButton, Stack, Button } from "@mui/material";
-import { CreditCard, X } from "lucide-react";
+import { Bell, Package, X } from "lucide-react";
 import OrderDetailsModal from "./OrderDetailsModal";
 
-export default function PaymentNotification({
+export default function GenericNotification({
   id,
   type,
   title,
   data,
   onClose,
+  message
 }) {
   const [openModal, setOpenModal] = useState(false);
 
   // Log dữ liệu props
-  console.log("[PaymentNotification] Dữ liệu props nhận được:", {
+  console.log("[GenericNotification] Dữ liệu props nhận được:", {
     id,
     type,
     title,
     data,
+    message
   });
+
+  // Chọn icon dựa trên type
+  const getIcon = () => {
+    switch (type) {
+      case "CREATE_ORDER":
+      case "ADD_ITEM":
+      case "DELETE_ITEM":
+      case "CANCEL_ORDER":
+      case "CONFIRM_ORDER":
+        return <Package size={20} color="#1c1c1e" />;
+      default:
+        return <Bell size={20} color="#1c1c1e" />;
+    }
+  };
 
   // Format dữ liệu hiển thị
   const displayData = {
-    title: title || "Thông báo thanh toán",
+    title: title || "Thông báo",
     table: data?.table
       ? `${data.table.tableNumber} (${data.table.area})`
-      : "N/A",
-    amount: data?.payment?.amount
-      ? `${data.payment.amount.toLocaleString("vi-VN")} VND`
       : "N/A",
   };
 
@@ -66,7 +79,7 @@ export default function PaymentNotification({
           mb={1}
         >
           <Stack direction="row" alignItems="center" spacing={1}>
-            <CreditCard size={20} color="#1c1c1e" />
+            {getIcon()}
             <Typography variant="subtitle2" fontWeight={600} color="#1c1c1e">
               {displayData.title}
             </Typography>
@@ -79,9 +92,6 @@ export default function PaymentNotification({
         <Stack spacing={0.5} mb={1}>
           <Typography variant="body2" color="text.secondary">
             <strong>Bàn:</strong> {displayData.table}
-          </Typography>
-          <Typography variant="body2" color="#d32f2f" fontWeight={600}>
-            <strong>Số tiền:</strong> {displayData.amount}
           </Typography>
         </Stack>
 
@@ -111,7 +121,7 @@ export default function PaymentNotification({
       <OrderDetailsModal
         open={openModal}
         onClose={handleCloseAll}
-        notificationData={{ id, type, title, data }}
+        notificationData={{ id, type, title, data, message }}
       />
     </>
   );
