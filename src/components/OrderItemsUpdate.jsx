@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Box,
   Paper,
@@ -12,50 +12,23 @@ import {
 } from "@mui/material";
 import { Package, X } from "lucide-react";
 import OrderItemsDetailsModal from "./OrderItemsDetailsModal";
-import { orderAPI } from "../services/apis/Order";
-import { toast } from "react-toastify";
 
-export default function OrderItemsUpdate({ id, message, data, onClose }) {
+export default function OrderItemsUpdate({ id, message, data, timestamp, onClose }) {
   const [openModal, setOpenModal] = useState(false);
-  const [orderInfo, setOrderInfo] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
   // Log dữ liệu props
   console.log("[OrderItemsUpdate] Dữ liệu props nhận được:", {
     id,
     message,
     data,
+    timestamp,
   });
-
-  // Gọi API getOrderInfo
-  useEffect(() => {
-    if (data?.orderId) {
-      setLoading(true);
-      orderAPI
-        .getOrderInfo({ id: data.orderId })
-        .then((response) => {
-          setOrderInfo(response);
-          setLoading(false);
-        })
-        .catch((err) => {
-          console.error(
-            "[OrderItemsUpdate] Lỗi khi lấy thông tin đơn hàng:",
-            err
-          );
-          setError("Không thể tải thông tin đơn hàng");
-          toast.error("Không thể tải thông tin đơn hàng");
-          setLoading(false);
-        });
-    }
-  }, [data?.orderId]);
 
   // Format dữ liệu hiển thị
   const displayData = {
     message: message || "Không có nội dung",
-    status: orderInfo?.order?.status || data?.status || "N/A",
-    time: orderInfo?.order?.time
-      ? new Date(orderInfo.order.time)
+    time: timestamp
+      ? new Date(timestamp)
           .toLocaleString("vi-VN", {
             hour: "2-digit",
             minute: "2-digit",
@@ -65,9 +38,9 @@ export default function OrderItemsUpdate({ id, message, data, onClose }) {
             year: "numeric",
           })
           .replace(",", "")
-      : data?.time || "N/A",
+      : "N/A",
     table: data?.table || "N/A",
-    items: data?.addedItems || data?.canceledItems || [], // Lấy danh sách món ăn (thêm hoặc hủy)
+    items: data?.addedItems || data?.canceledItems || [],
   };
 
   const handleViewDetails = () => {
@@ -123,52 +96,36 @@ export default function OrderItemsUpdate({ id, message, data, onClose }) {
         </Stack>
 
         <Stack spacing={0.5} mb={1}>
-          {loading ? (
-            <Typography variant="body2">Đang tải...</Typography>
-          ) : error ? (
-            <Typography variant="body2" color="error">
-              {error}
-            </Typography>
-          ) : (
+          <Typography variant="body2" color="text.secondary">
+            <strong>Thời gian:</strong> {displayData.time}
+          </Typography>
+          {displayData.items.length > 0 && (
             <>
-              <Typography variant="body2" color="text.secondary">
-                <strong>Bàn:</strong> {displayData.table}
+              <Typography variant="body2" color="text.secondary" fontWeight={600}>
+                {data.addedItems ? "Món đã thêm:" : "Món đã hủy:"}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
-                <strong>Trạng thái:</strong> {displayData.status}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                <strong>Thời gian:</strong> {displayData.time}
-              </Typography>
-              {displayData.items.length > 0 && (
-                <>
-                  <Typography variant="body2" color="text.secondary" fontWeight={600}>
-                    {data.addedItems ? "Món đã thêm:" : "Món đã hủy:"}
-                  </Typography>
-                  <List dense sx={{ pl: 1 }}>
-                    {displayData.items.map((item, index) => (
-                      <ListItem key={index} disablePadding>
-                        <ListItemText
-                          primary={
-                            <Typography variant="body2" color="text.primary">
-                              {`${item.quantity} x ${item.itemName}${
-                                item.size ? ` (${item.size})` : ""
-                              }`}
-                            </Typography>
-                          }
-                          secondary={
-                            item.cancel_reason ? (
-                              <Typography variant="caption" color="text.secondary">
-                                Lý do hủy: {item.cancel_reason}
-                              </Typography>
-                            ) : null
-                          }
-                        />
-                      </ListItem>
-                    ))}
-                  </List>
-                </>
-              )}
+              <List dense sx={{ pl: 1 }}>
+                {displayData.items.map((item, index) => (
+                  <ListItem key={index} disablePadding>
+                    <ListItemText
+                      primary={
+                        <Typography variant="body2" color="text.primary">
+                          {`${item.quantity} x ${item.itemName}${
+                            item.size ? ` (${item.size})` : ""
+                          }`}
+                        </Typography>
+                      }
+                      secondary={
+                        item.cancel_reason ? (
+                          <Typography variant="caption" color="text.secondary">
+                            Lý do hủy: {item.cancel_reason}
+                          </Typography>
+                        ) : null
+                      }
+                    />
+                  </ListItem>
+                ))}
+              </List>
             </>
           )}
         </Stack>
@@ -190,7 +147,6 @@ export default function OrderItemsUpdate({ id, message, data, onClose }) {
                 borderColor: "#bfbfc4",
               },
             }}
-            disabled={loading || error || !orderInfo}
           >
             Xem chi tiết
           </Button>
@@ -200,7 +156,7 @@ export default function OrderItemsUpdate({ id, message, data, onClose }) {
       <OrderItemsDetailsModal
         open={openModal}
         onClose={handleCloseAll}
-        notificationData={{ id, message, data }}
+        notificationData={{ id, message, data, timestamp }}
       />
     </>
   );

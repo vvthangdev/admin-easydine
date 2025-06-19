@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Box } from "@mui/material";
 import { useAuth } from "../contexts/AuthContext";
 import PaymentNotification from "./PaymentNotification";
 import OrderNotification from "./OrderNotification";
-import OrderItemsUpdate from "./OrderItemsUpdate"; // Import component mới
+import OrderItemsUpdate from "./OrderItemsUpdate";
 import soundOrder from "../assets/notification.mp3";
 
 export default function Notification() {
@@ -20,23 +20,26 @@ export default function Notification() {
   };
 
   // Xóa thông báo
-  const removeNotification = (id) => {
+  const removeNotification = useCallback((id) => {
     setNotifications((prev) => prev.filter((notif) => notif.id !== id));
-  };
+  }, []);
 
-  // Thêm thông báo mới
-  const addNotification = (notificationData) => {
-    console.log(
-      "[Notification] Dữ liệu nhận được:",
-      JSON.stringify(notificationData, null, 2)
-    );
-    const notification = {
-      id: notificationData.id || Date.now(),
-      ...notificationData,
-    };
-    setNotifications((prev) => [notification, ...prev.slice(0, 4)]); // Giới hạn 5 thông báo
-    playNotificationSound();
-  };
+  // Thêm thông báo mới, memoized with useCallback
+  const addNotification = useCallback(
+    (notificationData) => {
+      console.log(
+        "[Notification] Dữ liệu nhận được:",
+        JSON.stringify(notificationData, null, 2)
+      );
+      const notification = {
+        id: notificationData.id || Date.now(),
+        ...notificationData,
+      };
+      setNotifications((prev) => [notification, ...prev.slice(0, 4)]); // Giới hạn 5 thông báo
+      playNotificationSound();
+    },
+    [] // Empty dependency array since playNotificationSound is stable
+  );
 
   useEffect(() => {
     console.log("[Notification] useEffect triggered", {
@@ -77,7 +80,7 @@ export default function Notification() {
       socket.off("notification");
       socket.off("orderUpdate");
     };
-  }, [user, socket, socketInitialized]);
+  }, [user, socket, socketInitialized, addNotification]); // Added addNotification to dependencies
 
   if (notifications.length === 0) {
     console.log("[Notification] Không có thông báo để render");
@@ -91,6 +94,7 @@ export default function Notification() {
     "DELETE_ITEM",
     "CANCEL_ORDER",
     "CONFIRM_ORDER",
+    "CALL_STAFF",
   ];
 
   // Các loại thông báo cập nhật món cho OrderItemsUpdate

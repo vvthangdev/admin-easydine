@@ -60,18 +60,6 @@ const TableManagementView = () => {
           mb: 3,
         }}
       >
-        <Typography
-          variant="h5"
-          sx={{
-            bgcolor: "#1976d2",
-            color: "#fff",
-            p: 1,
-            borderRadius: 2,
-            "&:hover": { bgcolor: "#1565c0" },
-          }}
-        >
-          Quản lý bàn
-        </Typography>
         <Box sx={{ display: "flex", gap: 2 }}>
           <Button
             variant="contained"
@@ -100,43 +88,6 @@ const TableManagementView = () => {
           </Button>
         </Box>
       </Box>
-
-      {tables.some((table) => table.reservation_id) && (
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="h6" gutterBottom>
-            Tóm tắt đơn hàng
-          </Typography>
-          {orderSummary().map((order) => (
-            <Box key={order.order_number} sx={{ mb: 1 }}>
-              <Typography variant="body2">
-                Đơn #
-                <span
-                  style={{
-                    color: "#1976d2",
-                    cursor: "pointer",
-                    textDecoration: "underline",
-                  }}
-                  onClick={() => {
-                    navigator.clipboard
-                      .writeText(order.full_id)
-                      .then(() => {
-                        toast.success(
-                          `Đã sao chép mã đơn hàng: ${order.full_id}`
-                        );
-                      })
-                      .catch(() => {
-                        toast.error("Không thể sao chép mã đơn hàng");
-                      });
-                  }}
-                >
-                  {order.order_number}
-                </span>
-                : Bàn {order.tables.sort((a, b) => a - b).join(", ")}
-              </Typography>
-            </Box>
-          ))}
-        </Box>
-      )}
 
       {loading ? (
         <Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>

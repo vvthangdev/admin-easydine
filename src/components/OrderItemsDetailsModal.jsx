@@ -14,6 +14,7 @@ import {
   TableContainer,
   Paper,
   Stack,
+  Box,
 } from "@mui/material";
 import { orderAPI } from "../services/apis/Order";
 import { adminAPI } from "../services/apis/Admin";
@@ -59,14 +60,14 @@ export default function OrderItemsDetailsModal({ open, onClose, notificationData
               const cashier = await adminAPI.getCustomerDetails(response.order.cashier_id);
               setCashierName(cashier.name || "N/A");
             } else {
-              setCashierName("Không có");
+              setCashierName("N/A");
             }
           } catch (userError) {
             console.error("[OrderItemsDetailsModal] Lỗi khi lấy thông tin người dùng:", userError);
             toast.error("Không thể tải thông tin người dùng");
             setCustomerName("N/A");
             setStaffName("N/A");
-            setCashierName("Không có");
+            setCashierName("N/A");
           }
           setLoading(false);
         })
@@ -82,10 +83,8 @@ export default function OrderItemsDetailsModal({ open, onClose, notificationData
   // Format dữ liệu hiển thị
   const displayData = {
     title: notificationData?.message || "Cập nhật món ăn",
-    tables:
-      orderInfo?.reservedTables?.map((t) => `${t.table_number} (${t.area})`).join(", ") || "N/A",
-    timestamp: orderInfo?.order?.time
-      ? new Date(orderInfo.order.time).toLocaleString("vi-VN", {
+    timestamp: notificationData?.timestamp
+      ? new Date(notificationData?.timestamp).toLocaleString("vi-VN", {
           hour: "2-digit",
           minute: "2-digit",
           second: "2-digit",
@@ -99,94 +98,241 @@ export default function OrderItemsDetailsModal({ open, onClose, notificationData
       ? {
           type: orderInfo.order.type || "N/A",
           status: orderInfo.order.status || "N/A",
+          total_amount: orderInfo.order.total_amount || 0,
+          final_amount: orderInfo.order.final_amount || 0,
+          discount_amount: orderInfo.order.discount_amount || 0,
+          voucher_code: orderInfo.order.voucher_code || null,
+          payment_method: orderInfo.order.payment_method || "Tiền mặt",
         }
-      : { type: "N/A", status: "N/A" },
-    total_amount: orderInfo?.order?.final_amount
-      ? `${orderInfo.order.final_amount.toLocaleString("vi-VN")} VND`
-      : "N/A",
+      : { type: "N/A", status: "N/A", total_amount: 0, final_amount: 0, discount_amount: 0, payment_method: "Tiền mặt" },
     customer: customerName || "N/A",
-    staff: staffName || "N/A",
-    cashier: cashierName || "Không có",
+    staff: { name: staffName || "N/A" },
+    cashier: { name: cashierName || "N/A" },
+    reservedTables: orderInfo?.order?.reservedTables || [{ table_number: "N/A", capacity: 1, start_time: null }],
   };
 
   console.log("[OrderItemsDetailsModal] Dữ liệu orderInfo:", orderInfo);
 
-  // Hàm in phiếu
-  const handlePrint = () => {
-    const printContent = `
+  // Hàm tạo nội dung HTML cho in hóa đơn
+  const generatePrintHTML = (orderDetails, staffInfo, cashierInfo) => {
+    if (!orderDetails) return '';
+
+    return `
+      <!DOCTYPE html>
       <html>
         <head>
-          <title>Phiếu cập nhật món</title>
+          <title>In Phiếu Cập Nhật</title>
+          <meta charset="utf-8">
           <style>
-            body { font-family: Arial, sans-serif; margin: 10mm; font-size: 12px; }
-            .print-container { width: 80mm; }
-            h2 { font-size: 14px; text-align: center; margin-bottom: 5mm; }
-            .info { margin-bottom: 5mm; }
-            .info p { margin: 2mm 0; }
-            table { width: 100%; border-collapse: collapse; margin-bottom: 5mm; }
-            th, td { border: 1px solid #000; padding: 2mm; text-align: left; font-size: 12px; }
-            th { background-color: #f5f5f5; font-weight: bold; }
-            .total { font-weight: bold; }
-            .no-print { display: none; }
-            @media print {
-              body { margin: 0; }
-              .no-print { display: none; }
+            @page { 
+              margin: 5mm; 
+              size: 80mm auto;
             }
+            * {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+            body { 
+              font-family: 'Courier New', monospace;
+              font-size: 10px;
+              line-height: 1.4;
+              color: black;
+              width: 80mm;
+            }
+            .receipt-container {
+              width: 100%;
+              max-width: 80mm;
+              margin: 0 auto;
+            }
+            .header {
+              text-align: center;
+              margin-bottom: 10px;
+              padding-bottom: 5px;
+              border-bottom: 1px dashed black;
+            }
+            .company-name {
+              font-size: 12px;
+              font-weight: bold;
+              margin-bottom: 3px;
+            }
+            .receipt-title {
+              font-size: 11px;
+              font-weight: bold;
+              text-align: center;
+              margin-bottom: 8px;
+              text-transform: uppercase;
+            }
+            .info-section {
+              margin-bottom: 10px;
+            }
+            .info-row {
+              display: flex;
+              justify-content: space-between;
+              margin-bottom: 2px;
+            }
+            .info-row span:first-child {
+              flex: 1;
+            }
+            .info-row span:last-child {
+              font-weight: bold;
+              max-width: 50%;
+              word-wrap: break-word;
+            }
+            .items-table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-bottom: 10px;
+            }
+            .table-header {
+              border-top: 1px solid black;
+              border-bottom: 1px solid black;
+              font-weight: bold;
+              font-size: 9px;
+            }
+            .table-header td {
+              padding: 3px 2px;
+            }
+            .item-row td {
+              padding: 3px 2px;
+              font-size: 9px;
+              vertical-align: top;
+            }
+            .item-row td:nth-child(1) {
+              width: 50%;
+              max-width: 40mm;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+            }
+            .item-row td:nth-child(2) {
+              width: 15%;
+              text-align: center;
+            }
+            .item-row td:nth-child(3) {
+              width: 35%;
+              word-wrap: break-word;
+              max-width: 25mm;
+            }
+            .item-note {
+              font-size: 8px;
+              color: #666;
+              font-style: italic;
+              display: block;
+              margin-top: 2px;
+            }
+            .footer {
+              text-align: center;
+              font-weight: bold;
+              margin-top: 10px;
+              font-size: 10px;
+            }
+            .separator {
+              border-top: 1px dashed black;
+              margin: 5px 0;
+            }
+            .text-center { text-align: center; }
+            .text-right { text-align: right; }
+            .font-bold { font-weight: bold; }
           </style>
         </head>
         <body>
-          <div class="print-container">
-            <h2>${displayData.title}</h2>
-            <div class="info">
-              <p><strong>Khách hàng:</strong> ${displayData.customer}</p>
-              <p><strong>Nhân viên:</strong> ${displayData.staff}</p>
-              <p><strong>Thu ngân:</strong> ${displayData.cashier}</p>
-              <p><strong>Bàn:</strong> ${displayData.tables}</p>
-              <p><strong>Thời gian:</strong> ${displayData.timestamp}</p>
-              <p><strong>Loại đơn hàng:</strong> ${displayData.order.type}</p>
-              <p><strong>Trạng thái:</strong> ${displayData.order.status}</p>
-              <p><strong>Tổng tiền:</strong> ${displayData.total_amount}</p>
+          <div class="receipt-container">
+            <!-- Header -->
+            <div class="header">
+              <div class="company-name">EasyDine</div>
+              <div>vvthang.dev@gmail.com</div>
             </div>
-            <table>
-              <thead>
-                <tr>
-                  <th>Món</th>
-                  <th style="text-align: center;">Số lượng</th>
-                  <th>Kích cỡ</th>
-                  <th>Ghi chú</th>
-                  <th style="text-align: right;">Giá (VND)</th>
+            <!-- Receipt Title -->
+            <div class="receipt-title">${orderDetails.title || "CẬP NHẬT MÓN ĂN"}</div>
+
+            <!-- Order Info -->
+            <div class="info-section">
+              <div class="info-row">
+                <span>Bàn:</span>
+                <span>${notificationData?.data?.table || "N/A"}</span>
+              </div>
+              <div class="info-row">
+                <span>Khách:</span>
+                <span>${orderDetails.reservedTables?.[0]?.capacity || "1"}</span>
+              </div>
+              <div class="info-row">
+                <span>Giờ đặt:</span>
+                <span>${notificationData?.timestamp
+                  ? new Date(notificationData?.timestamp).toLocaleString('vi-VN', {
+                      day: '2-digit', month: '2-digit', year: 'numeric',
+                      hour: '2-digit', minute: '2-digit'
+                    }).replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$1.$2.$3')
+                  : "N/A"}</span>
+              </div>
+              <div class="info-row">
+                <span>Giờ in:</span>
+                <span>${new Date().toLocaleString('vi-VN', {
+                  day: '2-digit', month: '2-digit', year: 'numeric',
+                  hour: '2-digit', minute: '2-digit'
+                }).replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$1.$2.$3')}</span>
+              </div>
+              <div class="info-row">
+                <span>Nhân viên:</span>
+                <span>${staffInfo.name}</span>
+              </div>
+            </div>
+
+            <!-- Items Table -->
+            <table class="items-table">
+              <tr class="table-header">
+                <td style="width: 50%;">Món</td>
+                <td style="width: 15%; text-align: center;">SL</td>
+                <td style="width: 35%; text-align: left;">Ghi chú</td>
+              </tr>
+              ${orderDetails.items?.map(item => `
+                <tr class="item-row">
+                  <td>
+                    ${item.itemName || "N/A"}${item.size && item.size !== "Mặc định" ? ` / ${item.size}` : ""}
+                  </td>
+                  <td style="text-align: center;">${item.quantity || 0}</td>
+                  <td>
+                    ${item.note && item.note !== "Không có" ? `<span class="item-note">${item.note}</span>` : "-"}
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                ${displayData.items
-                  .map(
-                    (item) => `
-                  <tr>
-                    <td>${item.itemName}</td>
-                    <td style="text-align: center;">${item.quantity}</td>
-                    <td>${item.size || "-"}</td>
-                    <td>${item.note || "-"}</td>
-                    <td style="text-align: right;">${
-                      item.itemPrice
-                        ? (item.itemPrice * item.quantity).toLocaleString("vi-VN")
-                        : "N/A"
-                    }</td>
-                  </tr>
-                `
-                  )
-                  .join("")}
-              </tbody>
+              `).join('') || '<tr><td colspan="3">Không có món ăn nào</td></tr>'}
             </table>
+
+            <div class="separator"></div>
+
+            <!-- Footer -->
+            <div class="footer">
+              <div>CẢM ƠN QUÝ KHÁCH</div>
+            </div>
           </div>
         </body>
       </html>
     `;
-    const printWindow = window.open("", "_blank");
-    printWindow.document.write(printContent);
-    printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
-    printWindow.close();
+  };
+
+  // Hàm xử lý in hóa đơn
+  const handlePrint = () => {
+    if (!orderInfo || !displayData.items.length) {
+      toast.error("Không có dữ liệu để in!");
+      return;
+    }
+
+    const printContent = generatePrintHTML(displayData, displayData.staff, displayData.cashier);
+    const printWindow = window.open('', '', 'width=800,height=600');
+
+    if (printWindow) {
+      printWindow.document.write(printContent);
+      printWindow.document.close();
+
+      printWindow.onload = () => {
+        setTimeout(() => {
+          printWindow.print();
+          printWindow.close();
+        }, 100);
+      };
+    } else {
+      toast.error("Không thể mở cửa sổ in. Vui lòng kiểm tra popup blocker!");
+    }
   };
 
   return (
@@ -202,66 +348,58 @@ export default function OrderItemsDetailsModal({ open, onClose, notificationData
         ) : error ? (
           <Typography color="error">{error}</Typography>
         ) : (
-          <Stack spacing={2}>
-            <Typography variant="body2" color="text.secondary">
-              <strong>Khách hàng:</strong> {displayData.customer}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              <strong>Nhân viên:</strong> {displayData.staff}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              <strong>Thu ngân:</strong> {displayData.cashier}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              <strong>Bàn:</strong> {displayData.tables}
-            </Typography>
+          <Box sx={{ display: "flex", gap: 2, flexWrap: { xs: "wrap", md: "nowrap" } }}>
+            {/* Cột trái: Thông tin đơn hàng */}
+            <Box sx={{ flex: 1, minWidth: { xs: "100%", md: "200px" } }}>
+              <Stack spacing={1}>
+                <Typography variant="body2" color="text.secondary">
+                  <strong>Khách hàng:</strong> {displayData.customer}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  <strong>Nhân viên:</strong> {displayData.staff.name}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  <strong>Thu ngân:</strong> {displayData.cashier.name}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  <strong>Loại đơn hàng:</strong> {displayData.order.type}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  <strong>Trạng thái:</strong> {displayData.order.status}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  <strong>Thời gian:</strong> {displayData.timestamp}
+                </Typography>
+              </Stack>
+            </Box>
+            {/* Cột phải: Danh sách món ăn */}
             {displayData.items.length > 0 && (
-              <TableContainer component={Paper} sx={{ boxShadow: "0 2px 4px rgba(0,0,0,0.1)" }}>
-                <Table sx={{ minWidth: 500 }} size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell sx={{ fontWeight: 600 }}>Món</TableCell>
-                      <TableCell sx={{ fontWeight: 600, textAlign: "center" }}>
-                        Số lượng
-                      </TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Kích cỡ</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Ghi chú</TableCell>
-                      <TableCell sx={{ fontWeight: 600, textAlign: "right" }}>
-                        Giá (VND)
-                      </TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {displayData.items.map((item, index) => (
-                      <TableRow key={index}>
-                        <TableCell>{item.itemName}</TableCell>
-                        <TableCell sx={{ textAlign: "center" }}>{item.quantity}</TableCell>
-                        <TableCell>{item.size || "-"}</TableCell>
-                        <TableCell>{item.note || "-"}</TableCell>
-                        <TableCell sx={{ textAlign: "right" }}>
-                          {item.itemPrice
-                            ? (item.itemPrice * item.quantity).toLocaleString("vi-VN")
-                            : "N/A"}
-                        </TableCell>
+              <Box sx={{ flex: 2, minWidth: { xs: "100%", md: "300px" } }}>
+                <TableContainer component={Paper} sx={{ boxShadow: "0 2px 4px rgba(0,0,0,0.1)" }}>
+                  <Table sx={{ minWidth: 300 }} size="small">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: 600 }}>Món</TableCell>
+                        <TableCell sx={{ fontWeight: 600, textAlign: "center" }}>SL</TableCell>
+                        <TableCell sx={{ fontWeight: 600 }}>Kích cỡ</TableCell>
+                        <TableCell sx={{ fontWeight: 600 }}>Ghi chú</TableCell>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+                    </TableHead>
+                    <TableBody>
+                      {displayData.items.map((item, index) => (
+                        <TableRow key={index}>
+                          <TableCell>{item.itemName}</TableCell>
+                          <TableCell sx={{ textAlign: "center" }}>{item.quantity}</TableCell>
+                          <TableCell>{item.size || "-"}</TableCell>
+                          <TableCell>{item.note || "-"}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Box>
             )}
-            <Typography variant="body2" color="text.secondary">
-              <strong>Loại đơn hàng:</strong> {displayData.order.type}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              <strong>Trạng thái:</strong> {displayData.order.status}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              <strong>Tổng tiền:</strong> {displayData.total_amount}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              <strong>Thời gian:</strong> {displayData.timestamp}
-            </Typography>
-          </Stack>
+          </Box>
         )}
       </DialogContent>
       <DialogActions>
@@ -272,7 +410,7 @@ export default function OrderItemsDetailsModal({ open, onClose, notificationData
           sx={{ borderRadius: 20, textTransform: "none", marginRight: 1 }}
           disabled={loading || error || !orderInfo}
         >
-          In phiếu hàng
+          In phiếu
         </Button>
         <Button
           onClick={onClose}

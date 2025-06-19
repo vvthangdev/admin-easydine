@@ -1,60 +1,48 @@
-import React, { useState, useEffect } from "react";
-import { Box, Paper, Typography, IconButton, Stack, Button } from "@mui/material";
+import React, { useState } from "react";
+import {
+  Box,
+  Paper,
+  Typography,
+  IconButton,
+  Stack,
+  Button,
+} from "@mui/material";
 import { Package, X } from "lucide-react";
 import OrderDetailsModal from "./OrderDetailsModal";
-import { orderAPI } from "../services/apis/Order";
-import { toast } from "react-toastify";
 
 export default function OrderNotification({
   id,
   message,
   data,
+  timestamp,
+  type,
   onClose,
 }) {
   const [openModal, setOpenModal] = useState(false);
-  const [orderInfo, setOrderInfo] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
   // Log dữ liệu props
   console.log("[OrderNotification] Dữ liệu props nhận được:", {
     id,
     message,
     data,
+    timestamp,
+    type,
   });
-
-  // Gọi API getOrderInfo
-  useEffect(() => {
-    if (data?.orderId) {
-      setLoading(true);
-      orderAPI
-        .getOrderInfo({ id: data.orderId })
-        .then((response) => {
-          setOrderInfo(response);
-          setLoading(false);
-        })
-        .catch((err) => {
-          console.error("[OrderNotification] Lỗi khi lấy thông tin đơn hàng:", err);
-          setError("Không thể tải thông tin đơn hàng");
-          toast.error("Không thể tải thông tin đơn hàng");
-          setLoading(false);
-        });
-    }
-  }, [data?.orderId]);
 
   // Format dữ liệu hiển thị
   const displayData = {
     message: message || "Không có nội dung",
-    status: orderInfo?.order?.status || "N/A",
-    time: orderInfo?.order?.time
-      ? new Date(orderInfo.order.time).toLocaleString("vi-VN", {
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-        }).replace(",", "")
+    time: timestamp
+      ? new Date(timestamp)
+          .toLocaleString("vi-VN", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          })
+          .replace(",", "")
       : "N/A",
   };
 
@@ -66,6 +54,9 @@ export default function OrderNotification({
     setOpenModal(false);
     onClose();
   };
+
+  // Kiểm tra nếu type là CALL_STAFF thì không hiển thị nút Xem chi tiết
+  const isCallStaff = type === "CALL_STAFF";
 
   return (
     <>
@@ -107,53 +98,43 @@ export default function OrderNotification({
         </Stack>
 
         <Stack spacing={0.5} mb={1}>
-          {loading ? (
-            <Typography variant="body2">Đang tải...</Typography>
-          ) : error ? (
-            <Typography variant="body2" color="error">
-              {error}
-            </Typography>
-          ) : (
-            <>
-              <Typography variant="body2" color="text.secondary">
-                <strong>Trạng thái:</strong> {displayData.status}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                <strong>Thời gian:</strong> {displayData.time}
-              </Typography>
-            </>
-          )}
+          <Typography variant="body2" color="text.secondary">
+            <strong>Thời gian:</strong> {displayData.time}
+          </Typography>
         </Stack>
 
-        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-          <Button
-            onClick={handleViewDetails}
-            variant="outlined"
-            size="small"
-            sx={{
-              borderRadius: 20,
-              textTransform: "none",
-              fontWeight: 500,
-              px: 2,
-              borderColor: "#d1d1d6",
-              color: "#1c1c1e",
-              "&:hover": {
-                bgcolor: "#f2f2f7",
-                borderColor: "#bfbfc4",
-              },
-            }}
-            disabled={loading || error || !orderInfo}
-          >
-            Xem chi tiết
-          </Button>
-        </Box>
+        {!isCallStaff && (
+          <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+            <Button
+              onClick={handleViewDetails}
+              variant="outlined"
+              size="small"
+              sx={{
+                borderRadius: 20,
+                textTransform: "none",
+                fontWeight: 500,
+                px: 2,
+                borderColor: "#d1d1d6",
+                color: "#1c1c1e",
+                "&:hover": {
+                  bgcolor: "#f2f2f7",
+                  borderColor: "#bfbfc4",
+                },
+              }}
+            >
+              Xem chi tiết
+            </Button>
+          </Box>
+        )}
       </Paper>
 
-      <OrderDetailsModal
-        open={openModal}
-        onClose={handleCloseAll}
-        notificationData={{ id, message, data }}
-      />
+      {!isCallStaff && (
+        <OrderDetailsModal
+          open={openModal}
+          onClose={handleCloseAll}
+          notificationData={{ id, message, data, timestamp }}
+        />
+      )}
     </>
   );
 }

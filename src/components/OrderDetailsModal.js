@@ -62,12 +62,14 @@ export default function OrderDetailsModal({ open, onClose, notificationData }) {
     }
   }, [open, notificationData]);
 
+  console.log(`vvtdev: `, notificationData);
+
   // Format dữ liệu hiển thị
   const displayData = {
     title: notificationData?.message || "Thông báo đơn hàng",
     tables: orderInfo?.reservedTables?.map(t => `${t.table_number} (${t.area})`).join(", ") || "N/A",
-    timestamp: orderInfo?.order?.time
-      ? new Date(orderInfo.order.time).toLocaleString("vi-VN", {
+    timestamp: notificationData?.timestamp
+      ? new Date(notificationData?.timestamp).toLocaleString("vi-VN", {
           hour: "2-digit",
           minute: "2-digit",
           second: "2-digit",
@@ -115,7 +117,6 @@ export default function OrderDetailsModal({ open, onClose, notificationData }) {
             table { width: 100%; border-collapse: collapse; margin-bottom: 5mm; }
             th, td { border: 1px solid #000; padding: 2mm; text-align: left; font-size: 12px; }
             th { background-color: #f5f5f5; font-weight: bold; }
-            .total { font-weight: bold; }
             .no-print { display: none; }
             @media print {
               body { margin: 0; }
@@ -129,12 +130,8 @@ export default function OrderDetailsModal({ open, onClose, notificationData }) {
             <div class="info">
               <p><strong>Khách hàng:</strong> ${displayData.customer}</p>
               <p><strong>Nhân viên:</strong> ${displayData.staff}</p>
-              <p><strong>Thu ngân:</strong> ${displayData.cashier}</p>
               <p><strong>Bàn:</strong> ${displayData.tables}</p>
               <p><strong>Thời gian:</strong> ${displayData.timestamp}</p>
-              <p><strong>Loại đơn hàng:</strong> ${displayData.order.type}</p>
-              <p><strong>Trạng thái:</strong> ${displayData.order.status}</p>
-              <p><strong>Tổng tiền:</strong> ${displayData.total_amount}</p>
             </div>
             <table>
               <thead>
@@ -143,7 +140,6 @@ export default function OrderDetailsModal({ open, onClose, notificationData }) {
                   <th style="text-align: center;">Số lượng</th>
                   <th>Kích cỡ</th>
                   <th>Ghi chú</th>
-                  <th style="text-align: right;">Giá (VND)</th>
                 </tr>
               </thead>
               <tbody>
@@ -153,7 +149,6 @@ export default function OrderDetailsModal({ open, onClose, notificationData }) {
                     <td style="text-align: center;">${item.quantity}</td>
                     <td>${item.size}</td>
                     <td>${item.note}</td>
-                    <td style="text-align: right;">${item.total}</td>
                   </tr>
                 `).join('')}
               </tbody>
