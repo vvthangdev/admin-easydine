@@ -1,78 +1,59 @@
-"use client"
+"use client";
 
-import { useTheme } from "@mui/material/styles"
-import { appleColors, appleGradients, appleShadows, appleBorderRadius, appleSpacing } from "./apple-theme.js"
-import { appleComponentStyles } from "./theme-components.js"
+import { useTheme } from "@mui/material/styles";
+import {
+  appleColors,
+  appleGradients,
+  appleShadows,
+  appleBorderRadius,
+  appleSpacing,
+  appleTypography,
+} from "./apple-theme.js";
+import { appleComponentStyles } from "./theme-components.js";
 
 // Hook để sử dụng Apple theme
 export const useAppleTheme = () => {
-  const muiTheme = useTheme()
-console.log("appleColors:", appleColors); // Debug
-  return {
-    // Material-UI theme
+  const muiTheme = useTheme();
+  // console.log("appleBorderRadius:", appleBorderRadius); // Debug
+  
+  const theme = {
     mui: muiTheme,
-
-    // Apple colors
     colors: appleColors,
-
-    // Apple gradients
     gradients: appleGradients,
-
-    // Apple shadows
     shadows: appleShadows,
-
-    // Apple border radius
     borderRadius: appleBorderRadius,
-
-    // Apple spacing
     spacing: appleSpacing,
-
-    // Pre-built component styles
+    typography: appleTypography,
     components: appleComponentStyles,
-  }
-}
+  };
+  // console.log("useAppleTheme output:", theme); // Debug toàn bộ theme
+  return theme;
+};
 
 // Hook để tạo style nhanh
 export const useAppleStyles = () => {
-  const theme = useAppleTheme()
+  const theme = useAppleTheme();
+  // console.log("theme in useAppleStyles:", theme); // Debug
+
+  // if (!theme.borderRadius || !theme.colors) {
+  //   console.error("theme.borderRadius or theme.colors is undefined", theme);
+  // }
 
   return {
-    // Card styles
+    ...theme, // Trả về toàn bộ theme
     card: (variant = "main") => theme.components.card[variant],
-
-    // Button styles
     button: (variant = "primary") => theme.components.button[variant],
-
-    // Input styles
     input: (variant = "default") => theme.components.input[variant],
-
-    // Header styles
     header: (variant = "primary") => theme.components.header[variant],
-
-    // Icon container styles
-    iconContainer: (variant = "primary") => theme.components.iconContainer[variant],
-
-    // Status styles
+    iconContainer: (variant = "primary") =>
+      theme.components.iconContainer[variant],
     status: (variant = "success") => theme.components.status[variant],
-
-    // Gradient background
-    gradientBg: (color = "primary") => ({
-      background: theme.gradients[color],
-    }),
-
-    // Shadow
-    shadow: (size = "md") => ({
-      boxShadow: theme.shadows[size],
-    }),
-
-    // Border radius
-    rounded: (size = "md") => ({
-      borderRadius: theme.borderRadius[size],
-    }),
-
-    // Spacing
+    gradientBg: (color = "primary") => theme.gradients[color],
+    shadow: (size = "md") => theme.shadows[size],
+    rounded: (size = "md") => theme.borderRadius[size],
     spacing: (size) => theme.spacing[size],
-  }
-}
+    color: (name = "primary") => theme.colors[name],
+  };
+};
 
-export default useAppleTheme
+export default useAppleTheme;

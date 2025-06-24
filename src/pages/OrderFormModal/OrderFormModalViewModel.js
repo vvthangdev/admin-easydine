@@ -459,15 +459,16 @@ const OrderFormModalViewModel = ({
   };
 
   const handleOpenSplitModal = async () => {
-    if (!currentOrderId && !editingOrder) {
-      toast.info("Vui lòng lưu đơn hàng trước khi tách!");
-      await handleModalOk();
-      if (currentOrderId) {
-        setSplitModalVisible(true);
-      }
-    } else {
-      setSplitModalVisible(true);
-    }
+    setSplitModalVisible(true);
+    // if (!currentOrderId && !editingOrder) {
+    //   toast.info("Vui lòng lưu đơn hàng trước khi tách!");
+    //   await handleModalOk();
+    //   if (currentOrderId) {
+    //     setSplitModalVisible(true);
+    //   }
+    // } else {
+    //   setSplitModalVisible(true);
+    // }
   };
 
   const handleOpenMergeModal = async () => {

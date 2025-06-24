@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
-import { message, Input } from "antd";
+import { message } from "antd";
 import { orderAPI } from "../../services/apis/Order";
 
-const SplitOrderModalViewModel = ({ visible, orderDetails, onCancel, onSuccess }) => {
+const SplitOrderModalViewModel = ({ orderDetails, onCancel, onSuccess }) => {
   const [splitItems, setSplitItems] = useState([]);
+  const [selectedCount, setSelectedCount] = useState(0);
+  const [selectAll, setSelectAll] = useState(false);
 
   useEffect(() => {
     if (orderDetails?.itemOrders) {
@@ -15,8 +17,10 @@ const SplitOrderModalViewModel = ({ visible, orderDetails, onCancel, onSuccess }
         itemPrice: item.itemPrice || 0,
         size: item.size || "Mặc định",
         note: item.note || "",
-        quantity: 0,
+        quantity: item.quantity || 0,
+        splitQuantity: 0,
         maxQuantity: item.quantity || 0,
+        selected: false,
       }));
       setSplitItems(initialItems);
     } else {
@@ -24,15 +28,55 @@ const SplitOrderModalViewModel = ({ visible, orderDetails, onCancel, onSuccess }
     }
   }, [orderDetails]);
 
-  const handleQuantityChange = (key, value) => {
+  const updateSplitQuantity = (key, value) => {
     const quantity = parseInt(value) || 0;
     setSplitItems((prev) =>
       prev.map((item) =>
         item.key === key
-          ? { ...item, quantity: Math.min(quantity, item.maxQuantity) }
+          ? {
+              ...item,
+              splitQuantity: Math.min(quantity, item.maxQuantity),
+              selected: quantity > 0 ? true : item.selected,
+            }
           : item
       )
     );
+    updateSelectedCount();
+  };
+
+  const selectAllItems = (newSelectAll) => {
+    setSelectAll(newSelectAll);
+    setSplitItems((prev) =>
+      prev.map((item) => ({
+        ...item,
+        selected: newSelectAll,
+        splitQuantity: newSelectAll ? item.maxQuantity : 0,
+      }))
+    );
+    updateSelectedCount();
+  };
+
+  const toggleItemSelection = (key) => {
+    setSplitItems((prev) =>
+      prev.map((item) =>
+        item.key === key
+          ? {
+              ...item,
+              selected: !item.selected,
+              splitQuantity: !item.selected ? item.maxQuantity : 0,
+            }
+          : item
+      )
+    );
+    updateSelectedCount();
+  };
+
+  const updateSelectedCount = () => {
+    setSplitItems((prev) => {
+      const count = prev.filter((item) => item.selected && item.splitQuantity > 0).length;
+      setSelectedCount(count);
+      return prev;
+    });
   };
 
   const handleSplitOrder = async () => {
@@ -40,16 +84,16 @@ const SplitOrderModalViewModel = ({ visible, orderDetails, onCancel, onSuccess }
       message.error("Không tìm thấy ID đơn hàng để tách!");
       return;
     }
-    if (splitItems.every((item) => item.quantity === 0)) {
+    if (splitItems.every((item) => item.splitQuantity === 0)) {
       message.error("Vui lòng chọn ít nhất một món để tách!");
       return;
     }
 
     const newItems = splitItems
-      .filter((item) => item.quantity > 0)
+      .filter((item) => item.splitQuantity > 0)
       .map((item) => ({
         id: item.item_id,
-        quantity: item.quantity,
+        quantity: item.splitQuantity,
         size: item.size !== "Mặc định" ? item.size : undefined,
         note: item.note || undefined,
       }));
@@ -71,74 +115,19 @@ const SplitOrderModalViewModel = ({ visible, orderDetails, onCancel, onSuccess }
     }
   };
 
-  const columns = [
-    {
-      title: "Hình Ảnh",
-      dataIndex: "itemImage",
-      key: "itemImage",
-      render: (text) => (
-        <img
-          src={text}
-          alt="Item"
-          className="w-12 h-12 rounded-lg object-cover"
-        />
-      ),
-      width: 80,
-    },
-    {
-      title: "Tên Món",
-      dataIndex: "itemName",
-      key: "itemName",
-    },
-    {
-      title: "Giá",
-      dataIndex: "itemPrice",
-      key: "itemPrice",
-      render: (text) => `${text.toLocaleString()} VND`,
-      width: 120,
-    },
-    {
-      title: "Kích Thước",
-      dataIndex: "size",
-      key: "size",
-      width: 100,
-    },
-    {
-      title: "Ghi Chú",
-      dataIndex: "note",
-      key: "note",
-      width: 100,
-    },
-    {
-      title: "Số Lượng Tối Đa",
-      dataIndex: "maxQuantity",
-      key: "maxQuantity",
-      render: (text) => `${text}`,
-      width: 120,
-    },
-    {
-      title: "Số Lượng Tách",
-      dataIndex: "quantity",
-      key: "quantity",
-      render: (quantity, record) => (
-        <Input
-          type="number"
-          value={quantity}
-          min={0}
-          max={record.maxQuantity}
-          onChange={(e) => handleQuantityChange(record.key, e.target.value)}
-          style={{ width: 80 }}
-        />
-      ),
-      width: 120,
-    },
-  ];
+  const totalSelectedAmount = splitItems
+    .filter((item) => item.selected && item.splitQuantity > 0)
+    .reduce((sum, item) => sum + item.itemPrice * item.splitQuantity, 0);
 
   return {
     splitItems,
-    columns,
-    handleQuantityChange,
+    selectedCount,
+    selectAll,
+    totalSelectedAmount,
     handleSplitOrder,
+    updateSplitQuantity,
+    selectAllItems,
+    toggleItemSelection,
   };
 };
 

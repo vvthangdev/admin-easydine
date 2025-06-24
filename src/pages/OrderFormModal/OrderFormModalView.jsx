@@ -295,7 +295,7 @@ const OrderFormModalView = ({
         visible={splitModalVisible}
         orderDetails={orderDetails}
         onCancel={() => setSplitModalVisible(false)}
-        onSuccess={handleSplitSuccess}
+        onSuccess={() => setSplitModalVisible(false)}
         zIndex={1001}
       />
       <MergeOrderModalView

@@ -8,7 +8,7 @@ import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import Profile from "./pages/Profile/profile";
 import AdminLayout from "./pages/Admin/layouts/AdminLayout";
 import BanKhongPhaiLaAdmin from "./pages/BanKhongPhaiLaAdmin/BanKhongPhaiLaAdmin";
-import MergeOrderModalViewModel from "./pages/TableManagement/TableManagementView";
+import TableManagementView from "./pages/TableManagement/TableManagementView";
 import ItemManagements from "./pages/ItemManagement/ItemManagementsView";
 import UserVoucherManagement from "./pages/User/UserVoucherManagement";
 import Header from "../src/components/HomePage/Header";
@@ -53,7 +53,7 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute roles={["ADMIN", "STAFF"]}>
               <AdminLayout>
-                <MergeOrderModalViewModel />
+                <TableManagementView />
               </AdminLayout>
             </ProtectedRoute>
           }

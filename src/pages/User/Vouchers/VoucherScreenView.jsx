@@ -20,6 +20,7 @@ const VoucherScreenView = ({
   setSnackbar,
 }) => {
   const styles = useAppleStyles();
+  console.log("Màu error.main:", styles);
   const {
     vouchers,
     isModalVisible,

@@ -1,5 +1,3 @@
-'use client';
-
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Box, Typography, IconButton, Avatar } from '@mui/material';
@@ -57,7 +55,7 @@ export default function Sidebar({ onCollapseChange }) {
     },
     {
       path: '/cancel-items',
-      label: 'Quản lý liên hệ',
+      label: 'Món ăn hủy',
       icon: <MessageSquare size={20} />,
       roles: ['ADMIN'],
     },
