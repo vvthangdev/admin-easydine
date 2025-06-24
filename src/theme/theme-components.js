@@ -15,6 +15,19 @@ export const appleComponentStyles = {
         boxShadow: appleShadows.hover,
       },
     },
+    wide: {
+    borderRadius: appleBorderRadius.card,
+    background: appleGradients.light,
+    boxShadow: appleShadows.card,
+    border: "1px solid rgba(0, 0, 0, 0.05)",
+    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+    width: '100%',
+    maxWidth: 'none',
+    "&:hover": {
+      transform: "translateY(-4px)",
+      boxShadow: appleShadows.hover,
+    },
+  },
     gradient: {
       borderRadius: appleBorderRadius.card,
       background: appleGradients.primary,
@@ -103,8 +116,8 @@ export const appleComponentStyles = {
     default: {
       borderRadius: appleBorderRadius.input,
       backgroundColor: appleColors.background.light,
-      border: `1px solid ${appleColors.neutral[200]}`,
-      padding: `${appleSpacing[3]} ${appleSpacing[4]}`,
+      border: `0px solid ${appleColors.neutral[200]}`,
+      padding: `${appleSpacing[0]} ${appleSpacing[0]}`,
       fontSize: "1rem",
       transition: "all 0.2s ease",
       "&:hover": {

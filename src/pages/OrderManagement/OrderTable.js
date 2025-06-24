@@ -35,15 +35,15 @@ const OrderTable = ({
   const getStatusColor = (status) => {
     switch (status) {
       case 'pending':
-        return { bg: styles.colors?.warning?.[50] || '#fff3e0', color: styles.colors?.warning?.main || '#ff9500' };
+        return { bg: styles.colors.backgroundStatus.warning.light , color: styles.colors.warning};
       case 'confirmed':
-        return { bg: styles.colors?.success?.[50] || '#e0f2f1', color: styles.colors?.success?.main || '#34c759' };
+        return { bg: styles.colors.white , color: styles.colors?.success };
       case 'completed':
-        return { bg: styles.colors?.success?.[100] || '#e8f5e9', color: styles.colors?.success?.main || '#4caf50' };
+        return { bg: styles.colors.backgroundStatus.success.light, color: styles.colors?.secondary.main };
       case 'canceled':
-        return { bg: styles.colors?.error?.[50] || '#ffebee', color: styles.colors?.error?.main || '#ff2d55' };
+        return { bg: styles.colors.backgroundStatus.error.light, color: styles.colors.error };
       default:
-        return { bg: styles.colors?.neutral?.[50] || '#f5f5f5', color: styles.colors?.neutral?.[500] || '#9e9e9e' };
+        return { bg: styles.colors?.white, color: styles.colors?.black };
     }
   };
 
@@ -171,7 +171,7 @@ const OrderTable = ({
                       onChange={(e) => onStatusChange(record.id, e.target.value)}
                       sx={{
                         ...styles.input('default'),
-                        height: 36,
+                        height: 50,
                         backgroundColor: getStatusColor(record.status).bg,
                         color: getStatusColor(record.status).color,
                         fontWeight: 500,

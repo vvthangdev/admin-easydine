@@ -51,6 +51,29 @@ export const appleColors = {
     light: "#fafafa",
   },
 
+  backgroundStatus: {
+  success: {
+    light: "#e6f9ee",   // nhạt, nền dịu cho trạng thái thành công
+    main: "#ccf3dd",    // tông trung bình
+    dark: "#b3eacb",    // đậm hơn một chút
+  },
+  warning: {
+    light: "#fff4e5",
+    main: "#ffe0b2",
+    dark: "#ffcc80",
+  },
+  error: {
+    light: "#ffe6ea",
+    main: "#ffccd5",
+    dark: "#ffb3c2",
+  },
+  info: {
+    light: "#ecebfc",
+    main: "#d7d6f9",
+    dark: "#c2c0f6",
+  },
+},
+
   // Text colors
   text: {
     primary: "#1d1d1f",
@@ -108,6 +131,7 @@ export const appleBorderRadius = {
 export const appleSpacing = {
   0: "0px",
   1: "4px",
+  1.5: "6px",
   2: "8px",
   3: "12px",
   4: "16px",

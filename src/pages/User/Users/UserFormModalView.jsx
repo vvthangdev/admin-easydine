@@ -42,7 +42,7 @@ const UserFormModalView = ({
         {editingUser ? 'Sửa thông tin người dùng' : 'Thêm người dùng mới'}
       </DialogTitle>
       <DialogContent sx={styles.modal?.content}>
-        <Box sx={{ mb: styles.spacing(3) }}>
+        <Box sx={{ mb: styles.spacing(2) }}>
           <Box
             sx={{
               display: 'flex',
