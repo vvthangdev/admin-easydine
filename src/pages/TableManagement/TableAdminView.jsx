@@ -22,8 +22,10 @@ import TableAdminViewModel from "./TableAdminViewModel";
 import CloseIcon from "@mui/icons-material/Close";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { toast } from "react-toastify";
+import { useAppleStyles } from "../../theme/theme-hooks";
 
 const TableAdminView = ({ tables, areas, onAddSuccess, onEditSuccess, onDeleteSuccess }) => {
+  const styles = useAppleStyles(); // Sử dụng hook để lấy style Apple
   const {
     activeArea,
     setActiveArea,
@@ -69,19 +71,42 @@ const TableAdminView = ({ tables, areas, onAddSuccess, onEditSuccess, onDeleteSu
     });
   };
 
-  // Shorten the link for display (optional, e.g., show only table ID or a shorter format)
+  // Shorten the link for display
   const shortenLink = (link) => {
     const parts = link.split("/");
-    return `.../menu/${parts[parts.length - 1]}`; // Hiển thị chỉ phần cuối của link
+    return `.../menu/${parts[parts.length - 1]}`;
+  };
+
+  // Kiểm tra an toàn cho styles.table và styles.modal
+  const tableStyles = styles.table || {};
+  const modalStyles = styles.modal || {};
+  const tableContainerStyle = tableStyles.container || {
+    borderRadius: styles.borderRadius.card || "12px",
+    overflow: "hidden",
+    boxShadow: styles.shadows.card || "0 5px 15px rgba(0, 0, 0, 0.05)",
+    border: "1px solid rgba(0, 0, 0, 0.05)",
+  };
+  const modalContentStyle = modalStyles.content || {
+    borderRadius: styles.borderRadius.modal || "16px",
+    boxShadow: styles.shadows["2xl"] || "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+    border: "none",
+    background: styles.colors.background.paper || "#ffffff",
+    maxWidth: "90vw",
+    maxHeight: "90vh",
   };
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-        <Typography variant="h6">Danh sách bàn</Typography>
+    <Box sx={{ p: styles.spacing(3) }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between", mb: styles.spacing(2) }}>
+        <Typography
+          variant="h6"
+          sx={{ ...styles.typography.h6, color: styles.colors.text.primary }}
+        >
+          Danh sách bàn
+        </Typography>
         <Button
           variant="contained"
-          color="primary"
+          sx={{ ...styles.button("primary") }}
           onClick={handleAdd}
           disabled={loading}
         >
@@ -93,7 +118,19 @@ const TableAdminView = ({ tables, areas, onAddSuccess, onEditSuccess, onDeleteSu
         <Tabs
           value={activeArea}
           onChange={(e, newValue) => setActiveArea(newValue)}
-          sx={{ mb: 2 }}
+          sx={{
+            mb: styles.spacing(2),
+            "& .MuiTab-root": {
+              fontWeight: styles.typography.fontWeight.semibold,
+              color: styles.colors.text.secondary,
+              "&.Mui-selected": {
+                color: styles.colors.primary.main,
+              },
+            },
+            "& .MuiTabs-indicator": {
+              backgroundColor: styles.colors.primary.main,
+            },
+          }}
         >
           {tabAreas.map((area) => (
             <Tab label={area} value={area} key={area} />
@@ -102,14 +139,14 @@ const TableAdminView = ({ tables, areas, onAddSuccess, onEditSuccess, onDeleteSu
       )}
 
       {loading ? (
-        <Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>
-          <CircularProgress />
+        <Box sx={{ display: "flex", justifyContent: "center", p: styles.spacing(2) }}>
+          <CircularProgress sx={{ color: styles.colors.primary.main }} />
         </Box>
       ) : (
-        <TableContainer component={Paper}>
+        <TableContainer component={Paper} sx={tableContainerStyle}>
           <Table>
             <TableHead>
-              <TableRow>
+              <TableRow sx={tableStyles.header || {}}>
                 <TableCell>Số bàn</TableCell>
                 <TableCell>Sức chứa</TableCell>
                 <TableCell>Khu vực</TableCell>
@@ -118,30 +155,28 @@ const TableAdminView = ({ tables, areas, onAddSuccess, onEditSuccess, onDeleteSu
             </TableHead>
             <TableBody>
               {filteredTables.map((table) => (
-                <TableRow key={table._id || table.table_id}>
-                  <TableCell>{table.table_number}</TableCell>
-                  <TableCell>{table.capacity}</TableCell>
-                  <TableCell>{table.area}</TableCell>
-                  <TableCell align="right">
+                <TableRow key={table._id || table.table_id} sx={tableStyles.row || {}}>
+                  <TableCell sx={tableStyles.cell || {}}>{table.table_number}</TableCell>
+                  <TableCell sx={tableStyles.cell || {}}>{table.capacity}</TableCell>
+                  <TableCell sx={tableStyles.cell || {}}>{table.area}</TableCell>
+                  <TableCell align="right" sx={tableStyles.cell || {}}>
                     <Button
                       variant="outlined"
-                      color="primary"
+                      sx={{ ...styles.button("outline"), mr: styles.spacing(1) }}
                       onClick={() => handleEdit(table)}
-                      sx={{ mr: 1 }}
                     >
                       Sửa
                     </Button>
                     <Button
                       variant="outlined"
-                      color="error"
+                      sx={{ ...styles.button("outline"), borderColor: styles.colors.error, color: styles.colors.error, mr: styles.spacing(1) }}
                       onClick={() => handleDelete(table.table_id)}
-                      sx={{ mr: 1 }}
                     >
                       Xóa
                     </Button>
                     <Button
                       variant="outlined"
-                      color="secondary"
+                      sx={{ ...styles.button("secondary") }}
                       onClick={() => handleOpenQrModal(table)}
                     >
                       QR Code
@@ -159,65 +194,147 @@ const TableAdminView = ({ tables, areas, onAddSuccess, onEditSuccess, onDeleteSu
         open={openModal}
         onClose={handleCloseModal}
         aria-labelledby="qr-code-modal"
-        sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          ...modalStyles.overlay,
+        }}
       >
         <Box
           sx={{
-            bgcolor: "background.paper",
-            p: 4,
-            borderRadius: 2,
-            position: "relative",
+            ...modalContentStyle,
+            p: styles.spacing(4),
             textAlign: "center",
-            maxWidth: 400,
+            maxWidth: "400px",
             width: "90%",
           }}
         >
           <IconButton
             onClick={handleCloseModal}
-            sx={{ position: "absolute", top: 8, right: 8 }}
+            sx={{
+              position: "absolute",
+              top: styles.spacing(2),
+              right: styles.spacing(2),
+              color: styles.colors.text.secondary,
+              "&:hover": {
+                backgroundColor: styles.colors.neutral[100],
+              },
+            }}
           >
-            <CloseIcon />
           </IconButton>
-          <Typography variant="h6" gutterBottom>
+          <Typography
+            variant="h6"
+            sx={{
+              ...styles.typography.h6,
+              color: styles.colors.text.primary,
+              mb: styles.spacing(2),
+            }}
+          >
             QR Code Menu
           </Typography>
           {selectedTable && (
-            <Box sx={{ mb: 2, textAlign: "left" }}>
-              <Typography variant="body2">
+            <Box sx={{ mb: styles.spacing(2), textAlign: "left" }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  ...styles.typography.body2,
+                  color: styles.colors.text.primary,
+                  mb: styles.spacing(1),
+                }}
+              >
                 <strong>Số bàn:</strong> {selectedTable.table_number}
               </Typography>
-              <Typography variant="body2">
+              <Typography
+                variant="body2"
+                sx={{
+                  ...styles.typography.body2,
+                  color: styles.colors.text.primary,
+                  mb: styles.spacing(1),
+                }}
+              >
                 <strong>Tầng:</strong> {selectedTable.floor || "Không xác định"}
               </Typography>
-              <Typography variant="body2">
+              <Typography
+                variant="body2"
+                sx={{
+                  ...styles.typography.body2,
+                  color: styles.colors.text.primary,
+                  mb: styles.spacing(1),
+                }}
+              >
                 <strong>Sức chứa:</strong> {selectedTable.capacity}
               </Typography>
-              <Typography variant="body2">
+              <Typography
+                variant="body2"
+                sx={{
+                  ...styles.typography.body2,
+                  color: styles.colors.text.primary,
+                  mb: styles.spacing(1),
+                }}
+              >
                 <strong>Khu vực:</strong> {selectedTable.area}
               </Typography>
             </Box>
           )}
-          <Typography variant="body2" sx={{ mb: 2, wordBreak: "break-all" }}>
-            {shortenLink(qrLink)}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              mb: styles.spacing(2),
+              backgroundColor: styles.colors.background.light,
+              p: styles.spacing(1),
+              borderRadius: styles.rounded("sm"),
+            }}
+          >
+            <Typography
+              variant="body2"
+              sx={{
+                ...styles.typography.body2,
+                color: styles.colors.text.secondary,
+                wordBreak: "break-all",
+              }}
+            >
+              {shortenLink(qrLink)}
+            </Typography>
             <Tooltip title="Sao chép liên kết">
-              <IconButton onClick={handleCopyLink} sx={{ ml: 1 }}>
+              <IconButton
+                onClick={handleCopyLink}
+                sx={{
+                  ml: styles.spacing(1),
+                  color: styles.colors.primary.main,
+                  "&:hover": {
+                    backgroundColor: styles.colors.primary[50],
+                  },
+                }}
+              >
                 <ContentCopyIcon fontSize="small" />
               </IconButton>
             </Tooltip>
-          </Typography>
+          </Box>
           {qrLink && (
-            <QRCodeCanvas
-              value={qrLink}
-              size={200}
-              level="H"
-              includeMargin={true}
-            />
+            <Box
+              sx={{
+                backgroundColor: styles.colors.white,
+                p: styles.spacing(2),
+                borderRadius: styles.rounded("md"),
+                boxShadow: styles.shadow("sm"),
+                display: "inline-block",
+              }}
+            >
+              <QRCodeCanvas
+                value={qrLink}
+                size={200}
+                level="H"
+                includeMargin={true}
+              />
+            </Box>
           )}
           <Button
             variant="contained"
-            color="primary"
+            sx={{ ...styles.button("primary"), mt: styles.spacing(2) }}
             onClick={handleCloseModal}
-            sx={{ mt: 2 }}
           >
             Đóng
           </Button>

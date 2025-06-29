@@ -1,5 +1,3 @@
-"use client";
-
 import { useTheme } from "@mui/material/styles";
 import {
   appleColors,
@@ -15,7 +13,7 @@ import { appleComponentStyles } from "./theme-components.js";
 export const useAppleTheme = () => {
   const muiTheme = useTheme();
   // console.log("appleBorderRadius:", appleBorderRadius); // Debug
-  
+
   const theme = {
     mui: muiTheme,
     colors: appleColors,

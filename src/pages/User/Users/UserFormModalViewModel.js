@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useCallback, useEffect } from "react";
 import { adminAPI } from "../../../services/apis/Admin";
 import minioClient from "../../../Server/minioClient";
@@ -29,7 +27,9 @@ const UserFormModalViewModel = ({ editingUser, setSnackbar }) => {
         role: editingUser.role || "",
         password: "",
       });
-      setAvatar(editingUser.avatar ? [{ url: editingUser.avatar, uid: "1" }] : []);
+      setAvatar(
+        editingUser.avatar ? [{ url: editingUser.avatar, uid: "1" }] : []
+      );
     } else {
       setForm({
         name: "",
@@ -99,10 +99,14 @@ const UserFormModalViewModel = ({ editingUser, setSnackbar }) => {
         const timestamp = Date.now();
         const fileName = `images/${timestamp}_${avatar[0].originFileObj.name}`;
         const minioStorage = minioClient.storage.from("test01");
-        const { error } = await minioStorage.upload(fileName, avatar[0].originFileObj);
+        const { error } = await minioStorage.upload(
+          fileName,
+          avatar[0].originFileObj
+        );
         if (error) throw new Error(`Không thể upload file: ${error.message}`);
         const { data: publicUrlData } = minioStorage.getPublicUrl(fileName);
-        if (!publicUrlData.publicUrl) throw new Error("Không thể lấy URL công khai cho ảnh.");
+        if (!publicUrlData.publicUrl)
+          throw new Error("Không thể lấy URL công khai cho ảnh.");
         imageUrl = publicUrlData.publicUrl;
       }
 
@@ -139,13 +143,18 @@ const UserFormModalViewModel = ({ editingUser, setSnackbar }) => {
 
       setSnackbar({
         open: true,
-        message: editingUser ? "Cập nhật người dùng thành công" : "Thêm người dùng thành công",
+        message: editingUser
+          ? "Cập nhật người dùng thành công"
+          : "Thêm người dùng thành công",
         severity: "success",
       });
 
       return updatedUser; // Trả về dữ liệu người dùng để sử dụng trong UserScreenView
     } catch (error) {
-      const errorMessage = error.response?.data?.message || error.message || "Có lỗi xảy ra khi lưu người dùng";
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Có lỗi xảy ra khi lưu người dùng";
       setSnackbar({
         open: true,
         message: errorMessage,
