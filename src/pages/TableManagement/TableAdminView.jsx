@@ -245,16 +245,7 @@ const TableAdminView = ({ tables, areas, onAddSuccess, onEditSuccess, onDeleteSu
               >
                 <strong>Số bàn:</strong> {selectedTable.table_number}
               </Typography>
-              <Typography
-                variant="body2"
-                sx={{
-                  ...styles.typography.body2,
-                  color: styles.colors.text.primary,
-                  mb: styles.spacing(1),
-                }}
-              >
-                <strong>Tầng:</strong> {selectedTable.area || "Không xác định"}
-              </Typography>
+              
               <Typography
                 variant="body2"
                 sx={{
