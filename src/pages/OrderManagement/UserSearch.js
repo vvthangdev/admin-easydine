@@ -157,7 +157,7 @@ const UserSearch = ({ onSelectCustomer }) => {
                     fontWeight: 600,
                   }}
                 >
-                  Hành động
+                  
                 </TableCell>
               </TableRow>
             </TableHead>

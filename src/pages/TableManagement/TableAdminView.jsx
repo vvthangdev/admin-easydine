@@ -150,7 +150,7 @@ const TableAdminView = ({ tables, areas, onAddSuccess, onEditSuccess, onDeleteSu
                 <TableCell>Số bàn</TableCell>
                 <TableCell>Sức chứa</TableCell>
                 <TableCell>Khu vực</TableCell>
-                <TableCell align="right">Hành động</TableCell>
+                <TableCell align="right"></TableCell>
               </TableRow>
             </TableHead>
             <TableBody>

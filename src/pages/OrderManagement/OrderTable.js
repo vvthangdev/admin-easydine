@@ -117,7 +117,7 @@ const OrderTable = ({
               Loại đơn hàng
             </TableCell>
             <TableCell sx={{ ...styles.components?.table?.cell, fontWeight: 600, backgroundColor: styles.colors?.primary?.[50] || 'rgba(0, 113, 227, 0.05)' }}>
-              Hành động
+              
             </TableCell>
           </TableRow>
         </TableHead>

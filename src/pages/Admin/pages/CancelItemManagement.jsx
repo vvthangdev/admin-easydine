@@ -177,7 +177,7 @@ export default function CancelItemManagementView() {
                   <TableCell>Lý Do Hủy</TableCell>
                   <TableCell>Người Hủy</TableCell>
                   <TableCell>Thời Gian</TableCell>
-                  <TableCell align="center">Thao Tác</TableCell>
+                  <TableCell align="center"></TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
