@@ -253,7 +253,7 @@ const TableAdminView = ({ tables, areas, onAddSuccess, onEditSuccess, onDeleteSu
                   mb: styles.spacing(1),
                 }}
               >
-                <strong>Tầng:</strong> {selectedTable.floor || "Không xác định"}
+                <strong>Tầng:</strong> {selectedTable.area || "Không xác định"}
               </Typography>
               <Typography
                 variant="body2"
